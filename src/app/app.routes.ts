@@ -6,14 +6,15 @@ import { AdminUsers } from './pages/admin-users/admin-users';
 import { Rutas } from './pages/rutas/rutas';
 import { Reservas } from './pages/reservas/reservas';
 import { ViajesCompartidos } from './pages/viajes-compartidos/viajes-compartidos';
+import { authGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
   { path: 'login', component: Login },
   { path: 'register', component: Register },
-  { path: 'profile', component: Profile },
-  { path: 'admin-users', component: AdminUsers },
-  { path: 'rutas', component: Rutas },
-  { path: 'reservas', component: Reservas },
-  { path: 'viajes-compartidos', component: ViajesCompartidos },
+  { path: 'profile', component: Profile, canActivate: [authGuard] },
+  { path: 'admin-users', component: AdminUsers, canActivate: [authGuard] },
+  { path: 'rutas', component: Rutas, canActivate: [authGuard] },
+  { path: 'reservas', component: Reservas, canActivate: [authGuard] },
+  { path: 'viajes-compartidos', component: ViajesCompartidos, canActivate: [authGuard] },
   { path: '', redirectTo: 'login', pathMatch: 'full' }
 ];
