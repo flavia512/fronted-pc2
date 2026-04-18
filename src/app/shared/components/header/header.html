@@ -1,5 +1,5 @@
 <header class="main-header">
-  <div class="logo-container" routerLink="/rutas">
+  <div class="logo-container" routerLink="/" style="cursor: pointer;">
     <div class="logo-icon">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
         stroke-linecap="round" stroke-linejoin="round">
@@ -14,14 +14,14 @@
   </div>
 
   <nav class="nav-links">
-    <a routerLink="/rutas" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Buscar Viajes</a>
-    <a routerLink="/viajes-compartidos" routerLinkActive="active">Publicar Ruta</a>
+    <a routerLink="/viajes-compartidos" routerLinkActive="active">Viajes</a>
+    <a routerLink="/crear-viaje" routerLinkActive="active">Crear Viaje</a>
     <a routerLink="/rutas" routerLinkActive="active">Mis Rutas</a>
     <a routerLink="/reservas" routerLinkActive="active">Mis Reservas</a>
   </nav>
 
   <div class="user-actions">
-    <div class="user-profile" routerLink="/profile">
+    <div class="user-profile" routerLink="/profile" style="cursor: pointer;">
       <svg class="user-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
         stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
@@ -29,7 +29,7 @@
       </svg>
       <span class="user-name">{{ userName }}</span>
     </div>
-    <button class="logout-btn" (click)="logout()" title="Cerrar sesión">
+    <button class="logout-btn" (click)="logout()" title="Cerrar sesión" routerLink="/login">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
         stroke-linecap="round" stroke-linejoin="round">
         <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />

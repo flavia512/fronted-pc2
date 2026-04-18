@@ -1,1 +1,126 @@
-<p>viajes compartidos works!</p>
+<div class="viajes-compartidos-container">
+    <div class="header-section">
+        <h1>Buscar Viajes</h1>
+        <p>Encuentra el viaje compartido perfecto para ti</p>
+    </div>
+
+    <div class="search-card">
+        <div class="search-fields">
+            <div class="field-group">
+                <label>Origen</label>
+                <div class="input-wrapper">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0Z"></path>
+                        <circle cx="12" cy="10" r="3"></circle>
+                    </svg>
+                    <input type="text" placeholder="Alcorcón, Móstoles..." [(ngModel)]="origen">
+                </div>
+            </div>
+
+            <div class="field-group">
+                <label>Destino</label>
+                <div class="input-wrapper">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0Z"></path>
+                        <circle cx="12" cy="10" r="3"></circle>
+                    </svg>
+                    <input type="text" placeholder="Príncipe Pío" [(ngModel)]="destino">
+                </div>
+            </div>
+
+            <div class="field-group">
+                <label>Fecha</label>
+                <div class="input-wrapper">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect width="18" height="18" x="3" y="4" rx="2" ry="2"></rect>
+                        <line x1="16" x2="16" y1="2" y2="6"></line>
+                        <line x1="8" x2="8" y1="2" y2="6"></line>
+                        <line x1="3" x2="21" y1="10" y2="10"></line>
+                    </svg>
+                    <input type="text" placeholder="dd/mm/aaaa" [(ngModel)]="fecha">
+                </div>
+            </div>
+        </div>
+
+        <button class="btn-search" (click)="buscarViajes()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" x2="16.65" y1="21" y2="16.65"></line>
+            </svg>
+            Buscar Viajes
+        </button>
+    </div>
+
+    <div class="results-header">
+        <h2>{{viajes.length}} viajes disponibles</h2>
+    </div>
+
+    <div class="trips-list">
+        @for (viaje of viajes; track viaje.id) {
+        <div class="trip-card">
+            <div class="trip-content">
+                <div class="trip-route">
+                    <h3>{{viaje.origen}} <span class="arrow">→</span> {{viaje.destino}}</h3>
+                    <span class="route-badge">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                        </svg>
+                        {{viaje.etiqueta}}
+                    </span>
+                </div>
+
+                <div class="trip-meta">
+                    <span class="meta-item">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect width="18" height="18" x="3" y="4" rx="2" ry="2"></rect>
+                            <line x1="16" x2="16" y1="2" y2="6"></line>
+                            <line x1="8" x2="8" y1="2" y2="6"></line>
+                            <line x1="3" x2="21" y1="10" y2="10"></line>
+                        </svg>
+                        {{viaje.fecha}}
+                    </span>
+                    <span class="meta-item">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <polyline points="12 6 12 12 16 14"></polyline>
+                        </svg>
+                        {{viaje.hora}}
+                    </span>
+                    <span class="meta-item">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="9" cy="7" r="4"></circle>
+                            <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                        </svg>
+                        {{viaje.asientos}} asientos disponibles
+                    </span>
+                </div>
+
+                <p class="trip-desc">{{viaje.descripcion}}</p>
+
+                <div class="trip-driver">
+                    <div class="driver-avatar">{{viaje.inicial}}</div>
+                    <span class="driver-name">{{viaje.conductor}}</span>
+                    <span class="dot">•</span>
+                    <span class="car-info">{{viaje.vehiculo}}</span>
+                </div>
+            </div>
+
+            <div class="trip-price-section">
+                <div class="price">€{{viaje.precio | number:'1.2-2'}}</div>
+                <div class="price-sub">por asiento</div>
+                <button class="btn-details">Ver Detalles</button>
+            </div>
+        </div>
+        }
+    </div>
+</div>
