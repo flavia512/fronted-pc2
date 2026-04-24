@@ -1,4 +1,25 @@
 <div class="mis-rutas-container">
+    @if (toast) {
+    <div class="toast" [class.toast-exito]="toast.tipo === 'exito'" [class.toast-error]="toast.tipo === 'error'">
+        @if (toast.tipo === 'exito') {
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+        </svg>
+        } @else {
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="12"></line>
+            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+        </svg>
+        }
+        <span>{{ toast.mensaje }}</span>
+        <button class="toast-close" (click)="cerrarToast()" aria-label="Cerrar">&times;</button>
+    </div>
+    }
+
     <div class="header-section">
         <div class="header-titles">
             <h1>Mis Rutas</h1>

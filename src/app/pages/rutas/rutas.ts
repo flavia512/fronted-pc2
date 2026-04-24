@@ -41,6 +41,10 @@ export class Rutas implements OnInit, OnDestroy {
   mostrarModal = false;
   guardandoRuta = false;
 
+  // Toast de feedback
+  toast: { tipo: 'exito' | 'error'; mensaje: string } | null = null;
+  private toastTimeout: any = null;
+
   // Centro de Madrid por defecto
   private readonly MADRID_CENTER: [number, number] = [-3.7038, 40.4168];
 
@@ -201,10 +205,30 @@ export class Rutas implements OnInit, OnDestroy {
   }
 
   eliminarRuta(id: number): void {
+    const ruta = this.rutas.find(r => r.id === id);
+    const nombre = ruta?.nombre || 'esta ruta';
+    if (!confirm(`¿Eliminar "${nombre}"? Esta acción no se puede deshacer.`)) return;
+
     this.rutaService.eliminarRuta(id).subscribe({
-      next: () => this.rutas = this.rutas.filter(r => r.id !== id),
-      error: () => this.rutas = this.rutas.filter(r => r.id !== id)
+      next: () => {
+        this.rutas = this.rutas.filter(r => r.id !== id);
+        this.mostrarToast('exito', 'Ruta eliminada correctamente');
+      },
+      error: () => {
+        this.mostrarToast('error', 'No se pudo eliminar la ruta. Inténtalo de nuevo.');
+      }
     });
+  }
+
+  mostrarToast(tipo: 'exito' | 'error', mensaje: string): void {
+    this.toast = { tipo, mensaje };
+    if (this.toastTimeout) clearTimeout(this.toastTimeout);
+    this.toastTimeout = setTimeout(() => (this.toast = null), 3500);
+  }
+
+  cerrarToast(): void {
+    this.toast = null;
+    if (this.toastTimeout) clearTimeout(this.toastTimeout);
   }
 
   abrirModal(): void {
@@ -257,8 +281,14 @@ export class Rutas implements OnInit, OnDestroy {
         });
         this.guardandoRuta = false;
         this.cerrarModal();
+        this.mostrarToast('exito', `Ruta "${r.nombre ?? 'Sin nombre'}" guardada correctamente`);
+        // Recargar desde backend para mantener sincronía
+        this.cargarRutasUsuario();
       },
-      error: () => { this.guardandoRuta = false; }
+      error: () => {
+        this.guardandoRuta = false;
+        this.mostrarToast('error', 'No se pudo guardar la ruta. Verifica que hayas iniciado sesión.');
+      }
     });
   }
 }
