@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, ElementRef, NgZone } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import mapboxgl from 'mapbox-gl';
@@ -38,6 +38,7 @@ export class Rutas implements OnInit, OnDestroy {
 
   rutas: MiRuta[] = [];
   cargando = true;
+  errorCarga = false;
   mostrarModal = false;
   guardandoRuta = false;
 
@@ -66,7 +67,8 @@ export class Rutas implements OnInit, OnDestroy {
 
   constructor(
     private mapboxService: MapboxService,
-    private rutaService: RutaService
+    private rutaService: RutaService,
+    private ngZone: NgZone
   ) {}
 
   ngOnInit(): void {
@@ -181,6 +183,7 @@ export class Rutas implements OnInit, OnDestroy {
 
   cargarRutasUsuario(): void {
     this.cargando = true;
+    this.errorCarga = false;
     this.rutaService.obtenerRutas().subscribe({
       next: (rutas: Ruta[]) => {
         this.rutas = rutas.map(r => ({
@@ -195,11 +198,15 @@ export class Rutas implements OnInit, OnDestroy {
         }));
         this.cargando = false;
       },
-      error: () => {
-        // Sin token o sin backend: mostramos vacío
+      error: (err) => {
         this.rutas = [];
-
         this.cargando = false;
+        this.errorCarga = true;
+        if (err?.status === 401) {
+          this.mostrarToast('error', 'Sesión expirada. Vuelve a iniciar sesión.');
+        } else if (err?.status === 0) {
+          this.mostrarToast('error', 'No se pudo conectar con el servidor.');
+        }
       }
     });
   }
@@ -223,7 +230,7 @@ export class Rutas implements OnInit, OnDestroy {
   mostrarToast(tipo: 'exito' | 'error', mensaje: string): void {
     this.toast = { tipo, mensaje };
     if (this.toastTimeout) clearTimeout(this.toastTimeout);
-    this.toastTimeout = setTimeout(() => (this.toast = null), 3500);
+    this.toastTimeout = setTimeout(() => (this.toast = null), 5000);
   }
 
   cerrarToast(): void {
@@ -239,7 +246,8 @@ export class Rutas implements OnInit, OnDestroy {
 
   cerrarModal(): void {
     this.mostrarModal = false;
-    this.mapa?.remove();
+    this.guardandoRuta = false;
+    try { this.mapa?.remove(); } catch (_) {}
     this.mapa = null;
     this.rutaInfo = null;
     this.coordOrigen = null;
@@ -268,26 +276,48 @@ export class Rutas implements OnInit, OnDestroy {
 
     this.rutaService.crearRuta(payload).subscribe({
       next: (res) => {
-        const r = res.data;
-        this.rutas.unshift({
-          id: r.id,
-          nombre: r.nombre ?? 'Sin nombre',
-          origen: r.origin_text,
-          destino: r.dest_text,
-          horaSalida: r.hora_salida ?? '',
-          pasaPorM30: r.pasa_por_m30,
-          alertasActivas: true,
-          dias: 'Días: lunes a viernes'
+        this.ngZone.run(() => {
+          // Cerrar modal primero (antes de tocar el mapa)
+          this.mostrarModal = false;
+          this.guardandoRuta = false;
+
+          // Destruir mapa de forma segura
+          try { this.mapa?.remove(); } catch (_) {}
+          this.mapa = null;
+          this.rutaInfo = null;
+          this.coordOrigen = null;
+          this.coordDestino = null;
+          this.sugerenciasOrigen = [];
+          this.sugerenciasDestino = [];
+          this.nuevaRuta = { nombre: '', origen: '', destino: '', horaSalida: '' };
+
+          // Añadir ruta al array
+          const r = res?.data;
+          if (r) {
+            this.rutas.unshift({
+              id: r.id,
+              nombre: r.nombre ?? 'Sin nombre',
+              origen: r.origin_text,
+              destino: r.dest_text,
+              horaSalida: r.hora_salida ?? '',
+              pasaPorM30: r.pasa_por_m30,
+              alertasActivas: true,
+              dias: 'Días: lunes a viernes'
+            });
+          }
+
+          this.mostrarToast('exito', `✓ Ruta "${r?.nombre ?? 'Nueva ruta'}" guardada correctamente`);
         });
-        this.guardandoRuta = false;
-        this.cerrarModal();
-        this.mostrarToast('exito', `Ruta "${r.nombre ?? 'Sin nombre'}" guardada correctamente`);
-        // Recargar desde backend para mantener sincronía
-        this.cargarRutasUsuario();
       },
-      error: () => {
+      error: (err) => {
         this.guardandoRuta = false;
-        this.mostrarToast('error', 'No se pudo guardar la ruta. Verifica que hayas iniciado sesión.');
+        if (err?.status === 401) {
+          this.mostrarToast('error', 'Tu sesión ha expirado. Vuelve a iniciar sesión.');
+        } else if (err?.status === 422) {
+          this.mostrarToast('error', 'Datos inválidos. Revisa los campos.');
+        } else {
+          this.mostrarToast('error', 'No se pudo guardar la ruta. Inténtalo de nuevo.');
+        }
       }
     });
   }
