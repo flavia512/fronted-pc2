@@ -180,12 +180,13 @@ export class Rutas implements OnInit, OnDestroy {
       this.mapa!.fitBounds(bounds, { padding: 40 });
     });
   }
-
+ 
   cargarRutasUsuario(): void {
     this.cargando = true;
     this.errorCarga = false;
     this.rutaService.obtenerRutas().subscribe({
       next: (rutas: Ruta[]) => {
+        console.log('Rutas recibidas:', rutas); // Log temporal para depuración
         this.rutas = rutas.map(r => ({
           id: r.id,
           nombre: r.nombre ?? 'Sin nombre',
