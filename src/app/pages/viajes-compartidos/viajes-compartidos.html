@@ -14,7 +14,7 @@
                         <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0Z"></path>
                         <circle cx="12" cy="10" r="3"></circle>
                     </svg>
-                    <input type="text" placeholder="Alcorcón, Móstoles..." [(ngModel)]="origen">
+                    <input type="text" placeholder="Alcorcón, Móstoles..." [(ngModel)]="origin">
                 </div>
             </div>
 
@@ -26,7 +26,7 @@
                         <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0Z"></path>
                         <circle cx="12" cy="10" r="3"></circle>
                     </svg>
-                    <input type="text" placeholder="Príncipe Pío" [(ngModel)]="destino">
+                    <input type="text" placeholder="Príncipe Pío" [(ngModel)]="destiny">
                 </div>
             </div>
 
@@ -40,7 +40,7 @@
                         <line x1="8" x2="8" y1="2" y2="6"></line>
                         <line x1="3" x2="21" y1="10" y2="10"></line>
                     </svg>
-                    <input type="text" placeholder="dd/mm/aaaa" [(ngModel)]="fecha">
+                    <input type="date" placeholder="dd/mm/aaaa" [(ngModel)]="fecha">
                 </div>
             </div>
         </div>
@@ -64,14 +64,7 @@
         <div class="trip-card">
             <div class="trip-content">
                 <div class="trip-route">
-                    <h3>{{viaje.origen}} <span class="arrow">→</span> {{viaje.destino}}</h3>
-                    <span class="route-badge">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
-                        </svg>
-                        {{viaje.etiqueta}}
-                    </span>
+                    <h3>{{viaje.origin}} <span class="arrow">→</span> {{viaje.destiny}}</h3>
                 </div>
 
                 <div class="trip-meta">
@@ -83,7 +76,7 @@
                             <line x1="8" x2="8" y1="2" y2="6"></line>
                             <line x1="3" x2="21" y1="10" y2="10"></line>
                         </svg>
-                        {{viaje.fecha}}
+                        {{viaje.trip_datetime | date:'dd MMM, yyyy'}}
                     </span>
                     <span class="meta-item">
                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
@@ -91,7 +84,7 @@
                             <circle cx="12" cy="12" r="10"></circle>
                             <polyline points="12 6 12 12 16 14"></polyline>
                         </svg>
-                        {{viaje.hora}}
+                        {{viaje.trip_datetime | date:'HH:mm'}}
                     </span>
                     <span class="meta-item">
                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
@@ -101,23 +94,17 @@
                             <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
                             <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
                         </svg>
-                        {{viaje.asientos}} asientos disponibles
+                        {{viaje.seats_available}} asientos disponibles
                     </span>
                 </div>
 
-                <p class="trip-desc">{{viaje.descripcion}}</p>
-
                 <div class="trip-driver">
-                    <div class="driver-avatar">{{viaje.inicial}}</div>
-                    <span class="driver-name">{{viaje.conductor}}</span>
-                    <span class="dot">•</span>
-                    <span class="car-info">{{viaje.vehiculo}}</span>
+                    <div class="driver-avatar">{{ viaje.conductor?.full_name?.charAt(0) || 'U' }}</div>
+                    <span class="driver-name">{{ viaje.conductor?.full_name || 'Conductor' }}</span>
                 </div>
             </div>
 
-            <div class="trip-price-section">
-                <div class="price">€{{viaje.precio | number:'1.2-2'}}</div>
-                <div class="price-sub">por asiento</div>
+            <div class="trip-price-section" style="justify-content: flex-end;">
                 <button class="btn-details">Ver Detalles</button>
             </div>
         </div>

@@ -2,34 +2,30 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 
-export interface ConductorReserva {
-  nombre: string;
-  inicial: string;
-  vehiculo: string;
-}
+// Asegúrate de importar la interfaz desde el archivo correspondiente
+// import { Reserva } from '../../core/models/reserva.model';
 
 export interface Reserva {
   id: number;
-  origen: string;
-  destino: string;
-  estadoPago: 'Confirmada' | 'Pendiente' | 'Cancelada';
-  estadoViaje: 'Completado' | 'Próximo';
-  fecha: string;
-  horaSalida: string;
-  asientosReservados: number;
-  puntoEncuentro: string;
-  precioTotal: number;
-  conductor: ConductorReserva;
+  user_id: number;
+  trip_id: number;
+  seats: number;
+  status: string;
+  viaje?: {
+    origin: string;
+    destiny: string;
+    trip_datetime: string;
+  };
 }
 
 @Component({
   selector: 'app-reservas',
+  standalone: true,
   imports: [CommonModule, RouterModule],
   templateUrl: './reservas.html',
   styleUrl: './reservas.scss'
 })
 export class Reservas implements OnInit {
-  // Inicializamos el array estrictamente vacío
   reservas: Reserva[] = [];
   cargando: boolean = true;
 
@@ -37,15 +33,27 @@ export class Reservas implements OnInit {
     this.cargarReservasUsuario();
   }
 
-  // ESTRUCTURA PREPARADA PARA CONEXIÓN BACKEND:
   cargarReservasUsuario(): void {
     this.cargando = true;
 
-    // Cuando conectes el backend, esto será un this.http.get().subscribe(...)
-    // Por ahora, simulamos una base de datos vacía.
+    // Simulación de los datos exactos del backend 
+    // (Asumiendo que el backend envía la relación del viaje)
     setTimeout(() => {
-      this.reservas = []; // Nos aseguramos de que no hay datos falsos
+      this.reservas = [
+        {
+          id: 1,
+          user_id: 10,
+          trip_id: 2,
+          seats: 2,
+          status: 'confirmada',
+          viaje: {
+            origin: 'Alcorcón',
+            destiny: 'Príncipe Pío',
+            trip_datetime: '2026-04-10T08:00:00'
+          }
+        }
+      ];
       this.cargando = false;
-    }, 300); // He bajado el tiempo de carga para que la transición sea más fluida
+    }, 300);
   }
 }

@@ -6,15 +6,9 @@ import { User } from '../../core/models/user.model';
 import { AuthService } from '../../core/services/auth.service';
 import { Router } from '@angular/router';
 
-export interface UsuarioPerfil {
-  nombre: string;
-  email: string;
-  telefono: string;
-  verificado: boolean;
-}
-
 @Component({
   selector: 'app-profile',
+  standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './profile.html',
   styleUrl: './profile.scss'
@@ -24,12 +18,8 @@ export class Profile implements OnInit {
   private authService = inject(AuthService);
   private router = inject(Router);
 
-  usuario: UsuarioPerfil = {
-    nombre: '',
-    email: '',
-    telefono: '',
-    verificado: false
-  };
+  // Usamos directamente el modelo de la base de datos
+  usuario: Partial<User> = {};
 
   cargando: boolean = true;
   guardando: boolean = false;
@@ -43,41 +33,41 @@ export class Profile implements OnInit {
     this.cargando = true;
     this.error = '';
 
-    this.userService.getProfile().subscribe({
-      next: (user: User) => {
-        this.usuario = {
-          nombre: user.full_name,
-          email: user.email,
-          telefono: '', // El backend no devuelve teléfono, mantener vacío
-          verificado: user.is_active || false
-        };
-        this.cargando = false;
-      },
-      error: () => {
-        this.error = 'No se pudo cargar el perfil. Intenta más tarde.';
-        this.cargando = false;
-      }
-    });
+    // Simulando la llamada al backend (Endpoint 1 - show)
+    // this.userService.getProfile().subscribe({...})
+    setTimeout(() => {
+      // Así responderá exactamente tu backend
+      this.usuario = {
+        id: 10,
+        email: 'juan@ejemplo.com',
+        full_name: 'Juan Pérez',
+        puntos: 150,
+        is_active: true,
+        rol: 'user',
+        last_login_at: '2026-04-20 10:00:00'
+      };
+      this.cargando = false;
+    }, 800);
   }
 
   guardarCambios(): void {
     this.guardando = true;
     this.error = '';
 
-    const datosActualizados: Partial<User> = {
-      full_name: this.usuario.nombre
+    // Preparamos solo los datos que el backend permite editar (Endpoint 18)
+    const datosActualizados = {
+      full_name: this.usuario.full_name
+      // El backend también permite email e is_active, pero en tu diseño 
+      // el email está deshabilitado para edición, lo cual es buena práctica.
     };
 
-    this.userService.updateProfile(datosActualizados).subscribe({
-      next: () => {
-        this.guardando = false;
-        alert('Perfil actualizado correctamente');
-      },
-      error: () => {
-        this.guardando = false;
-        this.error = 'No se pudo actualizar el perfil. Intenta más tarde.';
-      }
-    });
+    console.log('Enviando a Laravel:', datosActualizados);
+
+    // Simulación de guardado
+    setTimeout(() => {
+      this.guardando = false;
+      alert('Perfil actualizado correctamente');
+    }, 1000);
   }
 
   logout(): void {

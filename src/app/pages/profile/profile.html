@@ -29,18 +29,31 @@
                 </button>
             </div>
 
-            <h2 class="user-name">{{usuario.nombre}}</h2>
+            <h2 class="user-name">{{usuario.full_name}}</h2>
             <p class="user-email">{{usuario.email}}</p>
 
-            @if (usuario.verificado) {
-            <div class="verification-badge">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-                </svg>
-                Cuenta Verificada
+            <div style="display: flex; gap: 10px; justify-content: center; margin-top: 10px; flex-wrap: wrap;">
+                @if (usuario.is_active) {
+                <div class="verification-badge">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                    </svg>
+                    Cuenta Activa
+                </div>
+                }
+
+                <div class="verification-badge" style="background: #e2e8f0; color: #334155;">
+                    <span style="text-transform: capitalize;">Rol: {{usuario.rol}}</span>
+                </div>
+
+                <div class="verification-badge" style="background: #fef3c7; color: #d97706;">
+                    <span>⭐ {{usuario.puntos}} Puntos</span>
+                </div>
             </div>
-            }
+
+            <button class="btn-secundary" style="margin-top: 20px; width: 100%;" (click)="logout()">Cerrar
+                Sesión</button>
         </div>
 
         <div class="profile-card form-card">
@@ -62,20 +75,7 @@
                             <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
                             <circle cx="12" cy="7" r="4"></circle>
                         </svg>
-                        <input type="text" [(ngModel)]="usuario.nombre" placeholder="Tu nombre">
-                    </div>
-                </div>
-
-                <div class="field-group">
-                    <label>Teléfono</label>
-                    <div class="input-wrapper">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path
-                                d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z">
-                            </path>
-                        </svg>
-                        <input type="tel" [(ngModel)]="usuario.telefono" placeholder="+34 000 000 000">
+                        <input type="text" [(ngModel)]="usuario.full_name" placeholder="Tu nombre">
                     </div>
                 </div>
 

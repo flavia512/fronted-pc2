@@ -1,7 +1,11 @@
 export interface User {
   id: number;
-  full_name: string;
   email: string;
-  is_active?: boolean;
-  role?: string;
+  full_name: string;
+  puntos: number;
+  is_active: boolean;
+  last_login_at?: string | null;
+  created_at?: string;
+  updated_at?: string;
+  rol: string;
 }
