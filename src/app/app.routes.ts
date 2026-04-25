@@ -9,6 +9,7 @@ import { ViajesCompartidos } from './pages/viajes-compartidos/viajes-compartidos
 import { authGuard } from './core/guards/auth.guard';
 import { CrearViaje } from './pages/crear-viaje/crear-viaje';
 import { Home } from './pages/home/home';
+import { Alertas } from './pages/alertas/alertas';
 
 //AÑADIR  canActivate: [authGuard]  CUANDO EL BACKEND ESTE CONECTADO
 export const routes: Routes = [
@@ -21,5 +22,6 @@ export const routes: Routes = [
   { path: 'rutas', component: Rutas },
   { path: 'reservas', component: Reservas },
   { path: 'viajes-compartidos', component: ViajesCompartidos },
+  { path: 'alertas', component: Alertas },
   { path: '', redirectTo: 'home', pathMatch: 'full' }
 ];

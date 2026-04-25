@@ -61,15 +61,15 @@
         }
       </div>
 
-      @if (successMessage) {
-        <div class="success-banner">{{ successMessage }}</div>
+      @if (successMessage()) {
+        <div class="success-banner">{{ successMessage() }}</div>
       }
-      @if (errorMessage) {
-        <div class="error-banner">{{ errorMessage }}</div>
+      @if (errorMessage()) {
+        <div class="error-banner">{{ errorMessage() }}</div>
       }
 
-      <button type="submit" class="btn-primary" [disabled]="loading">
-        {{ loading ? 'Registrando...' : 'Crear Cuenta' }}
+      <button type="submit" class="btn-primary" [disabled]="loading()">
+        {{ loading() ? 'Registrando...' : 'Crear Cuenta' }}
       </button>
     </form>
 

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 
@@ -26,34 +26,21 @@ export interface Reserva {
   styleUrl: './reservas.scss'
 })
 export class Reservas implements OnInit {
-  reservas: Reserva[] = [];
-  cargando: boolean = true;
+  reservas = signal<Reserva[]>([]);
+  cargando = signal(true);
 
   ngOnInit(): void {
     this.cargarReservasUsuario();
   }
 
   cargarReservasUsuario(): void {
-    this.cargando = true;
+    this.cargando.set(true);
 
     // Simulación de los datos exactos del backend 
     // (Asumiendo que el backend envía la relación del viaje)
     setTimeout(() => {
-      this.reservas = [
-        {
-          id: 1,
-          user_id: 10,
-          trip_id: 2,
-          seats: 2,
-          status: 'confirmada',
-          viaje: {
-            origin: 'Alcorcón',
-            destiny: 'Príncipe Pío',
-            trip_datetime: '2026-04-10T08:00:00'
-          }
-        }
-      ];
-      this.cargando = false;
+      this.reservas.set([]); // Nos aseguramos de que no hay datos falsos
+      this.cargando.set(false);
     }, 300);
   }
 }

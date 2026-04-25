@@ -5,10 +5,10 @@
     </div>
 
     <div class="reservas-list">
-        @if (cargando) {
+        @if (cargando()) {
         <div class="loading-state">Cargando tus reservas...</div>
         } @else {
-        @for (reserva of reservas; track reserva.id) {
+        @for (reserva of reservas(); track reserva.id) {
         <div class="reserva-card">
             <div class="card-top-row">
                 <div class="route-info">

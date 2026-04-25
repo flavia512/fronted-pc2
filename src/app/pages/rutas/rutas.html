@@ -1,7 +1,7 @@
 <div class="mis-rutas-container">
-    @if (toast) {
-    <div class="toast" [class.toast-exito]="toast.tipo === 'exito'" [class.toast-error]="toast.tipo === 'error'">
-        @if (toast.tipo === 'exito') {
+    @if (toast()) {
+    <div class="toast" [class.toast-exito]="toast()!.tipo === 'exito'" [class.toast-error]="toast()!.tipo === 'error'">
+        @if (toast()!.tipo === 'exito') {
         <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
@@ -15,7 +15,7 @@
             <line x1="12" y1="16" x2="12.01" y2="16"></line>
         </svg>
         }
-        <span>{{ toast.mensaje }}</span>
+        <span>{{ toast()!.mensaje }}</span>
         <button class="toast-close" (click)="cerrarToast()" aria-label="Cerrar">&times;</button>
     </div>
     }
@@ -36,12 +36,12 @@
     </div>
 
     <div class="rutas-list">
-        @if (cargando) {
+        @if (cargando()) {
         <div class="loading-state">
             <div class="loading-spinner"></div>
             Cargando tus rutas guardadas...
         </div>
-        } @else if (errorCarga) {
+        } @else if (errorCarga()) {
         <div class="error-state">
             <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
@@ -54,7 +54,7 @@
         </div>
         } @else {
         <div class="trips-list">
-            @for (ruta of rutas; track ruta.id) {
+            @for (ruta of rutas(); track ruta.id) {
             <div class="ruta-card">
                 <div class="card-header">
                     <h2>{{ruta.nombre}}</h2>
@@ -123,7 +123,7 @@
         }
     </div>
 
-    @if (mostrarModal) {
+    @if (mostrarModal()) {
     <div class="modal-backdrop" (click)="cerrarModal()">
         <div class="modal-content" (click)="$event.stopPropagation()">
             <div class="modal-header">
@@ -152,9 +152,9 @@
                             <input type="text" placeholder="Escribe una dirección..." [(ngModel)]="nuevaRuta.origen"
                                 (input)="onOrigenInput()" autocomplete="off">
                         </div>
-                        @if (sugerenciasOrigen.length > 0) {
+                        @if (sugerenciasOrigen().length > 0) {
                         <ul class="suggestions-list">
-                            @for (s of sugerenciasOrigen; track s.place_name) {
+                            @for (s of sugerenciasOrigen(); track s.place_name) {
                             <li (click)="seleccionarOrigen(s)">{{ s.place_name }}</li>
                             }
                         </ul>
@@ -166,9 +166,9 @@
                             <input type="text" placeholder="Escribe una dirección..." [(ngModel)]="nuevaRuta.destino"
                                 (input)="onDestinoInput()" autocomplete="off">
                         </div>
-                        @if (sugerenciasDestino.length > 0) {
+                        @if (sugerenciasDestino().length > 0) {
                         <ul class="suggestions-list">
-                            @for (s of sugerenciasDestino; track s.place_name) {
+                            @for (s of sugerenciasDestino(); track s.place_name) {
                             <li (click)="seleccionarDestino(s)">{{ s.place_name }}</li>
                             }
                         </ul>
@@ -183,7 +183,7 @@
                     </div>
                 </div>
 
-                @if (calculandoRuta) {
+                @if (calculandoRuta()) {
                 <div class="ruta-status calculando">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
                         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -193,15 +193,15 @@
                 </div>
                 }
 
-                @if (rutaInfo) {
+                @if (rutaInfo()) {
                 <div class="ruta-detectada">
                     <div class="ruta-stat">
                         <span class="stat-label">Duración estimada</span>
-                        <span class="stat-value">{{ rutaInfo.duracionMinutos }} min</span>
+                        <span class="stat-value">{{ rutaInfo()!.duracionMinutos }} min</span>
                     </div>
                     <div class="ruta-stat">
                         <span class="stat-label">M-30 detectada</span>
-                        @if (rutaInfo.pasamPorM30) {
+                        @if (rutaInfo()!.pasamPorM30) {
                         <span class="badge badge-m30-detected">Sí, pasa por la M-30</span>
                         } @else {
                         <span class="badge badge-no-m30">No pasa por la M-30</span>
@@ -212,7 +212,7 @@
 
                 <div class="mapa-wrapper">
                     <div #mapaContainer class="mapa-preview"></div>
-                    @if (!rutaInfo && !calculandoRuta) {
+                    @if (!rutaInfo() && !calculandoRuta()) {
                     <div class="mapa-overlay-hint">
                         <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none"
                             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -226,11 +226,11 @@
             </div>
 
             <div class="modal-footer">
-                <button class="btn-cancel" (click)="cerrarModal()" [disabled]="guardandoRuta">Cancelar</button>
+                <button class="btn-cancel" (click)="cerrarModal()" [disabled]="guardandoRuta()">Cancelar</button>
                 <button class="btn-submit" (click)="guardarRutaBackend()"
-                    [disabled]="guardandoRuta || !rutaInfo"
-                    [title]="!rutaInfo ? 'Primero selecciona un origen y un destino del autocompletado' : ''">
-                    @if (guardandoRuta) {
+                    [disabled]="guardandoRuta() || !rutaInfo()"
+                    [title]="!rutaInfo() ? 'Primero selecciona un origen y un destino del autocompletado' : ''">
+                    @if (guardandoRuta()) {
                     Guardando...
                     } @else {
                     Guardar Ruta

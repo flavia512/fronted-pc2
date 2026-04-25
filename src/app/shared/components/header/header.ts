@@ -1,5 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-header',
@@ -10,10 +11,12 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
 })
 export class Header {
   // Aquí podemos inyectar un servicio de autenticación para obtener el nombre real del usuario y la lógica de cerrar sesión.
-  userName = 'Juan EJMEPLO';
+  private authService = inject(AuthService);
+
+  userName = this.authService.currentUser()?.full_name;
 
   logout() {
     console.log('Logout clicked');
-    // Implementar lógica de logout
+    this.authService.logout();
   }
 }

@@ -4,12 +4,12 @@
     <p>Administra los usuarios del sistema</p>
   </div>
 
-  @if (error) {
-  <div class="mensaje mensaje-error">{{ error }}</div>
+  @if (error()) {
+    <div class="mensaje mensaje-error">{{ error() }}</div>
   }
 
-  @if (exito) {
-  <div class="mensaje mensaje-exito">{{ exito }}</div>
+  @if (exito()) {
+    <div class="mensaje mensaje-exito">{{ exito() }}</div>
   }
 
   <div class="controles">
@@ -19,13 +19,13 @@
       <button (click)="limpiarBusqueda()" class="btn-limpiar">✕</button>
       }
     </div>
-    <button (click)="cargarUsuarios()" class="btn-recargar" [disabled]="cargando">
+    <button (click)="cargarUsuarios()" class="btn-recargar" [disabled]="cargando()">
       Recargar
     </button>
   </div>
 
-  @if (cargando) {
-  <div class="estado-carga">Cargando usuarios...</div>
+  @if (cargando()) {
+    <div class="estado-carga">Cargando usuarios...</div>
   } @else if (usuariosFiltrados.length > 0) {
   <div class="tabla-container">
     <table class="tabla-usuarios">
@@ -70,9 +70,9 @@
     </table>
   </div>
 
-  <div class="contador">
-    Mostrando {{ usuariosFiltrados.length }} de {{ usuarios.length }} usuarios
-  </div>
+    <div class="contador">
+      Mostrando {{ usuariosFiltrados.length }} de {{ usuarios().length }} usuarios
+    </div>
   } @else {
   <div class="sin-resultados">
     @if (buscando) {

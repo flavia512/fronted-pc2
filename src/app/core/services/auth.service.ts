@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, inject, signal, computed } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
 import { AuthResponse } from '../models/auth-response.model';
@@ -15,12 +15,16 @@ export class AuthService {
   private tokenKey = 'token';
   private userKey = 'user';
 
+  readonly currentUser = signal<User | null>(this.getStoredUser());
+  readonly isLoggedIn = computed(() => !!this.currentUser());
+
   login(data: { email: string; password: string }): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${this.apiUrl}/login`, data).pipe(
       tap((response) => {
         this.saveToken(response.access_token);
         if (response.user) {
           this.saveUser(response.user);
+          this.currentUser.set(response.user);
         }
       })
     );
@@ -33,6 +37,7 @@ export class AuthService {
   logout(): void {
     localStorage.removeItem(this.tokenKey);
     localStorage.removeItem(this.userKey);
+    this.currentUser.set(null);
   }
 
   saveToken(token: string): void {
@@ -50,9 +55,5 @@ export class AuthService {
   getStoredUser(): User | null {
     const user = localStorage.getItem(this.userKey);
     return user ? JSON.parse(user) : null;
-  }
-
-  isLoggedIn(): boolean {
-    return !!this.getToken();
   }
 }

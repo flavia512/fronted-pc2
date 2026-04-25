@@ -48,12 +48,12 @@
         }
       </div>
 
-      @if (errorMessage) {
-      <div class="error-banner">{{ errorMessage }}</div>
+      @if (errorMessage()) {
+      <div class="error-banner">{{ errorMessage() }}</div>
       }
 
-      <button type="submit" class="btn-primary" [disabled]="loading">
-        {{ loading ? 'Ingresando...' : 'Iniciar Sesión' }}
+      <button type="submit" class="btn-primary" [disabled]="loading()">
+        {{ loading() ? 'Ingresando...' : 'Iniciar Sesión' }}
       </button>
       <!-- BOTON PARA PROBAR SIN LOGUEARSE -->
       <button type="button" class="btn-secundary" routerLink="/viajes-compartidos">

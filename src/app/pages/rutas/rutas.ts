@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ViewChild, ElementRef, NgZone } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, ElementRef, NgZone, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import mapboxgl from 'mapbox-gl';
@@ -36,14 +36,14 @@ export interface MiRuta {
 export class Rutas implements OnInit, OnDestroy {
   @ViewChild('mapaContainer') mapaContainer!: ElementRef;
 
-  rutas: MiRuta[] = [];
-  cargando = true;
-  errorCarga = false;
-  mostrarModal = false;
-  guardandoRuta = false;
+  rutas = signal<MiRuta[]>([]);
+  cargando = signal(true);
+  errorCarga = signal(false);
+  mostrarModal = signal(false);
+  guardandoRuta = signal(false);
 
   // Toast de feedback
-  toast: { tipo: 'exito' | 'error'; mensaje: string } | null = null;
+  toast = signal<{ tipo: 'exito' | 'error'; mensaje: string } | null>(null);
   private toastTimeout: any = null;
 
   // Centro de Madrid por defecto
@@ -52,14 +52,14 @@ export class Rutas implements OnInit, OnDestroy {
   nuevaRuta = { nombre: '', origen: '', destino: '', horaSalida: '' };
 
   // Autocomplete
-  sugerenciasOrigen: MapboxFeature[] = [];
-  sugerenciasDestino: MapboxFeature[] = [];
-  coordOrigen: [number, number] | null = null;
-  coordDestino: [number, number] | null = null;
+  sugerenciasOrigen = signal<MapboxFeature[]>([]);
+  sugerenciasDestino = signal<MapboxFeature[]>([]);
+  coordOrigen = signal<[number, number] | null>(null);
+  coordDestino = signal<[number, number] | null>(null);
 
   // Ruta calculada
-  rutaInfo: RouteInfo | null = null;
-  calculandoRuta = false;
+  rutaInfo = signal<RouteInfo | null>(null);
+  calculandoRuta = signal(false);
 
   private mapa: mapboxgl.Map | null = null;
   private origenSubject = new Subject<string>();
@@ -77,12 +77,12 @@ export class Rutas implements OnInit, OnDestroy {
     this.origenSubject.pipe(
       debounceTime(300),
       switchMap(q => q.length > 2 ? this.mapboxService.buscarDireccion(q) : of([]))
-    ).subscribe(r => this.sugerenciasOrigen = r);
+    ).subscribe(r => this.sugerenciasOrigen.set(r));
 
     this.destinoSubject.pipe(
       debounceTime(300),
       switchMap(q => q.length > 2 ? this.mapboxService.buscarDireccion(q) : of([]))
-    ).subscribe(r => this.sugerenciasDestino = r);
+    ).subscribe(r => this.sugerenciasDestino.set(r));
   }
 
   ngOnDestroy(): void {
@@ -92,45 +92,45 @@ export class Rutas implements OnInit, OnDestroy {
   }
 
   onOrigenInput(): void {
-    this.coordOrigen = null;
-    this.rutaInfo = null;
+    this.coordOrigen.set(null);
+    this.rutaInfo.set(null);
     this.origenSubject.next(this.nuevaRuta.origen);
   }
 
   onDestinoInput(): void {
-    this.coordDestino = null;
-    this.rutaInfo = null;
+    this.coordDestino.set(null);
+    this.rutaInfo.set(null);
     this.destinoSubject.next(this.nuevaRuta.destino);
   }
 
   seleccionarOrigen(feature: MapboxFeature): void {
     this.nuevaRuta.origen = feature.place_name;
-    this.coordOrigen = feature.center;
-    this.sugerenciasOrigen = [];
+    this.coordOrigen.set(feature.center);
+    this.sugerenciasOrigen.set([]);
     this.intentarCalcularRuta();
   }
 
   seleccionarDestino(feature: MapboxFeature): void {
     this.nuevaRuta.destino = feature.place_name;
-    this.coordDestino = feature.center;
-    this.sugerenciasDestino = [];
+    this.coordDestino.set(feature.center);
+    this.sugerenciasDestino.set([]);
     this.intentarCalcularRuta();
   }
 
   intentarCalcularRuta(): void {
-    if (!this.coordOrigen || !this.coordDestino) return;
-    this.calculandoRuta = true;
-    this.rutaInfo = null;
+    if (!this.coordOrigen() || !this.coordDestino()) return;
+    this.calculandoRuta.set(true);
+    this.rutaInfo.set(null);
     this.mapa?.remove();
     this.mapa = null;
 
-    this.mapboxService.calcularRuta(this.coordOrigen, this.coordDestino).subscribe({
+    this.mapboxService.calcularRuta(this.coordOrigen()!, this.coordDestino()!).subscribe({
       next: info => {
-        this.rutaInfo = info;
-        this.calculandoRuta = false;
+        this.rutaInfo.set(info);
+        this.calculandoRuta.set(false);
         setTimeout(() => this.inicializarMapa(info), 150);
       },
-      error: () => { this.calculandoRuta = false; }
+      error: () => { this.calculandoRuta.set(false); }
     });
   }
 
@@ -155,7 +155,7 @@ export class Rutas implements OnInit, OnDestroy {
     this.mapa = new mapboxgl.Map({
       container: this.mapaContainer.nativeElement,
       style: 'mapbox://styles/mapbox/streets-v12',
-      center: this.coordOrigen!,
+      center: this.coordOrigen()!,
       zoom: 11
     });
 
@@ -169,8 +169,8 @@ export class Rutas implements OnInit, OnDestroy {
         paint: { 'line-color': '#1d4ed8', 'line-width': 4, 'line-opacity': 0.9 }
       });
 
-      new mapboxgl.Marker({ color: '#16a34a' }).setLngLat(this.coordOrigen!).addTo(this.mapa!);
-      new mapboxgl.Marker({ color: '#dc2626' }).setLngLat(this.coordDestino!).addTo(this.mapa!);
+      new mapboxgl.Marker({ color: '#16a34a' }).setLngLat(this.coordOrigen()!).addTo(this.mapa!);
+      new mapboxgl.Marker({ color: '#dc2626' }).setLngLat(this.coordDestino()!).addTo(this.mapa!);
 
       const coords = info.geometry.coordinates as [number, number][];
       const bounds = coords.reduce(
@@ -182,12 +182,12 @@ export class Rutas implements OnInit, OnDestroy {
   }
  
   cargarRutasUsuario(): void {
-    this.cargando = true;
-    this.errorCarga = false;
+    this.cargando.set(true);
+    this.errorCarga.set(false);
     this.rutaService.obtenerRutas().subscribe({
       next: (rutas: Ruta[]) => {
         console.log('Rutas recibidas:', rutas); // Log temporal para depuración
-        this.rutas = rutas.map(r => ({
+        this.rutas.set(rutas.map(r => ({
           id: r.id,
           nombre: r.nombre ?? 'Sin nombre',
           origen: r.origin_text,
@@ -196,13 +196,13 @@ export class Rutas implements OnInit, OnDestroy {
           pasaPorM30: r.pasa_por_m30,
           alertasActivas: true,
           dias: 'Días: lunes a viernes'
-        }));
-        this.cargando = false;
+        })));
+        this.cargando.set(false);
       },
       error: (err) => {
-        this.rutas = [];
-        this.cargando = false;
-        this.errorCarga = true;
+        this.rutas.set([]);
+        this.cargando.set(false);
+        this.errorCarga.set(true);
         if (err?.status === 401) {
           this.mostrarToast('error', 'Sesión expirada. Vuelve a iniciar sesión.');
         } else if (err?.status === 0) {
@@ -213,13 +213,13 @@ export class Rutas implements OnInit, OnDestroy {
   }
 
   eliminarRuta(id: number): void {
-    const ruta = this.rutas.find(r => r.id === id);
+    const ruta = this.rutas().find(r => r.id === id);
     const nombre = ruta?.nombre || 'esta ruta';
     if (!confirm(`¿Eliminar "${nombre}"? Esta acción no se puede deshacer.`)) return;
 
     this.rutaService.eliminarRuta(id).subscribe({
       next: () => {
-        this.rutas = this.rutas.filter(r => r.id !== id);
+        this.rutas.update(list => list.filter(r => r.id !== id));
         this.mostrarToast('exito', 'Ruta eliminada correctamente');
       },
       error: () => {
@@ -229,73 +229,73 @@ export class Rutas implements OnInit, OnDestroy {
   }
 
   mostrarToast(tipo: 'exito' | 'error', mensaje: string): void {
-    this.toast = { tipo, mensaje };
+    this.toast.set({ tipo, mensaje });
     if (this.toastTimeout) clearTimeout(this.toastTimeout);
-    this.toastTimeout = setTimeout(() => (this.toast = null), 5000);
+    this.toastTimeout = setTimeout(() => this.toast.set(null), 5000);
   }
 
   cerrarToast(): void {
-    this.toast = null;
+    this.toast.set(null);
     if (this.toastTimeout) clearTimeout(this.toastTimeout);
   }
 
   abrirModal(): void {
-    this.mostrarModal = true;
+    this.mostrarModal.set(true);
     // Inicializar mapa vacío cuando el modal termine de renderizarse
     setTimeout(() => this.inicializarMapaVacio(), 200);
   }
 
   cerrarModal(): void {
-    this.mostrarModal = false;
-    this.guardandoRuta = false;
+    this.mostrarModal.set(false);
+    this.guardandoRuta.set(false);
     try { this.mapa?.remove(); } catch (_) {}
     this.mapa = null;
-    this.rutaInfo = null;
-    this.coordOrigen = null;
-    this.coordDestino = null;
-    this.sugerenciasOrigen = [];
-    this.sugerenciasDestino = [];
+    this.rutaInfo.set(null);
+    this.coordOrigen.set(null);
+    this.coordDestino.set(null);
+    this.sugerenciasOrigen.set([]);
+    this.sugerenciasDestino.set([]);
     this.nuevaRuta = { nombre: '', origen: '', destino: '', horaSalida: '' };
   }
 
   guardarRutaBackend(): void {
-    if (!this.coordOrigen || !this.coordDestino || !this.rutaInfo) return;
-    this.guardandoRuta = true;
+    if (!this.coordOrigen() || !this.coordDestino() || !this.rutaInfo()) return;
+    this.guardandoRuta.set(true);
 
     const payload = {
       nombre: this.nuevaRuta.nombre || null,
       origin_text: this.nuevaRuta.origen,
-      origin_lat: this.coordOrigen[1],
-      origin_lng: this.coordOrigen[0],
+      origin_lat: this.coordOrigen()![1],
+      origin_lng: this.coordOrigen()![0],
       dest_text: this.nuevaRuta.destino,
-      dest_lat: this.coordDestino[1],
-      dest_lng: this.coordDestino[0],
+      dest_lat: this.coordDestino()![1],
+      dest_lng: this.coordDestino()![0],
       hora_salida: this.nuevaRuta.horaSalida || null,
-      duration_min: this.rutaInfo.duracionMinutos,
-      pasa_por_m30: this.rutaInfo.pasamPorM30
+      duration_min: this.rutaInfo()!.duracionMinutos,
+      pasa_por_m30: this.rutaInfo()!.pasamPorM30
     };
 
     this.rutaService.crearRuta(payload).subscribe({
       next: (res) => {
         this.ngZone.run(() => {
           // Cerrar modal primero (antes de tocar el mapa)
-          this.mostrarModal = false;
-          this.guardandoRuta = false;
+          this.mostrarModal.set(false);
+          this.guardandoRuta.set(false);
 
           // Destruir mapa de forma segura
           try { this.mapa?.remove(); } catch (_) {}
           this.mapa = null;
-          this.rutaInfo = null;
-          this.coordOrigen = null;
-          this.coordDestino = null;
-          this.sugerenciasOrigen = [];
-          this.sugerenciasDestino = [];
+          this.rutaInfo.set(null);
+          this.coordOrigen.set(null);
+          this.coordDestino.set(null);
+          this.sugerenciasOrigen.set([]);
+          this.sugerenciasDestino.set([]);
           this.nuevaRuta = { nombre: '', origen: '', destino: '', horaSalida: '' };
 
           // Añadir ruta al array
           const r = res?.data;
           if (r) {
-            this.rutas.unshift({
+            this.rutas.update(list => [{
               id: r.id,
               nombre: r.nombre ?? 'Sin nombre',
               origen: r.origin_text,
@@ -304,14 +304,14 @@ export class Rutas implements OnInit, OnDestroy {
               pasaPorM30: r.pasa_por_m30,
               alertasActivas: true,
               dias: 'Días: lunes a viernes'
-            });
+            }, ...list]);
           }
 
           this.mostrarToast('exito', `✓ Ruta "${r?.nombre ?? 'Nueva ruta'}" guardada correctamente`);
         });
       },
       error: (err) => {
-        this.guardandoRuta = false;
+        this.guardandoRuta.set(false);
         if (err?.status === 401) {
           this.mostrarToast('error', 'Tu sesión ha expirado. Vuelve a iniciar sesión.');
         } else if (err?.status === 422) {

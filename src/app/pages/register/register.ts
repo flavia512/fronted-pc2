@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -16,9 +16,9 @@ export class Register {
   private authService = inject(AuthService);
   private router = inject(Router);
 
-  errorMessage = '';
-  successMessage = '';
-  loading = false;
+  errorMessage = signal('');
+  successMessage = signal('');
+  loading = signal(false);
 
   form = this.fb.group({
     full_name: ['', [Validators.required]],
@@ -32,9 +32,9 @@ export class Register {
       return;
     }
 
-    this.loading = true;
-    this.errorMessage = '';
-    this.successMessage = '';
+    this.loading.set(true);
+    this.errorMessage.set('');
+    this.successMessage.set('');
 
     this.authService.register(this.form.getRawValue() as {
       full_name: string;
@@ -42,13 +42,13 @@ export class Register {
       password: string;
     }).subscribe({
       next: () => {
-        this.loading = false;
-        this.successMessage = 'Usuario registrado correctamente';
+        this.loading.set(false);
+        this.successMessage.set('Usuario registrado correctamente');
         setTimeout(() => this.router.navigate(['/login']), 1500);
       },
       error: () => {
-        this.loading = false;
-        this.errorMessage = 'No se pudo registrar el usuario';
+        this.loading.set(false);
+        this.errorMessage.set('No se pudo registrar el usuario');
       }
     });
   }
