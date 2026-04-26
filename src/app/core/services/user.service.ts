@@ -10,33 +10,27 @@ export class UserService {
   private http = inject(HttpClient);
   private apiUrl = 'http://localhost:8000/api';
 
-  /** Obtener perfil del usuario autenticado */
   getProfile(): Observable<User> {
     return this.http.get<User>(`${this.apiUrl}/profile`);
   }
 
-  /** Actualizar perfil del usuario */
   updateProfile(data: Partial<User>): Observable<User> {
     return this.http.put<User>(`${this.apiUrl}/profile`, data);
   }
 
-  /** Obtener lista de todos los usuarios (solo admin) */
   getAllUsers(): Observable<User[]> {
-    return this.http.get<User[]>(`${this.apiUrl}/users`);
+    return this.http.get<User[]>(`${this.apiUrl}/users/listaUsuarios`);
   }
 
-  /** Obtener un usuario específico por ID */
   getUserById(id: number): Observable<User> {
-    return this.http.get<User>(`${this.apiUrl}/users/${id}`);
+    return this.http.get<User>(`${this.apiUrl}/users/usuario`);
   }
 
-  /** Actualizar un usuario (admin) */
   updateUser(id: number, data: Partial<User>): Observable<User> {
-    return this.http.put<User>(`${this.apiUrl}/users/${id}`, data);
+    return this.http.put<User>(`${this.apiUrl}/admin/usuarios/${id}`, data);
   }
 
-  /** Eliminar un usuario (admin) */
   deleteUser(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/users/${id}`);
+    return this.http.delete<void>(`${this.apiUrl}/users/eliminar/${id}`);
   }
 }
