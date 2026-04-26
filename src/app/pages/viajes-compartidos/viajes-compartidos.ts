@@ -1,22 +1,35 @@
-import { Component } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ViajeCompartidoService } from '../../core/services/viaje-compartido.service';
 
-// Esta interfaz coincide con tu modelo de base de datos
 export interface ViajeCompartido {
   id: number;
+
   driver_user_id: number;
   route_id: number;
+
   origin: string;
   destiny: string;
+
   trip_datetime: string;
+
   seats_total: number;
   seats_available: number;
+
   status: string;
-  // Relación de Laravel (se asume que el backend hace un ->with('conductor'))
+
   conductor?: {
-    full_name: string;
+    id?: number;
+    name?: string;
   };
+
+  ruta?: {
+    id?: number;
+    name?: string;
+  };
+
+  reservas?: any[];
 }
 
 @Component({
@@ -26,42 +39,60 @@ export interface ViajeCompartido {
   templateUrl: './viajes-compartidos.html',
   styleUrl: './viajes-compartidos.scss',
 })
-export class ViajesCompartidos {
-  // Variables atadas al buscador (ngModel)
+export class ViajesCompartidos implements OnInit {
+
+  private viajeService = inject(ViajeCompartidoService);
+
   origin: string = '';
   destiny: string = '';
   fecha: string = '';
+  errorMessage = '';
 
-  // Datos simulados estructurados exactamente como responderá Laravel
-  viajes: ViajeCompartido[] = [
-    {
-      id: 1,
-      driver_user_id: 10,
-      route_id: 1,
-      origin: 'Alcorcón',
-      destiny: 'Príncipe Pío',
-      trip_datetime: '2026-04-10T08:00:00', // Formato estándar de base de datos
-      seats_total: 4,
-      seats_available: 3,
-      status: 'activo',
-      conductor: { full_name: 'Juan Pérez' }
-    },
-    {
-      id: 2,
-      driver_user_id: 12,
-      route_id: 2,
-      origin: 'Móstoles',
-      destiny: 'Príncipe Pío',
-      trip_datetime: '2026-04-10T07:30:00',
-      seats_total: 4,
-      seats_available: 2,
-      status: 'activo',
-      conductor: { full_name: 'Ana Gómez' }
-    }
-  ];
+  viajes: ViajeCompartido[] = [];
+  loading: boolean = false;
 
-  buscarViajes() {
-    console.log('Buscando viajes con:', { origin: this.origin, destiny: this.destiny, fecha: this.fecha });
-    // Aquí se llamará al servicio HTTP pasando estos parámetros O los que sean necesarios para hacer la busqueda en la base de datos 
+  ngOnInit(): void {
+    this.listarViajes();
   }
+
+  listarViajes(): void {
+    this.loading = true;
+
+    this.viajeService.listarViajes().subscribe({
+      next: (response: any) => {
+        this.viajes = response.data ?? [];
+        this.loading = false;
+      },
+      error: (err) => {
+        console.error(err);
+        this.viajes = [];
+        this.loading = false;
+      }
+    });
+  }
+
+  verDetalle(id: number | undefined): void {
+    if (!id) return;
+    console.log('Detalle viaje:', id);
+  }
+
+  trackById(_: number, item: ViajeCompartido): number {
+    return item.id;
+  }
+
+  eliminarViaje(id: number): void {
+    if (!confirm('¿Estás seguro de eliminar este viaje?')) return;
+
+    this.viajeService.eliminarViaje(id).subscribe({
+      next: () => {
+        console.log('Viaje eliminado correctamente');
+        // Aquí podrías recargar la lista de viajes o actualizar el estado
+      },
+      error: (err) => {
+        console.error('Error eliminando viaje:', err);
+        this.errorMessage = 'Error al eliminar el viaje';
+      }
+    });
+  }
+
 }

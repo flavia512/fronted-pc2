@@ -1,56 +1,80 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { ViajeCompartidoService } from '../../core/services/viaje-compartido.service';
 
 @Component({
   selector: 'app-crear-viaje',
   standalone: true,
-  imports: [ReactiveFormsModule, RouterLink],
+  imports: [ReactiveFormsModule],
   templateUrl: './crear-viaje.html',
   styleUrl: './crear-viaje.scss'
 })
 export class CrearViaje {
+
+  private viajeService = inject(ViajeCompartidoService);
+
   form: FormGroup;
   loading = false;
   errorMessage = '';
 
   constructor(private fb: FormBuilder) {
     this.form = this.fb.group({
+      driver_user_id: [1, Validators.required],
+      route_id: [1, Validators.required],
+
       origin: ['', Validators.required],
       destiny: ['', Validators.required],
+
       seats_total: [null, [Validators.required, Validators.min(1)]],
-      // Controles visuales para armar el datetime
+
       fecha: ['', Validators.required],
       hora: ['', Validators.required]
     });
   }
 
-  onSubmit() {
-    if (this.form.valid) {
-      this.loading = true;
-      const formValues = this.form.value;
+  onSubmit(): void {
 
-      // Formateo del datetime para Laravel (YYYY-MM-DD HH:mm:ss)
-      const formattedDatetime = `${formValues.fecha} ${formValues.hora}:00`;
-
-      // Payload final exacto para el backend
-      const payloadViaje = {
-        origin: formValues.origin,
-        destiny: formValues.destiny,
-        seats_total: formValues.seats_total,
-        seats_available: formValues.seats_total, // Por defecto, todos los asientos están disponibles al crear
-        trip_datetime: formattedDatetime
-        // Nota: Faltará agregar driver_user_id y route_id en el servicio
-      };
-
-      console.log('Payload listo para enviar:', payloadViaje);
-
-      // Simulación de carga
-      setTimeout(() => {
-        this.loading = false;
-      }, 1500);
-    } else {
+    if (this.form.invalid) {
       this.form.markAllAsTouched();
+      return;
     }
+
+    this.loading = true;
+    this.errorMessage = '';
+
+    const v = this.form.value;
+
+    const trip_datetime = `${v.fecha} ${v.hora}:00`;
+
+    const payload = {
+      driver_user_id: v.driver_user_id,
+      route_id: v.route_id,
+
+      origin: v.origin,
+      destiny: v.destiny,
+
+      trip_datetime: trip_datetime,
+
+      seats_total: v.seats_total,
+      seats_available: v.seats_total,
+
+      status: 'activo'
+    };
+
+    console.log('PAYLOAD FINAL:', payload);
+
+    this.viajeService.crearViaje(payload).subscribe({
+      next: (res) => {
+        console.log('Viaje creado correctamente:', res);
+        this.loading = false;
+        this.form.reset();
+      },
+      error: (err) => {
+        console.error('Error creando viaje:', err);
+        this.errorMessage = 'Error al crear el viaje';
+        this.loading = false;
+      }
+    });
   }
+
 }

@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Reserva } from '../models/reserva.model';
 import { environment } from '../../../environments/environment';
+import {ReservasResponse} from '../../pages/reservas/reservas';
 
 @Injectable({
   providedIn: 'root'
@@ -11,11 +12,9 @@ export class ReservaService {
   private http = inject(HttpClient);
   private apiUrl = environment.apiUrl;
 
-  // Endpoint 10: Obtener reservas por usuario
-  obtenerReservasPorUsuario(): Observable<Reserva[]> {
-    return this.http.get<Reserva[]>(`${this.apiUrl}/users/obtener_reservas`);
+  obtenerReservasPorUsuario(userId: number): Observable<ReservasResponse> {
+    return this.http.get<ReservasResponse>(`${this.apiUrl}/users/obtener_reservas`, {params: { user_id: userId }});
   }
-
   // Endpoint 11: Actualizar reserva
   actualizarReserva(id: number, data: Partial<Reserva>): Observable<Reserva> {
     return this.http.put<Reserva>(`${this.apiUrl}/reservas/${id}`, data);
@@ -32,7 +31,7 @@ export class ReservaService {
   }
 
   // Endpoint 14: Reservas por ruta (driver)
-  reservasPorRuta(): Observable<Reserva[]> {
-    return this.http.get<Reserva[]>(`${this.apiUrl}/driver/reservas`);
+  reservasPorRuta(rutaId: number): Observable<{ success: boolean; data: any[] }> {
+    return this.http.get<{ success: boolean; data: any[] }>(`${this.apiUrl}/driver/reservas`, {params: { ruta_id: rutaId }});
   }
 }

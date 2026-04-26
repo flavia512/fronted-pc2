@@ -1,4 +1,5 @@
 <div class="admin-container">
+
   <div class="admin-header">
     <h1>Gestión de Usuarios</h1>
     <p>Administra los usuarios del sistema</p>
@@ -14,22 +15,36 @@
 
   <div class="controles">
     <div class="busqueda">
-      <input type="text" [(ngModel)]="buscando" placeholder="Buscar por nombre o correo..." class="input-busqueda">
+      <input
+        type="text"
+        [(ngModel)]="buscando"
+        placeholder="Buscar por nombre o correo..."
+        class="input-busqueda">
+
       @if (buscando) {
-      <button (click)="limpiarBusqueda()" class="btn-limpiar">✕</button>
+        <button (click)="limpiarBusqueda()" class="btn-limpiar">✕</button>
       }
     </div>
-    <button (click)="cargarUsuarios()" class="btn-recargar" [disabled]="cargando()">
+
+    <button
+      (click)="cargarUsuarios()"
+      class="btn-recargar"
+      [disabled]="cargando()">
       Recargar
     </button>
   </div>
 
   @if (cargando()) {
+
     <div class="estado-carga">Cargando usuarios...</div>
+
   } @else if (usuariosFiltrados.length > 0) {
-  <div class="tabla-container">
-    <table class="tabla-usuarios">
-      <thead>
+
+    <div class="tabla-container">
+
+      <table class="tabla-usuarios">
+
+        <thead>
         <tr>
           <th>ID</th>
           <th>Nombre</th>
@@ -37,49 +52,147 @@
           <th>Rol</th>
           <th>Estado</th>
           <th>Acciones</th>
+          <th>Reservas</th>
         </tr>
-      </thead>
-      <tbody>
-        @for (usuario of usuariosFiltrados; track usuario.id) {
-        <tr [class.inactivo]="!usuario.is_active">
-          <td>#{{ usuario.id }}</td>
-          <td>{{ usuario.full_name }}</td>
-          <td>{{ usuario.email }}</td>
-          <td>
-            <span class="badge" [class.admin]="usuario.rol === 'admin'">
-              {{ usuario.rol === 'admin' ? 'Admin' : 'Usuario' }}
-            </span>
-          </td>
-          <td>
-            <span class="estado" [class.activo]="usuario.is_active">
-              {{ usuario.is_active ? 'Activo' : 'Inactivo' }}
-            </span>
-          </td>
-          <td class="acciones">
-            <button (click)="toggleEstado(usuario)" class="btn-accion btn-toggle"
-              [title]="usuario.is_active ? 'Desactivar' : 'Activar'">
-              {{ usuario.is_active ? '⊘' : '✓' }}
-            </button>
-            <button (click)="eliminarUsuario(usuario)" class="btn-accion btn-eliminar" title="Eliminar">
-              🗑️
-            </button>
-          </td>
-        </tr>
-        }
-      </tbody>
-    </table>
-  </div>
+        </thead>
+
+        <tbody>
+
+          @for (usuario of usuariosFiltrados; track usuario.id) {
+
+            <tr [class.inactivo]="!usuario.is_active">
+
+              <td>#{{ usuario.id }}</td>
+              <td>{{ usuario.full_name }}</td>
+              <td>{{ usuario.email }}</td>
+
+              <td>
+                <span class="badge" [class.admin]="usuario.rol === 'admin'">
+                  {{ usuario.rol === 'admin' ? 'Admin' : 'Usuario' }}
+                </span>
+              </td>
+
+              <td>
+                <span class="estado" [class.activo]="usuario.is_active">
+                  {{ usuario.is_active ? 'Activo' : 'Inactivo' }}
+                </span>
+              </td>
+
+              <td class="acciones">
+
+                <button
+                  (click)="toggleEstado(usuario)"
+                  class="btn-accion btn-toggle"
+                  [title]="usuario.is_active ? 'Desactivar' : 'Activar'">
+                  {{ usuario.is_active ? '⊘' : '✓' }}
+                </button>
+
+                <button
+                  (click)="eliminarUsuario(usuario)"
+                  class="btn-accion btn-eliminar"
+                  title="Eliminar">
+                  🗑
+                </button>
+
+              </td>
+
+              <td>
+
+                <button
+                  class="btn-accion btn-ver"
+                  (click)="cargarReservasPorRuta(1)">
+                  Ver reservas
+                </button>
+
+              </td>
+
+            </tr>
+
+          }
+
+        </tbody>
+
+      </table>
+
+    </div>
 
     <div class="contador">
       Mostrando {{ usuariosFiltrados.length }} de {{ usuarios().length }} usuarios
     </div>
+
   } @else {
-  <div class="sin-resultados">
-    @if (buscando) {
-    <p>No se encontraron usuarios con "{{ buscando }}"</p>
-    } @else {
-    <p>No hay usuarios en el sistema</p>
-    }
-  </div>
+
+    <div class="sin-resultados">
+      @if (buscando) {
+        <p>No se encontraron usuarios con "{{ buscando }}"</p>
+      } @else {
+        <p>No hay usuarios en el sistema</p>
+      }
+    </div>
+
   }
+
+
+
+  @if (reservas().length > 0) {
+
+    <div class="reservas-section">
+
+      <h2>Reservas de la ruta seleccionada</h2>
+
+      <table class="tabla-usuarios">
+
+        <thead>
+        <tr>
+          <th>ID</th>
+          <th>Viaje</th>
+          <th>Asientos</th>
+          <th>Estado</th>
+        </tr>
+        </thead>
+
+        <tbody>
+
+          @for (reserva of reservas(); track reserva.id) {
+
+            <tr>
+
+              <td>#{{ reserva.id }}</td>
+
+              <td>{{ reserva.trip_id }}</td>
+
+              <td>{{ reserva.seats }}</td>
+
+              <td>
+                <span class="estado">
+                  {{ reserva.status }}
+                </span>
+              </td>
+
+            </tr>
+
+          }
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  }
+  <div class="filtro-ruta">
+    <label>Introduce ID de ruta:</label>
+
+    <input
+      type="number"
+      placeholder="Ej: 1"
+      [(ngModel)]="rutaSeleccionadaId"
+    />
+
+    <button
+      (click)="cargarReservasPorRuta(rutaSeleccionadaId!)"
+    >
+      Cargar reservas
+    </button>
+  </div>
 </div>
