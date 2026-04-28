@@ -56,4 +56,9 @@ export class AuthService {
     const user = localStorage.getItem(this.userKey);
     return user ? JSON.parse(user) : null;
   }
+
+  getRolUsuario(): string | null {
+    const user = this.currentUser();
+    return user ? user.rol : null;
+  }
 }

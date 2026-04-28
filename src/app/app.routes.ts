@@ -16,7 +16,7 @@ export const routes: Routes = [
   { path: 'login', component: Login },
   { path: 'register', component: Register },
   { path: 'profile', component: Profile, canActivate: [authGuard] },
-  { path: 'admin-users', component: AdminUsers, canActivate: [authGuard] },
+  { path: 'admin-users', component: AdminUsers, canActivate: [authGuard], data: { rolEsperado: 'admin' } },
   { path: 'crear-viaje', component: CrearViaje, canActivate: [authGuard] },
   { path: 'rutas', component: Rutas, canActivate: [authGuard] },
   { path: 'reservas', component: Reservas, canActivate: [authGuard] },

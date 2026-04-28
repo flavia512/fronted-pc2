@@ -19,6 +19,9 @@
     <a routerLink="/rutas" routerLinkActive="active">Mis Rutas</a>
     <a routerLink="/reservas" routerLinkActive="active">Mis Reservas</a>
     <a routerLink="/alertas" routerLinkActive="active">Mis Alertas</a>
+    @if (isAdmin()) {
+    <a routerLink="/admin-users" routerLinkActive="active">Admin Users</a>
+    }
   </nav>
 
   <div class="user-actions">

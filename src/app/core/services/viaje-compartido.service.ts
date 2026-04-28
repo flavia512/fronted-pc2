@@ -70,4 +70,9 @@ export class ViajeCompartidoService {
       `${this.apiUrl}/driver/eliminar_viaje?idviaje=${idViaje}`
     );
   }
+
+  listarViajes(): Observable<{ success: boolean; data: ViajeCompartido[] }> {
+    return this.http.get<{ success: boolean; data: ViajeCompartido[] }>
+      (`${this.apiUrl}/driver/listar_viajes`);
+  }
 }

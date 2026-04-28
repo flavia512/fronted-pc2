@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, computed } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 
@@ -14,6 +14,12 @@ export class Header {
   private authService = inject(AuthService);
 
   userName = this.authService.currentUser()?.full_name;
+
+  isAdmin = computed(() => {
+    const role = this.authService.getRolUsuario();
+    console.log('rol detectado:', role);
+    return role === 'admin';
+  });
 
   logout() {
     console.log('Logout clicked');
