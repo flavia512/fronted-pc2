@@ -1,80 +1,106 @@
-import { Component, inject } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Router, RouterLink } from '@angular/router';
 import { ViajeCompartidoService } from '../../core/services/viaje-compartido.service';
+import { RutaService } from '../../core/services/ruta.service';
 
 @Component({
   selector: 'app-crear-viaje',
   standalone: true,
-  imports: [ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink],
   templateUrl: './crear-viaje.html',
   styleUrl: './crear-viaje.scss'
 })
-export class CrearViaje {
-
+export class CrearViaje implements OnInit {
+  private fb = inject(FormBuilder);
   private viajeService = inject(ViajeCompartidoService);
+  private rutaService = inject(RutaService);
+  private router = inject(Router);
 
   form: FormGroup;
   loading = false;
-  errorMessage = '';
+  cargandoRutas = true;
+  misRutas: any[] = [];
 
-  constructor(private fb: FormBuilder) {
+  // Sistema de notificaciones (Toast)
+  toast = signal<{ tipo: 'exito' | 'error'; mensaje: string } | null>(null);
+  private toastTimeout: any = null;
+
+  constructor() {
     this.form = this.fb.group({
-      driver_user_id: [1, Validators.required],
-      route_id: [1, Validators.required],
-
-      origin: ['', Validators.required],
-      destiny: ['', Validators.required],
-
-      seats_total: [null, [Validators.required, Validators.min(1)]],
-
+      route_id: [null, Validators.required],
       fecha: ['', Validators.required],
-      hora: ['', Validators.required]
+      hora: ['', Validators.required],
+      seats_total: [null, [Validators.required, Validators.min(1), Validators.max(8)]]
     });
   }
 
-  onSubmit(): void {
-
-    if (this.form.invalid) {
-      this.form.markAllAsTouched();
-      return;
-    }
-
-    this.loading = true;
-    this.errorMessage = '';
-
-    const v = this.form.value;
-
-    const trip_datetime = `${v.fecha} ${v.hora}:00`;
-
-    const payload = {
-      driver_user_id: v.driver_user_id,
-      route_id: v.route_id,
-
-      origin: v.origin,
-      destiny: v.destiny,
-
-      trip_datetime: trip_datetime,
-
-      seats_total: v.seats_total,
-      seats_available: v.seats_total,
-
-      status: 'activo'
-    };
-
-    console.log('PAYLOAD FINAL:', payload);
-
-    this.viajeService.crearViaje(payload).subscribe({
-      next: (res) => {
-        console.log('Viaje creado correctamente:', res);
-        this.loading = false;
-        this.form.reset();
+  ngOnInit() {
+    // 1. Cargar las rutas del usuario al iniciar la pantalla
+    this.rutaService.obtenerRutas().subscribe({
+      next: (rutas) => {
+        this.misRutas = rutas.map(r => ({
+          id: r.id,
+          origen: r.origin_text,
+          destino: r.dest_text
+        }));
+        this.cargandoRutas = false;
       },
       error: (err) => {
-        console.error('Error creando viaje:', err);
-        this.errorMessage = 'Error al crear el viaje';
-        this.loading = false;
+        this.cargandoRutas = false;
+        console.error('Error al cargar las rutas:', err);
+        this.mostrarToast('error', 'No se pudieron cargar tus rutas guardadas.');
       }
     });
   }
 
+  // --- MÉTODOS DEL TOAST ---
+  mostrarToast(tipo: 'exito' | 'error', mensaje: string): void {
+    this.toast.set({ tipo, mensaje });
+    if (this.toastTimeout) clearTimeout(this.toastTimeout);
+    this.toastTimeout = setTimeout(() => this.toast.set(null), 3000);
+  }
+
+  cerrarToast(): void {
+    this.toast.set(null);
+    if (this.toastTimeout) clearTimeout(this.toastTimeout);
+  }
+
+  // --- ENVÍO DEL FORMULARIO ---
+  onSubmit() {
+    if (this.form.valid) {
+      this.loading = true;
+      const formValues = this.form.value;
+      const formattedDatetime = `${formValues.fecha} ${formValues.hora}:00`;
+
+      // Payload limpio y estructurado con el ID de la ruta
+      const payloadViaje = {
+        route_id: Number(formValues.route_id),
+        trip_datetime: formattedDatetime,
+        seats_total: formValues.seats_total,
+        seats_available: formValues.seats_total // Mismo valor inicial
+      };
+
+      this.viajeService.crearViaje(payloadViaje).subscribe({
+        next: () => {
+          this.loading = false;
+          this.mostrarToast('exito', '¡Viaje publicado con éxito!');
+
+          // Redirigimos a la pantalla principal tras 1.5 segundos
+          setTimeout(() => {
+            this.router.navigate(['/']);
+          }, 1500);
+        },
+        error: (err) => {
+          this.loading = false;
+          console.error('Error al crear el viaje:', err);
+          this.mostrarToast('error', 'Error al publicar el viaje. Revisa tu conexión.');
+        }
+      });
+    } else {
+      // Marcar todos los campos como tocados para que salgan en rojo si faltan datos
+      this.form.markAllAsTouched();
+    }
+  }
 }

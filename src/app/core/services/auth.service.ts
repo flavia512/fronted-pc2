@@ -30,7 +30,7 @@ export class AuthService {
     );
   }
 
-  register(data: { full_name: string; email: string; password: string }): Observable<any> {
+  register(data: { full_name: string; email: string; password: string; password_confirmation: string }): Observable<any> {
     return this.http.post(`${this.apiUrl}/register`, data);
   }
 
