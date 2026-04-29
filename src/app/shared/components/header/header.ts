@@ -7,7 +7,7 @@ import { AuthService } from '../../../core/services/auth.service';
   standalone: true,
   imports: [RouterLink, RouterLinkActive],
   templateUrl: './header.html',
-  styleUrl: './header.scss',
+  
 })
 export class Header {
   // Aquí podemos inyectar un servicio de autenticación para obtener el nombre real del usuario y la lógica de cerrar sesión.
@@ -15,14 +15,14 @@ export class Header {
 
   userName = this.authService.currentUser()?.full_name;
 
+    es_logeado = computed(() => !!this.authService.currentUser());
+
   isAdmin = computed(() => {
     const role = this.authService.getRolUsuario();
-    console.log('rol detectado:', role);
     return role === 'admin';
   });
 
   logout() {
-    console.log('Logout clicked');
     this.authService.logout();
   }
 }

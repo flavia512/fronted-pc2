@@ -6,8 +6,8 @@ import { RouterModule } from '@angular/router';
   selector: 'app-home',
   imports: [CommonModule, RouterModule],
   templateUrl: './home.html',
-  styleUrl: './home.scss'
+  styleUrls: ['./home.scss']
+  
 })
 export class Home {
-  // Por ahora no necesitamos lógica compleja aquí
 }

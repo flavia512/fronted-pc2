@@ -1,52 +1,59 @@
-<div class="home-container">
-
-    <section class="hero-section">
-        <h1>Viaja inteligente,<br>viaja con VoyContigo</h1>
-        <p class="hero-subtitle">
-            Comparte trayectos hacia Príncipe Pío y otras estaciones de transporte.<br>
-            Ahorra tiempo y dinero con predicciones de tráfico de la M-30 en tiempo real.
-        </p>
-
-        <div class="hero-buttons">
-            <button class="btn-primary" routerLink="/viajes-compartidos">Buscar Viaje</button>
-            <button class="btn-secondary" routerLink="/crear-viaje">Publicar Ruta</button>
-        
+<div class="container py-5">
+    <section class="text-center mb-5">
+        <div class="bg-primary bg-gradient rounded-4 shadow-lg p-5 mb-4 text-white position-relative overflow-hidden">
+            <div class="position-absolute top-0 start-0 w-100 h-100 opacity-25" style="background: url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80') center/cover no-repeat;"></div>
+            <div class="position-relative">
+                <h1 class="display-3 fw-bold mb-3">Viaja inteligente,<br>viaja con VoyContigo</h1>
+                <p class="lead mb-4">
+                    Comparte trayectos hacia Príncipe Pío y otras estaciones de transporte.<br>
+                    Ahorra tiempo y dinero con predicciones de tráfico de la M-30 en tiempo real.
+                </p>
+                <div class="d-flex justify-content-center gap-3 flex-wrap">
+                    <button class="btn btn-outline-primary btn-lg px-4 py-2 rounded-pill d-flex align-items-center gap-2 fw-semibold btn-login-custom" 
+                        style="font-size:1.1rem; letter-spacing:0.5px; background: #fff; border-width: 2px;" 
+                        routerLink="/login">
+                        <i class="bi bi-box-arrow-in-right me-2"></i>Iniciar Sesión
+                        </button>
+                    <button class="btn btn-outline-light btn-lg px-4 shadow-sm border-2 rounded-pill" routerLink="/register">
+                        <i class="bi bi-person-plus me-2"></i>Registrarte
+                    </button>
+                </div>
+            </div>
         </div>
     </section>
 
-    <section class="features-section">
-        <h2>¿Por qué VoyContigo?</h2>
-
-        <div class="features-grid">
-
-            <div class="feature-card">
-                <div class="icon-wrapper">
+    <section>
+        <h2 class="text-center mb-5 fw-bold">¿Por qué VoyContigo?</h2>
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            <div class="col">
+                <div class="card h-100 text-center p-4 border-0 shadow-sm bg-light">
+                    <div class="mb-3 d-flex justify-content-center align-items-center bg-primary bg-opacity-10 rounded-circle mx-auto" style="width:64px;height:64px;">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
                         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
                         <polyline points="17 6 23 6 23 12"></polyline>
                     </svg>
                 </div>
-                <h3>Predicción de Tráfico</h3>
-                <p>Sistema inteligente que predice el tráfico en la M-30 y te recomienda cuándo salir para llegar a
-                    tiempo.</p>
+                    <h3 class="h5 mt-3">Predicción de Tráfico</h3>
+                    <p class="text-secondary">Sistema inteligente que predice el tráfico en la M-30 y te recomienda cuándo salir para llegar a tiempo.</p>
+                </div>
             </div>
-
-            <div class="feature-card">
-                <div class="icon-wrapper">
+            <div class="col">
+                <div class="card h-100 text-center p-4 border-0 shadow-sm bg-light">
+                    <div class="mb-3 d-flex justify-content-center align-items-center bg-primary bg-opacity-10 rounded-circle mx-auto" style="width:64px;height:64px;">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
                         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <circle cx="12" cy="12" r="10"></circle>
                         <polyline points="12 6 12 12 16 14"></polyline>
                     </svg>
                 </div>
-                <h3>Alertas Inteligentes</h3>
-                <p>Recibe notificaciones personalizadas sobre cuándo debes salir según el tráfico previsto en tu ruta.
-                </p>
+                    <h3 class="h5 mt-3">Alertas Inteligentes</h3>
+                    <p class="text-secondary">Recibe notificaciones personalizadas sobre cuándo debes salir según el tráfico previsto en tu ruta.</p>
+                </div>
             </div>
-
-            <div class="feature-card">
-                <div class="icon-wrapper">
+            <div class="col">
+                <div class="card h-100 text-center p-4 border-0 shadow-sm bg-light">
+                    <div class="mb-3 d-flex justify-content-center align-items-center bg-primary bg-opacity-10 rounded-circle mx-auto" style="width:64px;height:64px;">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
                         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
@@ -55,35 +62,38 @@
                         <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
                     </svg>
                 </div>
-                <h3>Viajes Compartidos</h3>
-                <p>Comparte trayectos con otros usuarios, ahorra en costos y contribuye al medio ambiente.</p>
+                    <h3 class="h5 mt-3">Viajes Compartidos</h3>
+                    <p class="text-secondary">Comparte trayectos con otros usuarios, ahorra en costos y contribuye al medio ambiente.</p>
+                </div>
             </div>
-
-            <div class="feature-card">
-                <div class="icon-wrapper">
+            <div class="col">
+                <div class="card h-100 text-center p-4 border-0 shadow-sm bg-light">
+                    <div class="mb-3 d-flex justify-content-center align-items-center bg-primary bg-opacity-10 rounded-circle mx-auto" style="width:64px;height:64px;">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
                         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0Z"></path>
                         <circle cx="12" cy="10" r="3"></circle>
                     </svg>
                 </div>
-                <h3>Rutas Recurrentes</h3>
-                <p>Guarda tus rutas habituales y gestiona tus viajes diarios de forma sencilla.</p>
+                    <h3 class="h5 mt-3">Rutas Recurrentes</h3>
+                    <p class="text-secondary">Guarda tus rutas habituales y gestiona tus viajes diarios de forma sencilla.</p>
+                </div>
             </div>
-
-            <div class="feature-card">
-                <div class="icon-wrapper">
+            <div class="col">
+                <div class="card h-100 text-center p-4 border-0 shadow-sm bg-light">
+                    <div class="mb-3 d-flex justify-content-center align-items-center bg-primary bg-opacity-10 rounded-circle mx-auto" style="width:64px;height:64px;">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
                         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
                     </svg>
                 </div>
-                <h3>Seguro y Confiable</h3>
-                <p>Perfiles verificados y sistema de valoraciones para viajar con tranquilidad.</p>
+                    <h3 class="h5 mt-3">Seguro y Confiable</h3>
+                    <p class="text-secondary">Perfiles verificados y sistema de valoraciones para viajar con tranquilidad.</p>
+                </div>
             </div>
-
-            <div class="feature-card">
-                <div class="icon-wrapper">
+            <div class="col">
+                <div class="card h-100 text-center p-4 border-0 shadow-sm bg-light">
+                    <div class="mb-3 d-flex justify-content-center align-items-center bg-primary bg-opacity-10 rounded-circle mx-auto" style="width:64px;height:64px;">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
                         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path
@@ -94,10 +104,10 @@
                         <circle cx="17" cy="17" r="2"></circle>
                     </svg>
                 </div>
-                <h3>Movilidad Híbrida</h3>
-                <p>Combina coche compartido con transporte público desde Príncipe Pío y otras estaciones.</p>
+                    <h3 class="h5 mt-3">Movilidad Híbrida</h3>
+                    <p class="text-secondary">Combina coche compartido con transporte público desde Príncipe Pío y otras estaciones.</p>
+                </div>
             </div>
-
         </div>
     </section>
 </div>

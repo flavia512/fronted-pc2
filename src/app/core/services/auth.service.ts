@@ -14,7 +14,7 @@ export class AuthService {
   private apiUrl = environment.apiUrl;
   private tokenKey = 'token';
   private userKey = 'user';
-
+// se creo para que el header solo sea visto por los autenticados y para mostrar el nombre del usuario en el header
   readonly currentUser = signal<User | null>(this.getStoredUser());
   readonly isLoggedIn = computed(() => !!this.currentUser());
 
