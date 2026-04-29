@@ -30,8 +30,18 @@ export class AuthService {
     );
   }
 
-  register(data: { full_name: string; email: string; password: string; password_confirmation: string }): Observable<any> {
-    return this.http.post(`${this.apiUrl}/register`, data);
+  register(data: { full_name: string; email: string; password: string; password_confirmation: string }): Observable<AuthResponse> {
+    return this.http.post<AuthResponse>(`${this.apiUrl}/register`, data).pipe(
+      tap((response) => {
+        if (response.access_token || response.access_token) {
+          this.saveToken(response.access_token || response.access_token);
+        }
+        if (response.user) {
+          this.saveUser(response.user);
+          this.currentUser.set(response.user);
+        }
+      })
+    );
   }
 
   logout(): void {

@@ -9,8 +9,7 @@ import { HttpErrorResponse } from '@angular/common/http';
   selector: 'app-register',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, RouterLink],
-  templateUrl: './register.html',
-  styleUrl: './register.scss'
+  templateUrl: './register.html'
 })
 export class Register {
   private fb = inject(FormBuilder);
@@ -47,7 +46,8 @@ export class Register {
       next: () => {
         this.loading.set(false);
         this.successMessage.set('Usuario registrado correctamente');
-        setTimeout(() => this.router.navigate(['/login']), 1500);
+        // Redirige automáticamente al home (o dashboard) porque ya está autenticado
+        this.router.navigate(['/']);
       },
       // MEJORA: Ahora capturamos el error que manda Laravel
       error: (err: HttpErrorResponse) => {
