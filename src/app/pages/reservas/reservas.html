@@ -1,108 +1,50 @@
-<div class="mis-reservas-container">
+<div class="container py-4 py-md-5" style="max-width: 640px;">
 
-  <!-- HEADER -->
-  <div class="header-section">
-    <div>
-      <h1>Mis Reservas</h1>
-      <p>Gestiona tus viajes compartidos</p>
+  <!-- TOAST -->
+  @if (toast()) {
+    <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1090;">
+      <div class="toast show align-items-center border-0 text-white"
+           [class.bg-success]="toast()!.tipo === 'exito'"
+           [class.bg-danger]="toast()!.tipo === 'error'">
+        <div class="d-flex">
+          <div class="toast-body">{{ toast()!.mensaje }}</div>
+          <button type="button" class="btn-close btn-close-white me-2 m-auto" (click)="cerrarToast()"></button>
+        </div>
+      </div>
     </div>
-
-    <button class="btn-create" (click)="abrirModal()">
-      + Crear nueva reserva
-    </button>
-  </div>
-
-  <!-- LISTA -->
-  <div class="reservas-list">
-
-    @if (cargando()) {
-      <div class="loading-state">
-        Cargando reservas...
-      </div>
-    } @else {
-
-      @for (reserva of reservas(); track reserva.id) {
-        <div class="reserva-card">
-
-          <h2>
-            {{ reserva.viaje?.origin || 'Viaje' }}
-            →
-            {{ reserva.viaje?.destiny || ('#' + reserva.trip_id) }}
-          </h2>
-
-          <div class="details">
-            <p><b>Estado:</b> {{ reserva.status }}</p>
-            <p><b>Asientos:</b> {{ reserva.seats }}</p>
-          </div>
-          <!-- 👇 BOTÓN NUEVO -->
-          <button class="btn-delete" (click)="eliminarReserva(reserva.id)">
-            Eliminar
-          </button>
-
-        </div>
-      } @empty {
-        <div class="empty-state">
-          <h3>No tienes reservas</h3>
-        </div>
-      }
-
-    }
-
-  </div>
-
-  <!-- MODAL -->
-  @if (mostrarModal()) {
-
-    <h2>Crear nueva reserva</h2>
-
-    <form (ngSubmit)="crearReserva()">
-
-      <!-- TRIP ID -->
-      <label for="trip_id">ID del viaje</label>
-      <input
-        id="trip_id"
-        name="trip_id"
-        type="number"
-        [(ngModel)]="nuevaReserva.trip_id"
-        required
-      />
-
-      <!-- ASIENTOS -->
-      <label for="seats">Asientos</label>
-      <input
-        id="seats"
-        name="seats"
-        type="number"
-        min="1"
-        [(ngModel)]="nuevaReserva.seats"
-        required
-      />
-
-      <!-- STATUS -->
-      <label for="status">Estado</label>
-      <select
-        id="status"
-        name="status"
-        [(ngModel)]="nuevaReserva.status"
-      >
-        <option value="pending">Pending</option>
-        <option value="confirmed">Confirmed</option>
-      </select>
-
-      <!-- BOTONES -->
-      <div class="actions">
-        <button type="submit">
-          Guardar
-        </button>
-
-        <button type="button" (click)="cerrarModal()">
-          Cancelar
-        </button>
-      </div>
-
-    </form>
   }
 
+  <h1 class="fw-bold mb-4" style="font-size:1.75rem;">Mis Reservas</h1>
 
+  @if (reservas().length === 0) {
+    <p class="text-secondary">No tienes reservas. Encuentra un viaje en <strong>Viajes Compartidos</strong>.</p>
+  } @else {
+    <div class="d-flex flex-column gap-2">
+      @for (reserva of reservas(); track reserva.id) {
+        <div class="d-flex justify-content-between align-items-center px-3 py-3 bg-white border rounded-3">
+          <div>
+            <div class="fw-semibold small">
+              {{ reserva.viaje?.origin || 'Origen' }} → {{ reserva.viaje?.destiny || ('Viaje #' + reserva.trip_id) }}
+            </div>
+            <div class="text-secondary" style="font-size:.8rem;">
+              @if (reserva.viaje?.trip_datetime) {
+                {{ reserva.viaje!.trip_datetime | date:'dd MMM · HH:mm' }} &nbsp;·&nbsp;
+              }
+              {{ reserva.seats }} asiento{{ reserva.seats !== 1 ? 's' : '' }} &nbsp;·&nbsp;
+              <span [class.text-warning]="reserva.status === 'pending'"
+                    [class.text-success]="reserva.status === 'confirmed'">
+                {{ reserva.status === 'pending' ? 'Pendiente' : reserva.status === 'confirmed' ? 'Confirmada' : reserva.status }}
+              </span>
+            </div>
+          </div>
+          <button class="btn btn-link text-danger p-0 ms-3" title="Cancelar reserva"
+                  (click)="eliminarReserva(reserva.id)">
+            <i class="bi bi-x-circle fs-5"></i>
+          </button>
+        </div>
+      }
+    </div>
+  }
 
 </div>
+
