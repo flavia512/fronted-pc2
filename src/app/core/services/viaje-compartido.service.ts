@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment'; // Ajusta esta ruta si es diferente en tu proyecto
 
@@ -73,6 +73,21 @@ export class ViajeCompartidoService {
 
   listarViajes(): Observable<{ success: boolean; data: ViajeCompartido[] }> {
     return this.http.get<{ success: boolean; data: ViajeCompartido[] }>
-      (`${this.apiUrl}/driver/listar_viajes`);
+      (`${this.apiUrl}/user/listar_viajes`);
+  }
+
+  /**
+   * ENDPOINT buscarViajes: Buscar viajes con filtros server-side
+   * GET /api/driver/buscar_viajes?origin=X&destiny=Y&fecha=YYYY-MM-DD
+   */
+  buscarViajes(filtros: { origin?: string; destiny?: string; fecha?: string }): Observable<{ success: boolean; data: ViajeCompartido[] }> {
+    let params = new HttpParams();
+    if (filtros.origin)  params = params.set('origin', filtros.origin);
+    if (filtros.destiny) params = params.set('destiny', filtros.destiny);
+    if (filtros.fecha)   params = params.set('fecha', filtros.fecha);
+    return this.http.get<{ success: boolean; data: ViajeCompartido[] }>(
+      `${this.apiUrl}/user/buscar_viajes`,
+      { params }
+    );
   }
 }

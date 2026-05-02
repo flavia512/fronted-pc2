@@ -4,13 +4,13 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { Router, RouterLink } from '@angular/router';
 import { ViajeCompartidoService } from '../../core/services/viaje-compartido.service';
 import { RutaService } from '../../core/services/ruta.service';
+import { Ruta } from '../../core/models/ruta.model';
 
 @Component({
   selector: 'app-crear-viaje',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, RouterLink],
-  templateUrl: './crear-viaje.html',
-  styleUrl: './crear-viaje.scss'
+  templateUrl: './crear-viaje.html'
 })
 export class CrearViaje implements OnInit {
   private fb = inject(FormBuilder);
@@ -20,8 +20,8 @@ export class CrearViaje implements OnInit {
 
   form: FormGroup;
   loading = false;
-  cargandoRutas = true;
-  misRutas: any[] = [];
+  misRutas: Ruta[] = [];
+  rutaSeleccionada = signal<Ruta | null>(null);
 
   // Sistema de notificaciones (Toast)
   toast = signal<{ tipo: 'exito' | 'error'; mensaje: string } | null>(null);
@@ -39,18 +39,17 @@ export class CrearViaje implements OnInit {
   ngOnInit() {
     // 1. Cargar las rutas del usuario al iniciar la pantalla
     this.rutaService.obtenerRutas().subscribe({
-      next: (rutas) => {
-        this.misRutas = rutas.map(r => ({
-          id: r.id,
-          origen: r.origin_text,
-          destino: r.dest_text
-        }));
-        this.cargandoRutas = false;
-      },
-      error: (err) => {
-        this.cargandoRutas = false;
-        console.error('Error al cargar las rutas:', err);
-        this.mostrarToast('error', 'No se pudieron cargar tus rutas guardadas.');
+      next: (rutas) => { this.misRutas = rutas; },
+      error: () => { this.mostrarToast('error', 'No se pudieron cargar tus rutas guardadas.'); }
+    });
+
+    this.form.get('route_id')!.valueChanges.subscribe((id: number | null) => {
+      const ruta = id ? this.misRutas.find(r => r.id === Number(id)) ?? null : null;
+      this.rutaSeleccionada.set(ruta);
+      if (ruta?.hora_salida) {
+        // Normalizar a HH:MM (el input type=time no acepta segundos)
+        const hora = ruta.hora_salida.substring(0, 5);
+        this.form.get('hora')!.setValue(hora);
       }
     });
   }
@@ -72,7 +71,9 @@ export class CrearViaje implements OnInit {
     if (this.form.valid) {
       this.loading = true;
       const formValues = this.form.value;
-      const formattedDatetime = `${formValues.fecha} ${formValues.hora}:00`;
+      // Asegurar formato HH:MM limpio (sin segundos extra)
+      const horaLimpia = String(formValues.hora).substring(0, 5);
+      const formattedDatetime = `${formValues.fecha} ${horaLimpia}:00`;
 
       // Payload limpio y estructurado con el ID de la ruta
       const payloadViaje = {
@@ -89,7 +90,7 @@ export class CrearViaje implements OnInit {
 
           // Redirigimos a la pantalla principal tras 1.5 segundos
           setTimeout(() => {
-            this.router.navigate(['/']);
+            this.router.navigate(['/viajes-compartidos']);
           }, 1500);
         },
         error: (err) => {

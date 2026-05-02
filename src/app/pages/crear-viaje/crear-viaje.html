@@ -1,114 +1,123 @@
-<div class="crear-viaje-container">
+<div class="container py-4 py-md-5" style="max-width: 620px;">
 
-    @if (toast()) {
-    <div class="toast" [class.toast-exito]="toast()!.tipo === 'exito'" [class.toast-error]="toast()!.tipo === 'error'">
-        @if (toast()!.tipo === 'exito') {
-        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-            <polyline points="22 4 12 14.01 9 11.01"></polyline>
-        </svg>
-        } @else {
-        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="10"></circle>
-            <line x1="12" y1="8" x2="12" y2="12"></line>
-            <line x1="12" y1="16" x2="12.01" y2="16"></line>
-        </svg>
+  <!-- TOAST -->
+  @if (toast()) {
+    <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1090;">
+      <div class="toast show align-items-center border-0 text-white"
+           [class.bg-success]="toast()!.tipo === 'exito'"
+           [class.bg-danger]="toast()!.tipo === 'error'">
+        <div class="d-flex">
+          <div class="toast-body">{{ toast()!.mensaje }}</div>
+          <button type="button" class="btn-close btn-close-white me-2 m-auto" (click)="cerrarToast()"></button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- HEADER -->
+  <div class="mb-4 mb-md-5">
+    <h1 class="fw-bold mb-1" style="font-size: 2rem;">Crear Viaje</h1>
+    <p class="text-secondary mb-0">Comparte tu trayecto y ayuda a otros a llegar a su destino</p>
+  </div>
+
+  <!-- FORMULARIO -->
+  <div class="card border-0 shadow-sm rounded-4">
+    <div class="card-body p-4">
+      <form [formGroup]="form" (ngSubmit)="onSubmit()">
+
+        <!-- Ruta -->
+        <div class="mb-3">
+          <label class="form-label text-secondary small fw-medium">Ruta guardada <span class="text-danger">*</span></label>
+          <div class="input-group">
+            <span class="input-group-text bg-white border-end-0"><i class="bi bi-geo-alt text-secondary"></i></span>
+            <select class="form-select border-start-0 rounded-end-3" formControlName="route_id"
+                    [class.is-invalid]="form.get('route_id')?.invalid && form.get('route_id')?.touched">
+              <option [ngValue]="null" disabled>— Elige una de tus rutas guardadas —</option>
+              @for (ruta of misRutas; track ruta.id) {
+                <option [value]="ruta.id">
+                  {{ ruta.nombre ? ruta.nombre + ' · ' : '' }}{{ ruta.origin_text }} → {{ ruta.dest_text }}
+                </option>
+              }
+            </select>
+          </div>
+          @if (misRutas.length === 0) {
+            <div class="form-text text-warning mt-1">
+              <i class="bi bi-exclamation-triangle me-1"></i>
+              No tienes rutas guardadas. <a routerLink="/rutas" class="text-warning fw-semibold">Crea una aquí</a>.
+            </div>
+          }
+        </div>
+
+        <!-- Origen / Destino (solo lectura, aparece al seleccionar ruta) -->
+        @if (rutaSeleccionada()) {
+          <div class="row g-3 mb-3">
+            <div class="col-6">
+              <label class="form-label text-secondary small fw-medium">Origen</label>
+              <input type="text" class="form-control rounded-3 bg-light text-secondary"
+                     [value]="rutaSeleccionada()!.origin_text" readonly>
+            </div>
+            <div class="col-6">
+              <label class="form-label text-secondary small fw-medium">Destino</label>
+              <input type="text" class="form-control rounded-3 bg-light text-secondary"
+                     [value]="rutaSeleccionada()!.dest_text" readonly>
+            </div>
+          </div>
         }
-        <span>{{ toast()!.mensaje }}</span>
-        <button class="toast-close" (click)="cerrarToast()" aria-label="Cerrar">&times;</button>
+
+        <!-- Fecha y Hora -->
+        <div class="row g-3 mb-3">
+          <div class="col-7">
+            <label class="form-label text-secondary small fw-medium">Fecha <span class="text-danger">*</span></label>
+            <div class="input-group">
+              <span class="input-group-text bg-white border-end-0"><i class="bi bi-calendar3 text-secondary"></i></span>
+              <input type="date" class="form-control border-start-0 rounded-end-3" formControlName="fecha"
+                     [class.is-invalid]="form.get('fecha')?.invalid && form.get('fecha')?.touched">
+            </div>
+          </div>
+          <div class="col-5">
+            <label class="form-label text-secondary small fw-medium">
+              Hora salida <span class="text-danger">*</span>
+              @if (rutaSeleccionada()?.hora_salida) {
+                <span class="badge bg-primary bg-opacity-10 text-primary ms-1" style="font-size:.7rem;">auto</span>
+              }
+            </label>
+            <div class="input-group">
+              <span class="input-group-text bg-white border-end-0"><i class="bi bi-clock text-secondary"></i></span>
+              <input type="time" class="form-control border-start-0 rounded-end-3" formControlName="hora"
+                     [class.is-invalid]="form.get('hora')?.invalid && form.get('hora')?.touched">
+            </div>
+          </div>
+        </div>
+
+        <!-- Asientos -->
+        <div class="mb-4">
+          <label class="form-label text-secondary small fw-medium">
+            Asientos disponibles <span class="text-danger">*</span>
+          </label>
+          <div class="input-group">
+            <span class="input-group-text bg-white border-end-0"><i class="bi bi-people text-secondary"></i></span>
+            <input type="number" class="form-control border-start-0 rounded-end-3"
+                   formControlName="seats_total" min="1" max="8" placeholder="Ej: 4"
+                   [class.is-invalid]="form.get('seats_total')?.invalid && form.get('seats_total')?.touched">
+            <div class="invalid-feedback">Introduce un número entre 1 y 8.</div>
+          </div>
+        </div>
+
+        <!-- Botón -->
+        <div class="d-grid">
+          <button type="submit" class="btn btn-primary rounded-pill py-2 fw-semibold"
+                  [disabled]="loading || misRutas.length === 0">
+            @if (loading) {
+              <span class="spinner-border spinner-border-sm me-2"></span> Publicando...
+            } @else {
+              <i class="bi bi-send me-2"></i> Publicar Viaje
+            }
+          </button>
+        </div>
+
+      </form>
     </div>
-    }
+  </div>
 
-    <div class="header-section">
-        <h1>Crear Viaje</h1>
-        <p>Comparte tu viaje y ayuda a otros a llegar a su destino</p>
-    </div>
-
-    <div class="form-card">
-        <form [formGroup]="form" (ngSubmit)="onSubmit()">
-
-            <div class="form-row">
-                <div class="field-group" style="width: 100%;">
-                    <label>Ruta seleccionada <span>*</span></label>
-                    <div class="input-wrapper">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0Z"></path>
-                            <circle cx="12" cy="10" r="3"></circle>
-                        </svg>
-
-                        <select formControlName="route_id"
-                            style="width: 100%; border: none; background: transparent; outline: none; padding: 8px; font-family: inherit; color: inherit; cursor: pointer;">
-                            <option [ngValue]="null" disabled selected>-- Elige una de tus rutas guardadas --</option>
-                            @for (ruta of misRutas; track ruta.id) {
-                            <option [value]="ruta.id">{{ ruta.origen }} &rarr; {{ ruta.destino }}</option>
-                            }
-                        </select>
-                    </div>
-
-                    @if (misRutas.length === 0 && !cargandoRutas) {
-                    <div style="margin-top: 10px; font-size: 0.9em; color: #d97706;">
-                        No tienes rutas guardadas.
-                        <a routerLink="/mis-rutas"
-                            style="color: #b45309; text-decoration: underline; font-weight: 600;">Crea tu primera ruta
-                            aquí</a>.
-                    </div>
-                    }
-                </div>
-            </div>
-
-            <div class="form-row" style="margin-top: 16px;">
-                <div class="field-group">
-                    <label>Fecha <span>*</span></label>
-                    <div class="input-wrapper">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <rect width="18" height="18" x="3" y="4" rx="2" ry="2"></rect>
-                            <line x1="16" x2="16" y1="2" y2="6"></line>
-                            <line x1="8" x2="8" y1="2" y2="6"></line>
-                            <line x1="3" x2="21" y1="10" y2="10"></line>
-                        </svg>
-                        <input type="date" formControlName="fecha">
-                    </div>
-                </div>
-
-                <div class="field-group">
-                    <label>Hora de salida <span>*</span></label>
-                    <div class="input-wrapper">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <circle cx="12" cy="12" r="10"></circle>
-                            <polyline points="12 6 12 12 16 14"></polyline>
-                        </svg>
-                        <input type="time" formControlName="hora">
-                    </div>
-                </div>
-            </div>
-
-            <div class="form-row">
-                <div class="field-group">
-                    <label>Asientos disponibles <span>*</span></label>
-                    <div class="input-wrapper">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
-                            <circle cx="9" cy="7" r="4"></circle>
-                            <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
-                            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-                        </svg>
-                        <input type="number" formControlName="seats_total" min="1" max="8" placeholder="Ej: 4">
-                    </div>
-                </div>
-            </div>
-
-            <div class="form-actions" style="margin-top: 24px;">
-                <button type="submit" class="btn-submit" [disabled]="loading || misRutas.length === 0">
-                    {{ loading ? 'Publicando viaje...' : 'Publicar Viaje' }}
-                </button>
-            </div>
-
-        </form>
-    </div>
 </div>
+
