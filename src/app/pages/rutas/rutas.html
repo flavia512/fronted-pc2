@@ -26,12 +26,7 @@
   </div>
 
   <!-- LISTA DE RUTAS -->
-  @if (cargando()) {
-    <div class="text-center py-5">
-      <div class="spinner-border text-primary" role="status" style="width:2.5rem;height:2.5rem;"></div>
-      <p class="mt-3 text-secondary">Cargando tus rutas...</p>
-    </div>
-  } @else if (errorCarga()) {
+  @if (errorCarga()) {
     <div class="alert alert-danger border-0 rounded-3 text-center py-4">
       <p class="mb-2">No se pudieron cargar tus rutas. ¿Tienes sesión activa?</p>
       <button class="btn btn-sm btn-danger rounded-pill px-3" (click)="cargarRutasUsuario()">Reintentar</button>
