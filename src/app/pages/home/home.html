@@ -8,7 +8,7 @@
                     Comparte trayectos hacia Príncipe Pío y otras estaciones de transporte.<br>
                     Ahorra tiempo y dinero con predicciones de tráfico de la M-30 en tiempo real.
                 </p>
-                <div class="d-flex justify-content-center gap-3 flex-wrap">
+                <div *ngIf="!auth.isLoggedIn()" class="d-flex justify-content-center gap-3 flex-wrap">
                     <button class="btn btn-outline-primary btn-lg px-4 py-2 rounded-pill d-flex align-items-center gap-2 fw-semibold btn-login-custom" 
                         style="font-size:1.1rem; letter-spacing:0.5px; background: #fff; border-width: 2px;" 
                         routerLink="/login">
