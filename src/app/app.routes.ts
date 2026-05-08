@@ -10,6 +10,7 @@ import { authGuard } from './core/guards/auth.guard';
 import { CrearViaje } from './pages/crear-viaje/crear-viaje';
 import { Home } from './pages/home/home';
 import { Alertas } from './pages/alertas/alertas';
+import { Favoritos } from './pages/favoritos/favoritos';
 
 export const routes: Routes = [
   { path: 'home', component: Home },
@@ -22,6 +23,7 @@ export const routes: Routes = [
   { path: 'reservas', component: Reservas, canActivate: [authGuard] },
   { path: 'viajes-compartidos', component: ViajesCompartidos, canActivate: [authGuard] },
   { path: 'alertas', component: Alertas, canActivate: [authGuard] },
+  { path: 'favoritos', component: Favoritos, canActivate: [authGuard] },
   { path: '', redirectTo: 'home', pathMatch: 'full' }
 ];
 

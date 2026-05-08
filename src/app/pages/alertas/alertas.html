@@ -1,120 +1,191 @@
-<div class="alertas-container">
+﻿<div class="container py-4">
 
-  <!-- Toast exito -->
+  <!-- Notificaciones -->
   @if (exito()) {
-    <div class="toast toast-exito">
-      <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none"
-        stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-        <polyline points="22 4 12 14.01 9 11.01"></polyline>
-      </svg>
+    <div class="alert alert-success alert-dismissible d-flex align-items-center" role="alert">
+      <i class="bi bi-check-circle-fill me-2"></i>
       <span>{{ exito() }}</span>
-      <button class="toast-close" (click)="exito.set('')" aria-label="Cerrar">&times;</button>
+      <button type="button" class="btn-close" (click)="exito.set('')"></button>
     </div>
   }
-
-  <!-- Toast error -->
   @if (error()) {
-    <div class="toast toast-error">
-      <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none"
-        stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="12" cy="12" r="10"></circle>
-        <line x1="12" y1="8" x2="12" y2="12"></line>
-        <line x1="12" y1="16" x2="12.01" y2="16"></line>
-      </svg>
+    <div class="alert alert-danger alert-dismissible d-flex align-items-center" role="alert">
+      <i class="bi bi-exclamation-triangle-fill me-2"></i>
       <span>{{ error() }}</span>
-      <button class="toast-close" (click)="error.set('')" aria-label="Cerrar">&times;</button>
+      <button type="button" class="btn-close" (click)="error.set('')"></button>
     </div>
   }
 
-  <!-- Header -->
-  <div class="header-section">
-    <div class="header-titles">
-      <h1>Mis Alertas</h1>
-      <p>Gestiona las alertas activas de tus rutas</p>
+  <!-- Cabecera -->
+  <div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+      <h2 class="fw-bold mb-0"><i class="bi bi-bell me-2 text-primary"></i>Mis Alertas</h2>
+      <p class="text-muted mb-0">Gestiona alertas de trafico en tus rutas por la M-30</p>
     </div>
-    <button (click)="cargarAlertas()" class="btn-primary" [disabled]="cargando()">
-      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-        stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-        <polyline points="23 4 23 10 17 10"></polyline>
-        <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
-      </svg>
-      Recargar
+    <button class="btn btn-outline-secondary btn-sm" (click)="cargarAlertas()" [disabled]="cargando()">
+      <i class="bi bi-arrow-clockwise me-1"></i>Recargar
     </button>
   </div>
 
-  <!-- Cargando -->
-  @if (cargando()) {
-    <div class="loading-state">
-      <div class="loading-spinner"></div>
-      Cargando tus alertas...
+  <!-- Formulario: crear nueva alerta -->
+  <div class="card shadow-sm mb-4">
+    <div class="card-header bg-primary text-white">
+      <h5 class="mb-0"><i class="bi bi-plus-circle me-2"></i>Crear nueva alerta</h5>
     </div>
+    <div class="card-body">
+      <div class="row g-3">
 
-  <!-- Con datos -->
-  } @else if (alertas().length > 0) {
-    <div class="tabla-card">
-      <div class="tabla-container">
-        <table class="tabla-alertas">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Ruta</th>
-              <th>Fecha programada</th>
-              <th>Estado</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (alerta of alertas(); track alerta.id) {
-              <tr [class.inactiva]="alerta.status === 'inactiva'">
-                <td><span class="id-chip">#{{ alerta.id }}</span></td>
-                <td>Ruta #{{ alerta.route_id }}</td>
-                <td>{{ alerta.for_datetime | date: 'dd/MM/yyyy HH:mm' }}</td>
-                <td>
-                  <span class="badge" [class.activa]="alerta.status === 'activa'">
-                    <span class="badge-dot"></span>
-                    {{ alerta.status === 'activa' ? 'Activa' : 'Inactiva' }}
-                  </span>
-                </td>
-                <td class="acciones">
-                  @if (alerta.status === 'activa') {
-                    <button
-                      (click)="desactivarAlerta(alerta)"
-                      class="btn-accion btn-desactivar"
-                      title="Desactivar alerta"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line>
-                      </svg>
-                      Desactivar
-                    </button>
-                  }
-                </td>
-              </tr>
+        <!-- Select ruta M-30 -->
+        <div class="col-md-4">
+          <label class="form-label fw-semibold">Ruta (pasa por M-30)</label>
+          <select class="form-select"
+            [ngModel]="routeIdSeleccionado()"
+            (ngModelChange)="routeIdSeleccionado.set($event ? +$event : null)">
+            <option [ngValue]="null">-- Selecciona una ruta --</option>
+            @for (ruta of rutasM30(); track ruta.id) {
+              <option [value]="ruta.id">
+                {{ ruta.nombre || (ruta.origin_text + ' -> ' + ruta.dest_text) }}
+              </option>
             }
-          </tbody>
-        </table>
-      </div>
-      <div class="tabla-footer">
-        {{ alertas().length }} alerta{{ alertas().length !== 1 ? 's' : '' }} en total
-      </div>
-    </div>
+          </select>
+          @if (rutasM30().length === 0) {
+            <small class="text-muted">No tienes rutas que pasen por la M-30.</small>
+          }
+        </div>
 
-  <!-- Sin datos -->
-  } @else {
-    <div class="empty-state">
-      <div class="empty-icon">
-        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none"
-          stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
-          <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
-        </svg>
+        <!-- Fecha -->
+        <div class="col-md-3">
+          <label class="form-label fw-semibold">Fecha</label>
+          <input type="date" class="form-control"
+            [ngModel]="fechaAlerta()"
+            (ngModelChange)="fechaAlerta.set($event); prediccion.set(null)" />
+        </div>
+
+        <!-- Hora -->
+        <div class="col-md-3">
+          <label class="form-label fw-semibold">Hora de salida</label>
+          <input type="time" class="form-control"
+            [ngModel]="horaAlerta()"
+            (ngModelChange)="horaAlerta.set($event); prediccion.set(null)" />
+        </div>
+
+        <!-- Boton consultar trafico -->
+        <div class="col-md-2 d-flex align-items-end">
+          <button class="btn btn-warning w-100"
+            (click)="consultarTrafico()"
+            [disabled]="!fechaAlerta() || !horaAlerta() || consultando()">
+            @if (consultando()) {
+              <span class="spinner-border spinner-border-sm me-1" role="status"></span>
+            } @else {
+              <i class="bi bi-cloud-haze2 me-1"></i>
+            }
+            Consultar
+          </button>
+        </div>
       </div>
-      <h3>Sin alertas registradas</h3>
-      <p>Cuando actives alertas en tus rutas, aparecerán aquí para que puedas gestionarlas.</p>
+
+      <!-- Resultado de la prediccion PC1 -->
+      @if (prediccion()) {
+        <div class="alert alert-{{ prediccion()!.color }} d-flex align-items-start mt-3 mb-0" role="alert">
+          <i class="bi bi-{{ prediccion()!.color === 'danger' ? 'exclamation-triangle-fill' : 'check-circle-fill' }} fs-5 me-2 mt-1 flex-shrink-0"></i>
+          <div class="flex-grow-1">
+            <div class="fw-semibold">{{ prediccion()!.descripcion }}</div>
+            <div class="mt-1">{{ prediccion()!.recomendacion }}</div>
+            @if (prediccion()!.minutos_antes > 0) {
+              <div class="mt-2">
+                <span class="badge bg-{{ prediccion()!.color }}">
+                  <i class="bi bi-clock me-1"></i>Salir {{ prediccion()!.minutos_antes }} min antes
+                </span>
+              </div>
+            }
+          </div>
+          <button class="btn btn-{{ prediccion()!.color }} btn-sm ms-3 flex-shrink-0"
+            (click)="crearAlerta()"
+            [disabled]="!routeIdSeleccionado() || creando()">
+            @if (creando()) {
+              <span class="spinner-border spinner-border-sm me-1" role="status"></span>
+            } @else {
+              <i class="bi bi-bell-fill me-1"></i>
+            }
+            Crear alerta
+          </button>
+        </div>
+      }
     </div>
-  }
+  </div>
+
+  <!-- Tabla de alertas -->
+  <div class="card shadow-sm">
+    <div class="card-header bg-white d-flex align-items-center justify-content-between">
+      <h5 class="mb-0 fw-semibold">
+        <i class="bi bi-list-ul me-2 text-secondary"></i>Alertas registradas
+      </h5>
+      <span class="badge bg-secondary rounded-pill">{{ alertas().length }}</span>
+    </div>
+    <div class="card-body p-0">
+
+      @if (cargando()) {
+        <div class="text-center py-5 text-muted">
+          <div class="spinner-border text-primary mb-2" role="status">
+            <span class="visually-hidden">Cargando...</span>
+          </div>
+          <div>Cargando alertas...</div>
+        </div>
+
+      } @else if (alertas().length === 0) {
+        <div class="text-center py-5 text-muted">
+          <i class="bi bi-bell-slash fs-1 d-block mb-2 text-secondary"></i>
+          <p class="mb-0">No tienes alertas registradas aun.</p>
+          <small>Usa el formulario de arriba para crear una.</small>
+        </div>
+
+      } @else {
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>#ID</th>
+                <th>Ruta</th>
+                <th>Fecha programada</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (alerta of alertas(); track alerta.id) {
+                <tr>
+                  <td><span class="badge bg-light text-dark border">#{{ alerta.id }}</span></td>
+                  <td><i class="bi bi-signpost me-1 text-muted"></i>Ruta #{{ alerta.route_id }}</td>
+                  <td><i class="bi bi-calendar-event me-1 text-muted"></i>{{ alerta.for_datetime | date: 'dd/MM/yyyy HH:mm' }}</td>
+                  <td>
+                    @if (alerta.status === 'activa') {
+                      <span class="badge bg-success">
+                        <i class="bi bi-check-circle me-1"></i>Activa
+                      </span>
+                    } @else {
+                      <span class="badge bg-secondary">
+                        <i class="bi bi-x-circle me-1"></i>Inactiva
+                      </span>
+                    }
+                  </td>
+                  <td>
+                    @if (alerta.status === 'activa') {
+                      <button class="btn btn-outline-danger btn-sm" (click)="desactivarAlerta(alerta)">
+                        <i class="bi bi-bell-slash me-1"></i>Desactivar
+                      </button>
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        <div class="card-footer text-muted small">
+          {{ alertas().length }} alerta{{ alertas().length !== 1 ? 's' : '' }} en total
+        </div>
+      }
+
+    </div>
+  </div>
 
 </div>

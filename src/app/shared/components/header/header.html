@@ -23,6 +23,7 @@
       <a routerLink="/rutas" routerLinkActive="fw-semibold text-primary" class="text-secondary text-decoration-none small">Mis Rutas</a>
       <a routerLink="/reservas" routerLinkActive="fw-semibold text-primary" class="text-secondary text-decoration-none small">Mis Reservas</a>
       <a routerLink="/alertas" routerLinkActive="fw-semibold text-primary" class="text-secondary text-decoration-none small">Mis Alertas</a>
+      <a routerLink="/favoritos" routerLinkActive="fw-semibold text-primary" class="text-secondary text-decoration-none small">Favoritos</a>
       @if (isAdmin()) {
         <a routerLink="/admin-users" routerLinkActive="fw-semibold text-primary" class="text-secondary text-decoration-none small">Admin Users</a>
       }
@@ -85,6 +86,11 @@
            class="text-secondary text-decoration-none py-2 px-3 rounded-3 d-flex align-items-center gap-3"
            style="font-size:.97rem;" (click)="cerrarMenu()">
           <i class="bi bi-bell fs-5"></i> Mis Alertas
+        </a>
+        <a routerLink="/favoritos" routerLinkActive="text-primary fw-semibold"
+           class="text-secondary text-decoration-none py-2 px-3 rounded-3 d-flex align-items-center gap-3"
+           style="font-size:.97rem;" (click)="cerrarMenu()">
+          <i class="bi bi-heart fs-5"></i> Favoritos
         </a>
         @if (isAdmin()) {
           <a routerLink="/admin-users" routerLinkActive="text-primary fw-semibold"
