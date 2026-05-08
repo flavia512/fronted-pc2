@@ -1,191 +1,162 @@
-﻿<div class="container py-4">
+﻿<div class="container py-4 alertas-page">
 
-  <!-- Notificaciones -->
   @if (exito()) {
-    <div class="alert alert-success alert-dismissible d-flex align-items-center" role="alert">
-      <i class="bi bi-check-circle-fill me-2"></i>
-      <span>{{ exito() }}</span>
-      <button type="button" class="btn-close" (click)="exito.set('')"></button>
+    <div class="toast-banner toast-success mb-3">
+      <i class="bi bi-check-circle-fill me-2"></i>{{ exito() }}
     </div>
   }
   @if (error()) {
-    <div class="alert alert-danger alert-dismissible d-flex align-items-center" role="alert">
-      <i class="bi bi-exclamation-triangle-fill me-2"></i>
-      <span>{{ error() }}</span>
-      <button type="button" class="btn-close" (click)="error.set('')"></button>
+    <div class="toast-banner toast-error mb-3">
+      <i class="bi bi-exclamation-circle-fill me-2"></i>{{ error() }}
+      <button class="toast-close ms-auto" (click)="error.set('')">x</button>
     </div>
   }
 
-  <!-- Cabecera -->
-  <div class="d-flex align-items-center justify-content-between mb-4">
-    <div>
-      <h2 class="fw-bold mb-0"><i class="bi bi-bell me-2 text-primary"></i>Mis Alertas</h2>
-      <p class="text-muted mb-0">Gestiona alertas de trafico en tus rutas por la M-30</p>
+  <!-- Header -->
+  <div class="d-flex align-items-center gap-3 mb-4">
+    <div class="page-header-icon">
+      <i class="bi bi-bell-fill"></i>
     </div>
-    <button class="btn btn-outline-secondary btn-sm" (click)="cargarAlertas()" [disabled]="cargando()">
-      <i class="bi bi-arrow-clockwise me-1"></i>Recargar
+    <div class="flex-grow-1">
+      <h1 class="page-title mb-0">Alertas M-30</h1>
+      <p class="page-subtitle mb-0 d-none d-sm-block">Consulta el trafico y crea alertas para tus rutas</p>
+    </div>
+    <button class="btn-icon" (click)="cargarAlertas()" [disabled]="cargando()" title="Recargar">
+      <i class="bi bi-arrow-clockwise" [class.spin]="cargando()"></i>
     </button>
   </div>
 
-  <!-- Formulario: crear nueva alerta -->
-  <div class="card shadow-sm mb-4">
-    <div class="card-header bg-primary text-white">
-      <h5 class="mb-0"><i class="bi bi-plus-circle me-2"></i>Crear nueva alerta</h5>
+  <!-- Formulario nueva alerta -->
+  <div class="section-card mb-3">
+    <div class="section-label">
+      <i class="bi bi-plus-lg"></i> Nueva alerta
     </div>
-    <div class="card-body">
-      <div class="row g-3">
 
-        <!-- Select ruta M-30 -->
-        <div class="col-md-4">
-          <label class="form-label fw-semibold">Ruta (pasa por M-30)</label>
-          <select class="form-select"
-            [ngModel]="routeIdSeleccionado()"
-            (ngModelChange)="routeIdSeleccionado.set($event ? +$event : null)">
-            <option [ngValue]="null">-- Selecciona una ruta --</option>
-            @for (ruta of rutasM30(); track ruta.id) {
-              <option [value]="ruta.id">
-                {{ ruta.nombre || (ruta.origin_text + ' -> ' + ruta.dest_text) }}
-              </option>
-            }
-          </select>
-          @if (rutasM30().length === 0) {
-            <small class="text-muted">No tienes rutas que pasen por la M-30.</small>
+    <div class="row g-3 align-items-end">
+      <div class="col-12 col-md-5">
+        <label class="form-label fw-semibold small">Ruta por M-30</label>
+        <select class="form-select form-select-sm"
+          [ngModel]="routeIdSeleccionado()"
+          (ngModelChange)="routeIdSeleccionado.set($event ? +$event : null)">
+          <option [ngValue]="null">Selecciona una ruta</option>
+          @for (ruta of rutasM30(); track ruta.id) {
+            <option [value]="ruta.id">{{ ruta.nombre || (ruta.origin_text + ' a ' + ruta.dest_text) }}</option>
           }
-        </div>
-
-        <!-- Fecha -->
-        <div class="col-md-3">
-          <label class="form-label fw-semibold">Fecha</label>
-          <input type="date" class="form-control"
-            [ngModel]="fechaAlerta()"
-            (ngModelChange)="fechaAlerta.set($event); prediccion.set(null)" />
-        </div>
-
-        <!-- Hora -->
-        <div class="col-md-3">
-          <label class="form-label fw-semibold">Hora de salida</label>
-          <input type="time" class="form-control"
-            [ngModel]="horaAlerta()"
-            (ngModelChange)="horaAlerta.set($event); prediccion.set(null)" />
-        </div>
-
-        <!-- Boton consultar trafico -->
-        <div class="col-md-2 d-flex align-items-end">
-          <button class="btn btn-warning w-100"
-            (click)="consultarTrafico()"
-            [disabled]="!fechaAlerta() || !horaAlerta() || consultando()">
-            @if (consultando()) {
-              <span class="spinner-border spinner-border-sm me-1" role="status"></span>
-            } @else {
-              <i class="bi bi-cloud-haze2 me-1"></i>
-            }
-            Consultar
-          </button>
-        </div>
+        </select>
+        @if (rutasM30().length === 0) {
+          <div class="form-text">No tienes rutas que pasen por M-30</div>
+        }
       </div>
 
-      <!-- Resultado de la prediccion PC1 -->
-      @if (prediccion()) {
-        <div class="alert alert-{{ prediccion()!.color }} d-flex align-items-start mt-3 mb-0" role="alert">
-          <i class="bi bi-{{ prediccion()!.color === 'danger' ? 'exclamation-triangle-fill' : 'check-circle-fill' }} fs-5 me-2 mt-1 flex-shrink-0"></i>
-          <div class="flex-grow-1">
-            <div class="fw-semibold">{{ prediccion()!.descripcion }}</div>
-            <div class="mt-1">{{ prediccion()!.recomendacion }}</div>
-            @if (prediccion()!.minutos_antes > 0) {
-              <div class="mt-2">
-                <span class="badge bg-{{ prediccion()!.color }}">
-                  <i class="bi bi-clock me-1"></i>Salir {{ prediccion()!.minutos_antes }} min antes
-                </span>
-              </div>
-            }
-          </div>
-          <button class="btn btn-{{ prediccion()!.color }} btn-sm ms-3 flex-shrink-0"
-            (click)="crearAlerta()"
-            [disabled]="!routeIdSeleccionado() || creando()">
-            @if (creando()) {
-              <span class="spinner-border spinner-border-sm me-1" role="status"></span>
-            } @else {
-              <i class="bi bi-bell-fill me-1"></i>
-            }
-            Crear alerta
-          </button>
-        </div>
-      }
+      <div class="col-6 col-md-3">
+        <label class="form-label fw-semibold small">Activa desde</label>
+        <input type="date" class="form-control form-control-sm"
+          [ngModel]="fechaAlerta()"
+          (ngModelChange)="fechaAlerta.set($event); prediccion.set(null)" />
+      </div>
+
+      <div class="col-6 col-md-2">
+        <label class="form-label fw-semibold small">Hora diaria</label>
+        <input type="time" class="form-control form-control-sm"
+          [ngModel]="horaAlerta()"
+          (ngModelChange)="horaAlerta.set($event); prediccion.set(null)" />
+      </div>
+
+      <div class="col-12 col-md-2">
+        <button class="btn btn-primary btn-sm w-100"
+          (click)="consultarTrafico()"
+          [disabled]="!fechaAlerta() || !horaAlerta() || consultando()">
+          @if (consultando()) {
+            <span class="spinner-border spinner-border-sm me-1"></span>
+          } @else {
+            <i class="bi bi-search me-1"></i>
+          }
+          Consultar
+        </button>
+      </div>
     </div>
+
+    <!-- Resultado prediccion PC1 -->
+    @if (prediccion()) {
+      <div class="prediction-banner prediction-{{ prediccion()!.color }} mt-3">
+        <div class="prediction-icon">
+          @if (prediccion()!.nivel_gravedad >= 3) { <i class="bi bi-exclamation-triangle-fill"></i> }
+          @else if (prediccion()!.nivel_gravedad === 2) { <i class="bi bi-dash-circle-fill"></i> }
+          @else { <i class="bi bi-check-circle-fill"></i> }
+        </div>
+        <div class="prediction-body flex-grow-1">
+          <div class="fw-semibold small">{{ prediccion()!.descripcion }}</div>
+          <div class="prediction-text">{{ prediccion()!.recomendacion }}</div>
+          @if (prediccion()!.minutos_antes > 0) {
+            <span class="prediction-chip">
+              <i class="bi bi-clock-fill me-1"></i>Salir {{ prediccion()!.minutos_antes }} min antes
+            </span>
+          }
+        </div>
+        <button class="btn btn-dark btn-sm flex-shrink-0"
+          (click)="crearAlerta()"
+          [disabled]="!routeIdSeleccionado() || creando()">
+          @if (creando()) { <span class="spinner-border spinner-border-sm me-1"></span> }
+          @else { <i class="bi bi-bell-fill me-1"></i> }
+          Guardar
+        </button>
+      </div>
+    }
   </div>
 
-  <!-- Tabla de alertas -->
-  <div class="card shadow-sm">
-    <div class="card-header bg-white d-flex align-items-center justify-content-between">
-      <h5 class="mb-0 fw-semibold">
-        <i class="bi bi-list-ul me-2 text-secondary"></i>Alertas registradas
-      </h5>
-      <span class="badge bg-secondary rounded-pill">{{ alertas().length }}</span>
+  <!-- Lista alertas -->
+  <div class="section-card">
+    <div class="section-label">
+      <i class="bi bi-list-ul"></i>
+      Mis alertas
+      <span class="count-pill ms-auto">{{ alertas().length }}</span>
     </div>
-    <div class="card-body p-0">
 
-      @if (cargando()) {
-        <div class="text-center py-5 text-muted">
-          <div class="spinner-border text-primary mb-2" role="status">
-            <span class="visually-hidden">Cargando...</span>
-          </div>
-          <div>Cargando alertas...</div>
-        </div>
+    @if (cargando()) {
+      <div class="empty-state">
+        <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+        <span>Cargando alertas...</span>
+      </div>
+    } @else if (alertasActivas().length === 0) {
+      <div class="empty-state">
+        <i class="bi bi-bell-slash"></i>
+        <span>No tienes alertas activas</span>
+        <small class="text-muted">Usa el formulario de arriba para crear una</small>
+      </div>
+    } @else {
+      <div class="alerts-list">
+        @for (alerta of alertasActivas(); track alerta.id) {
+          <div class="alert-item row align-items-center gx-3">
 
-      } @else if (alertas().length === 0) {
-        <div class="text-center py-5 text-muted">
-          <i class="bi bi-bell-slash fs-1 d-block mb-2 text-secondary"></i>
-          <p class="mb-0">No tienes alertas registradas aun.</p>
-          <small>Usa el formulario de arriba para crear una.</small>
-        </div>
+            <div class="col">
+              <div class="alert-route">{{ alerta.rutaNombre }}</div>
+              <div class="alert-meta">
+                <i class="bi bi-arrow-repeat me-1"></i>Diaria a las
+                <strong>{{ alerta.for_datetime | date: 'HH:mm' : 'UTC' }}</strong>
+                &nbsp;&middot; desde {{ alerta.for_datetime | date: 'dd/MM/yyyy' : 'UTC' }}
+              </div>
+            </div>
 
-      } @else {
-        <div class="table-responsive">
-          <table class="table table-hover align-middle mb-0">
-            <thead class="table-light">
-              <tr>
-                <th>#ID</th>
-                <th>Ruta</th>
-                <th>Fecha programada</th>
-                <th>Estado</th>
-                <th>Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              @for (alerta of alertas(); track alerta.id) {
-                <tr>
-                  <td><span class="badge bg-light text-dark border">#{{ alerta.id }}</span></td>
-                  <td><i class="bi bi-signpost me-1 text-muted"></i>Ruta #{{ alerta.route_id }}</td>
-                  <td><i class="bi bi-calendar-event me-1 text-muted"></i>{{ alerta.for_datetime | date: 'dd/MM/yyyy HH:mm' }}</td>
-                  <td>
-                    @if (alerta.status === 'activa') {
-                      <span class="badge bg-success">
-                        <i class="bi bi-check-circle me-1"></i>Activa
-                      </span>
-                    } @else {
-                      <span class="badge bg-secondary">
-                        <i class="bi bi-x-circle me-1"></i>Inactiva
-                      </span>
-                    }
-                  </td>
-                  <td>
-                    @if (alerta.status === 'activa') {
-                      <button class="btn btn-outline-danger btn-sm" (click)="desactivarAlerta(alerta)">
-                        <i class="bi bi-bell-slash me-1"></i>Desactivar
-                      </button>
-                    }
-                  </td>
-                </tr>
+            <div class="col-auto d-flex align-items-center gap-2">
+              @if (alerta.status === 'activa') {
+                <span class="status-pill active">Activa</span>
+                <button class="btn-deactivate" (click)="desactivarAlerta(alerta)"
+                  [disabled]="desactivando() === alerta.id" title="Desactivar">
+                  @if (desactivando() === alerta.id) {
+                    <span class="spinner-border spinner-border-sm" style="width:12px;height:12px;color:#ef4444"></span>
+                  } @else {
+                    <i class="bi bi-bell-slash"></i>
+                  }
+                </button>
+              } @else {
+                <span class="status-pill inactive">Inactiva</span>
               }
-            </tbody>
-          </table>
-        </div>
-        <div class="card-footer text-muted small">
-          {{ alertas().length }} alerta{{ alertas().length !== 1 ? 's' : '' }} en total
-        </div>
-      }
+            </div>
 
-    </div>
+          </div>
+        }
+      </div>
+    }
   </div>
 
 </div>

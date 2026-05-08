@@ -1,0 +1,57 @@
+﻿@if (visible() && alertaActual()) {
+
+  <div class="modal-backdrop fade show" (click)="cerrar()"></div>
+
+  <div class="modal fade show d-block" role="dialog" aria-modal="true" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+      <div class="modal-content popup-content px-1">
+
+        <div class="modal-body py-4 px-4">
+
+          <!-- Icono + titulo -->
+          <div class="d-flex align-items-center gap-3 mb-3">
+            <div class="popup-icon flex-shrink-0">
+              <i class="bi bi-bell-fill"></i>
+            </div>
+            <div>
+              <div class="popup-title">{{ getNombreRuta(alertaActual()!) }}</div>
+              <div class="popup-subtitle">
+                Hoy a las <strong>{{ getHora(alertaActual()!) }}</strong>
+              </div>
+            </div>
+          </div>
+
+          <!-- Prediccion PC1 -->
+          @if (cargandoPrediccion()) {
+            <div class="d-flex align-items-center gap-2 text-muted small">
+              <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+              Consultando trafico...
+            </div>
+          } @else if (prediccion()) {
+            <div class="pred-banner pred-{{ prediccion()!.color }} d-flex align-items-start gap-2 rounded-3 p-3">
+              <div class="pred-icon flex-shrink-0">
+                @if (prediccion()!.nivel_gravedad >= 3) { <i class="bi bi-exclamation-triangle-fill"></i> }
+                @else if (prediccion()!.nivel_gravedad === 2) { <i class="bi bi-dash-circle-fill"></i> }
+                @else { <i class="bi bi-check-circle-fill"></i> }
+              </div>
+              <div>
+                <div class="pred-title fw-semibold small">{{ prediccion()!.descripcion }}</div>
+                @if (prediccion()!.minutos_antes > 0) {
+                  <div class="pred-text small opacity-75 mt-1">
+                    Sale {{ prediccion()!.minutos_antes }} min antes
+                  </div>
+                }
+              </div>
+            </div>
+          }
+        </div>
+
+        <div class="modal-footer border-0 pt-0 pb-3 justify-content-center">
+          <button class="btn btn-primary px-5" (click)="cerrar()">OK</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+}

@@ -62,7 +62,7 @@
   <div class="row g-3">
       @for (viaje of viajes(); track viaje.id) {
         <div class="col-12">
-          <div class="card border-0 shadow-sm rounded-3">
+          <div class="card border-0 shadow-sm rounded-3 position-relative">
             <div class="card-body px-4 py-3">
               <div class="d-flex flex-column flex-sm-row justify-content-between gap-3">
 
@@ -109,9 +109,24 @@
                     }
                     {{ viaje.seats_available < 1 ? 'Completo' : 'Reservar' }}
                   </button>
+
                 </div>
 
               </div>
+
+              <!-- Favorito — esquina inferior derecha -->
+              <button class="btn btn-link p-0 fav-btn position-absolute"
+                      style="bottom:.65rem;right:.85rem;"
+                      [class.fav-active]="esFavorito(viaje.route_id)"
+                      [disabled]="toggling() === viaje.route_id"
+                      (click)="toggleFavorito(viaje)"
+                      title="{{ esFavorito(viaje.route_id) ? 'Quitar de favoritos' : 'Añadir a favoritos' }}">
+                @if (toggling() === viaje.route_id) {
+                  <span class="spinner-border spinner-border-sm" style="width:14px;height:14px"></span>
+                } @else {
+                  <i class="bi {{ esFavorito(viaje.route_id) ? 'bi-heart-fill' : 'bi-heart' }} fs-5"></i>
+                }
+              </button>
             </div>
           </div>
         </div>

@@ -1,109 +1,158 @@
-<div class="container py-4">
+<div class="container py-4 py-md-5" style="max-width: 680px;">
 
-  <!-- Notificaciones -->
+  <!-- Toast éxito/error -->
   @if (exito()) {
-    <div class="alert alert-success alert-dismissible d-flex align-items-center" role="alert">
-      <i class="bi bi-check-circle-fill me-2"></i>
-      <span>{{ exito() }}</span>
-      <button type="button" class="btn-close" (click)="exito.set('')"></button>
+    <div class="position-fixed top-0 end-0 p-3" style="z-index:1090;">
+      <div class="toast show border-0 text-white bg-success">
+        <div class="d-flex">
+          <div class="toast-body">{{ exito() }}</div>
+          <button class="btn-close btn-close-white me-2 m-auto" (click)="exito.set('')"></button>
+        </div>
+      </div>
     </div>
   }
   @if (error()) {
-    <div class="alert alert-danger alert-dismissible d-flex align-items-center" role="alert">
-      <i class="bi bi-exclamation-triangle-fill me-2"></i>
-      <span>{{ error() }}</span>
-      <button type="button" class="btn-close" (click)="error.set('')"></button>
+    <div class="position-fixed top-0 end-0 p-3" style="z-index:1090;">
+      <div class="toast show border-0 text-white bg-danger">
+        <div class="d-flex">
+          <div class="toast-body">{{ error() }}</div>
+          <button class="btn-close btn-close-white me-2 m-auto" (click)="error.set('')"></button>
+        </div>
+      </div>
     </div>
   }
 
   <!-- Cabecera -->
-  <div class="d-flex align-items-center justify-content-between mb-4">
-    <div>
-      <h2 class="fw-bold mb-0"><i class="bi bi-heart me-2 text-danger"></i>Mis Favoritos</h2>
-      <p class="text-muted mb-0">Rutas que has guardado como favoritas</p>
-    </div>
-    <button class="btn btn-outline-secondary btn-sm" (click)="cargarFavoritos()" [disabled]="cargando()">
-      <i class="bi bi-arrow-clockwise me-1"></i>Recargar
-    </button>
+  <div class="mb-4 mb-md-5">
+    <h1 class="fw-bold mb-1" style="font-size:2rem;">Favoritos</h1>
+    <p class="text-secondary mb-0">Viajes compartidos que has guardado</p>
   </div>
 
-  <!-- Contenido -->
+  <!-- Estado: cargando -->
   @if (cargando()) {
-    <div class="text-center py-5 text-muted">
-      <div class="spinner-border text-danger mb-2" role="status">
-        <span class="visually-hidden">Cargando...</span>
-      </div>
-      <div>Cargando favoritos...</div>
+    <div class="d-flex flex-column align-items-center py-5 text-secondary gap-2">
+      <div class="spinner-border spinner-border-sm"></div>
+      <span class="small">Cargando…</span>
     </div>
 
+  <!-- Estado: vacío -->
   } @else if (favoritos().length === 0) {
     <div class="text-center py-5">
-      <i class="bi bi-heart fs-1 text-secondary d-block mb-3"></i>
-      <h5 class="text-muted">No tienes rutas favoritas aún</h5>
-      <p class="text-muted mb-4">Añade rutas a favoritos desde la sección de rutas disponibles.</p>
-      <a routerLink="/viajes-compartidos" class="btn btn-primary">
-        <i class="bi bi-car-front me-2"></i>Ver viajes compartidos
+      <i class="bi bi-heart text-secondary d-block mb-3" style="font-size:3rem;"></i>
+      <p class="fw-semibold mb-1">Aún no tienes favoritos</p>
+      <p class="text-secondary small mb-4">Pulsa el corazón en cualquier viaje para guardarlo aquí.</p>
+      <a routerLink="/viajes-compartidos" class="btn btn-primary rounded-pill px-4">
+        <i class="bi bi-car-front me-2"></i>Ver viajes
       </a>
     </div>
 
+  <!-- Lista -->
   } @else {
-    <div class="row g-3">
+    <div class="d-flex flex-column gap-3">
       @for (fav of favoritos(); track fav.route_id) {
-        <div class="col-12 col-md-6 col-lg-4">
-          <div class="card h-100 shadow-sm">
-            <div class="card-body">
+        <div class="card border-0 shadow-sm rounded-3 overflow-hidden">
 
-              <!-- Nombre de la ruta -->
-              <h6 class="card-title fw-semibold mb-1">
-                <i class="bi bi-signpost me-1 text-primary"></i>
-                {{ fav.ruta?.nombre || ('Ruta #' + fav.route_id) }}
-              </h6>
-
-              <!-- Origen → Destino -->
-              @if (fav.ruta) {
-                <div class="text-muted small mb-2">
-                  <i class="bi bi-geo-alt me-1 text-success"></i>{{ fav.ruta.origin_text }}
-                  <i class="bi bi-arrow-right mx-1"></i>
-                  <i class="bi bi-geo-alt-fill me-1 text-danger"></i>{{ fav.ruta.dest_text }}
-                </div>
-
-                <div class="d-flex flex-wrap gap-2 mb-3">
+          <!-- Cabecera de la card -->
+          <div class="card-body px-4 py-3 position-relative">
+            <div class="d-flex align-items-start gap-3" style="padding-right:2.5rem;">
+              <div class="bg-primary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
+                   style="width:42px;height:42px;">
+                <i class="bi bi-car-front text-primary fs-5"></i>
+              </div>
+              <div class="flex-grow-1" style="min-width:0;">
+                @if (fav.ruta) {
+                  <h6 class="fw-semibold mb-1 text-truncate">
+                    {{ fav.ruta.origin_text.split(',')[0] }}
+                    <i class="bi bi-arrow-right text-secondary small mx-1"></i>
+                    {{ fav.ruta.dest_text.split(',')[0] }}
+                  </h6>
                   @if (fav.ruta.hora_salida) {
-                    <span class="badge bg-light text-dark border">
-                      <i class="bi bi-clock me-1"></i>{{ fav.ruta.hora_salida }}
+                    <span class="badge bg-light text-secondary border rounded-pill px-2 py-1 me-2" style="font-size:.74rem;">
+                      <i class="bi bi-clock me-1"></i>{{ fav.ruta.hora_salida.slice(0,5) }}
                     </span>
                   }
-                  @if (fav.ruta.pasa_por_m30) {
-                    <span class="badge bg-warning text-dark">
-                      <i class="bi bi-exclamation-triangle me-1"></i>Pasa por M-30
-                    </span>
+                } @else {
+                  <h6 class="fw-semibold mb-0">Viaje #{{ fav.route_id }}</h6>
+                }
+
+                <!-- Botón ver viajes -->
+                <button class="btn btn-sm btn-outline-primary rounded-pill px-3 mt-2"
+                        style="font-size:.78rem;"
+                        (click)="toggleViajes(fav)">
+                  @if (cargandoViajes() === fav.route_id) {
+                    <span class="spinner-border spinner-border-sm me-1" style="width:10px;height:10px;"></span>
+                  } @else {
+                    <i class="bi bi-{{ expandido() === fav.route_id ? 'chevron-up' : 'search' }} me-1"></i>
+                  }
+                  {{ expandido() === fav.route_id ? 'Ocultar viajes' : 'Ver viajes disponibles' }}
+                </button>
+              </div>
+            </div>
+
+            <!-- Corazón quitar -->
+            <button class="btn btn-link p-0 position-absolute fav-remove-btn"
+                    style="top:.75rem;right:.85rem;"
+                    [disabled]="eliminando() === fav.route_id"
+                    (click)="eliminarFavorito(fav)"
+                    title="Quitar de favoritos">
+              @if (eliminando() === fav.route_id) {
+                <span class="spinner-border spinner-border-sm" style="width:14px;height:14px"></span>
+              } @else {
+                <i class="bi bi-heart-fill fs-5 text-danger"></i>
+              }
+            </button>
+          </div>
+
+          <!-- Panel expandible: viajes disponibles -->
+          @if (expandido() === fav.route_id) {
+            <div class="border-top bg-light px-4 py-3">
+              @if (cargandoViajes() === fav.route_id) {
+                <div class="d-flex align-items-center gap-2 text-secondary small py-2">
+                  <span class="spinner-border spinner-border-sm"></span> Buscando viajes…
+                </div>
+              } @else if (viajesDeRuta(fav.route_id).length === 0) {
+                <p class="text-secondary small mb-0 py-1">
+                  <i class="bi bi-info-circle me-1"></i>No hay viajes disponibles para esta ruta.
+                </p>
+              } @else {
+                <div class="d-flex flex-column gap-2">
+                  @for (viaje of viajesDeRuta(fav.route_id); track viaje.id) {
+                    <div class="d-flex align-items-center justify-content-between bg-white rounded-3 px-3 py-2 border gap-2">
+                      <div class="d-flex flex-wrap gap-2 align-items-center small">
+                        <span class="text-secondary">
+                          <i class="bi bi-calendar3 me-1"></i>{{ viaje.trip_datetime | date:'dd MMM yyyy' }}
+                        </span>
+                        <span class="text-secondary">
+                          <i class="bi bi-clock me-1"></i>{{ viaje.trip_datetime | date:'HH:mm' }}
+                        </span>
+                        <span class="text-secondary">
+                          <i class="bi bi-people me-1"></i>{{ viaje.seats_available }} libres
+                        </span>
+                      </div>
+                      <button class="btn btn-sm btn-primary rounded-pill px-3 flex-shrink-0"
+                              style="font-size:.78rem;"
+                              [disabled]="viaje.seats_available < 1 || reservando() === viaje.id"
+                              (click)="reservarViaje(viaje)">
+                        @if (reservando() === viaje.id) {
+                          <span class="spinner-border spinner-border-sm"></span>
+                        } @else {
+                          {{ viaje.seats_available < 1 ? 'Completo' : 'Reservar' }}
+                        }
+                      </button>
+                    </div>
                   }
                 </div>
               }
-
             </div>
+          }
 
-            <div class="card-footer bg-transparent border-top-0 pt-0 pb-3 px-3">
-              <button
-                class="btn btn-outline-danger btn-sm w-100"
-                (click)="eliminarFavorito(fav)"
-                [disabled]="eliminando() === fav.route_id">
-                @if (eliminando() === fav.route_id) {
-                  <span class="spinner-border spinner-border-sm me-1" role="status"></span>
-                } @else {
-                  <i class="bi bi-heart-break me-1"></i>
-                }
-                Quitar de favoritos
-              </button>
-            </div>
-          </div>
         </div>
       }
     </div>
 
-    <div class="mt-3 text-muted small text-end">
-      {{ favoritos().length }} ruta{{ favoritos().length !== 1 ? 's' : '' }} en favoritos
-    </div>
+    <p class="text-secondary small text-end mt-3">
+      {{ favoritos().length }} viaje{{ favoritos().length !== 1 ? 's' : '' }} guardado{{ favoritos().length !== 1 ? 's' : '' }}
+    </p>
   }
 
 </div>

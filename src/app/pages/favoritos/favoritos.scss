@@ -1,1 +1,8 @@
-// Estilos específicos de Favoritos — Bootstrap 5 se encarga del layout principal
+// Estilos específicos de Favoritos
+.fav-remove-btn {
+  line-height: 1;
+  color: #f43f5e;
+  transition: transform .15s, opacity .15s;
+  &:hover  { transform: scale(1.2); opacity: .75; }
+  &:focus  { box-shadow: none; }
+}

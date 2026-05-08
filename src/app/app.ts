@@ -1,12 +1,13 @@
 import { Component, inject } from '@angular/core';
 import { RouterOutlet, Router, NavigationEnd } from '@angular/router';
 import { Header } from './shared/components/header/header';
+import { AlertaPopup } from './shared/components/alerta-popup/alerta-popup';
 import { filter } from 'rxjs';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, Header],
+  imports: [RouterOutlet, Header, AlertaPopup],
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })

@@ -5,6 +5,7 @@ import { Subject, Subscription, debounceTime, switchMap } from 'rxjs';
 import { ViajeCompartidoService } from '../../core/services/viaje-compartido.service';
 import { ReservaService } from '../../core/services/reserva.service';
 import { AuthService } from '../../core/services/auth.service';
+import { FavoritoService } from '../../core/services/favorito.service';
 
 export interface ViajeCompartido {
   id: number;
@@ -24,14 +25,23 @@ export interface ViajeCompartido {
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './viajes-compartidos.html',
+  styles: [`
+    .fav-btn { line-height:1; color: #d1d5db; transition: color .15s, transform .15s; }
+    .fav-btn:hover  { color: #f43f5e; transform: scale(1.2); }
+    .fav-btn.fav-active { color: #f43f5e; }
+    .fav-btn:focus { box-shadow: none; }
+  `]
 })
 export class ViajesCompartidos implements OnInit, OnDestroy {
-  private viajeService = inject(ViajeCompartidoService);
-  private reservaService = inject(ReservaService);
-  private authService = inject(AuthService);
+  private viajeService    = inject(ViajeCompartidoService);
+  private reservaService  = inject(ReservaService);
+  private authService     = inject(AuthService);
+  private favoritoService = inject(FavoritoService);
 
-  viajes = signal<ViajeCompartido[]>([]);
-  cargando = signal(true);
+  viajes       = signal<ViajeCompartido[]>([]);
+  cargando     = signal(true);
+  favoritosIds = signal<Set<number>>(new Set());
+  toggling     = signal<number | null>(null);
 
   filtroOrigen = '';
   filtroDestino = '';
@@ -64,6 +74,7 @@ export class ViajesCompartidos implements OnInit, OnDestroy {
     });
 
     this.filtros$.next(); // carga inicial
+    this.cargarFavoritos();
   }
 
   ngOnDestroy(): void {
@@ -83,6 +94,42 @@ export class ViajesCompartidos implements OnInit, OnDestroy {
   }
 
   reservando = signal<number | null>(null);
+
+  cargarFavoritos(): void {
+    this.favoritoService.listarFavoritos().subscribe({
+      next: (res) => {
+        const ids = new Set(res.favoritos.map(f => f.route_id));
+        this.favoritosIds.set(ids);
+      }
+    });
+  }
+
+  esFavorito(routeId: number): boolean {
+    return this.favoritosIds().has(routeId);
+  }
+
+  toggleFavorito(viaje: ViajeCompartido): void {
+    const userId = this.authService.currentUser()?.id;
+    if (!userId || this.toggling() === viaje.route_id) return;
+    this.toggling.set(viaje.route_id);
+    if (this.esFavorito(viaje.route_id)) {
+      this.favoritoService.eliminarFavorito(userId, viaje.route_id).subscribe({
+        next: () => {
+          this.favoritosIds.update(s => { const n = new Set(s); n.delete(viaje.route_id); return n; });
+          this.toggling.set(null);
+        },
+        error: () => this.toggling.set(null)
+      });
+    } else {
+      this.favoritoService.agregarFavorito({ user_id: userId, route_id: viaje.route_id }).subscribe({
+        next: () => {
+          this.favoritosIds.update(s => new Set([...s, viaje.route_id]));
+          this.toggling.set(null);
+        },
+        error: () => this.toggling.set(null)
+      });
+    }
+  }
 
   reservarViaje(viaje: ViajeCompartido): void {
     const userId = this.authService.currentUser()?.id;
