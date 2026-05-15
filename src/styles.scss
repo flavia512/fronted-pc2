@@ -1,19 +1,50 @@
-/* You can add global styles to this file, and also import other style files */
 @import 'bootstrap/dist/css/bootstrap.min.css';
 @import 'mapbox-gl/dist/mapbox-gl.css';
 
+/* RESET */
 *, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
 
+/* VARIABLES BASE (tema claro por defecto) */
+:root {
+  --bg-color: #ffffff;
+  --text-color: #1e293b;
+  --card-color: #f5f7fa;
+  --primary-color: #3f51b5;
+}
+
+/* TEMA OSCURO */
+body.dark-theme {
+  --bg-color: #121212;
+  --text-color: #f1f1f1;
+  --card-color: #1e1e1e;
+  --primary-color: #90caf9;
+}
+
+/* ESTILOS BASE USANDO VARIABLES */
 body {
   font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-  background: #f5f7fa;
-  color: #1e293b;
+  background: var(--bg-color);
+  color: var(--text-color);
   -webkit-font-smoothing: antialiased;
 }
 
-/* Importing Bootstrap SCSS file. */
+/* ELEMENTOS GLOBALES */
+.card,
+.grafico-card,
+.admin-container,
+.tabla-container {
+  background: var(--card-color);
+  color: var(--text-color);
+}
+
+/* BOTONES BASE (opcional mejora visual) */
+button {
+  cursor: pointer;
+}
+
+/* IMPORT FINAL BOOTSTRAP SCSS */
 @import 'bootstrap/scss/bootstrap';

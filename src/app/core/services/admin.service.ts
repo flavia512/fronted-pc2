@@ -1,16 +1,16 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import {map, Observable} from 'rxjs';
 import { User } from '../models/user.model';
 
 @Injectable({
   providedIn: 'root'
 })
-export class UserService {
+export class AdminService {
   private http = inject(HttpClient);
   private apiUrl = 'http://localhost:8000/api';
 
-  getProfile(): Observable<User> {
+  getProfile(): Observable<any> {
     return this.http.get<User>(`${this.apiUrl}/profile`);
   }
 
@@ -19,7 +19,7 @@ export class UserService {
   }
 
   getAllUsers(): Observable<User[]> {
-    return this.http.get<User[]>(`${this.apiUrl}/users/listaUsuarios`);
+    return this.http.get<{ ok: boolean; usuarios: User[] }>(`${this.apiUrl}/users/listaUsuarios`).pipe(map(response => response.usuarios));
   }
 
   getUserById(id: number): Observable<User> {

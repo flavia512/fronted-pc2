@@ -1,12 +1,14 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
 import { User } from '../../core/models/user.model';
-import { UserService } from '../../core/services/user.service';
+import { AdminService } from '../../core/services/admin.service';
 import { ReservaService } from '../../core/services/reserva.service';
 import { Reserva } from '../../core/models/reserva.model';
+import {Chart, registerables} from 'chart.js';
 
+Chart.register(...registerables);
 @Component({
   selector: 'app-admin-users',
   standalone: true,
@@ -15,8 +17,10 @@ import { Reserva } from '../../core/models/reserva.model';
   styleUrl: './admin-users.scss',
 })
 export class AdminUsers implements OnInit {
-
-  private userService = inject(UserService);
+  chartRoles: any;
+  chartEstados: any;
+  chartReservas: any;
+  private userService = inject(AdminService);
   private reservaService = inject(ReservaService);
 
   // USERS
@@ -41,10 +45,10 @@ export class AdminUsers implements OnInit {
   cargarUsuarios(): void {
     this.cargando.set(true);
     this.error.set('');
-
     this.userService.getAllUsers().subscribe({
       next: (usuarios) => {
         this.usuarios.set(usuarios);
+        this.crearGraficos();
         this.cargando.set(false);
       },
       error: () => {
@@ -53,7 +57,90 @@ export class AdminUsers implements OnInit {
       }
     });
   }
+  crearGraficos(): void {
 
+    const usuarios = this.usuarios();
+
+ //grafico
+    const admins = usuarios.filter(u => u.rol === 'admin').length;
+    const normales = usuarios.filter(u => u.rol !== 'admin').length;
+
+    if (this.chartRoles) {
+      this.chartRoles.destroy();
+    }
+
+    this.chartRoles = new Chart('chartRoles', {
+
+      type: 'pie',
+
+      data: {
+        labels: ['Admins', 'Usuarios'],
+        datasets: [{
+          data: [admins, normales],
+          backgroundColor: [
+            '#ff6384',
+            '#36a2eb'
+          ]
+        }]
+      }
+    });
+
+//grafico
+    const activos = usuarios.filter(u => u.is_active).length;
+    const inactivos = usuarios.filter(u => !u.is_active).length;
+
+    if (this.chartEstados) {
+      this.chartEstados.destroy();
+    }
+
+    this.chartEstados = new Chart('chartEstados', {
+
+      type: 'doughnut',
+
+      data: {
+        labels: ['Activos', 'Inactivos'],
+        datasets: [{
+          data: [activos, inactivos],
+          backgroundColor: [
+            '#4bc0c0',
+            '#ff9f40'
+          ]
+        }]
+      }
+    });
+
+   //Grafico
+    const letras: any = {};
+
+    usuarios.forEach(u => {
+
+      const inicial = u.full_name.charAt(0).toUpperCase();
+
+      letras[inicial] = (letras[inicial] || 0) + 1;
+    });
+
+    if (this.chartReservas) {
+      this.chartReservas.destroy();
+    }
+
+    this.chartReservas = new Chart('chartIniciales', {
+
+      type: 'bar',
+
+      data: {
+        labels: Object.keys(letras),
+        datasets: [{
+          label: 'Usuarios',
+          data: Object.values(letras),
+          backgroundColor: '#9966ff'
+        }]
+      },
+
+      options: {
+        responsive: true
+      }
+    });
+  }
   get usuariosFiltrados(): User[] {
     if (!this.buscando.trim()) return this.usuarios();
 
@@ -117,5 +204,12 @@ export class AdminUsers implements OnInit {
         this.cargando.set(false);
       }
     });
+  }
+  oscuro(): void {
+    document.body.classList.add('dark-theme');
+  }
+
+  claro(): void {
+    document.body.classList.remove('dark-theme');
   }
 }

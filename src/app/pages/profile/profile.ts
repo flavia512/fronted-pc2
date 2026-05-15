@@ -1,7 +1,7 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { UserService } from '../../core/services/user.service';
+import { AdminService } from '../../core/services/admin.service';
 import { User } from '../../core/models/user.model';
 import { AuthService } from '../../core/services/auth.service';
 import { Router } from '@angular/router';
@@ -14,7 +14,7 @@ import { Router } from '@angular/router';
   styleUrl: './profile.scss'
 })
 export class Profile implements OnInit {
-  private userService = inject(UserService);
+  private userService = inject(AdminService);
   private authService = inject(AuthService);
   private router = inject(Router);
 
