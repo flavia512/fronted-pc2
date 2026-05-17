@@ -1,7 +1,26 @@
+:host {
+
+  --local-bg: var(--bg-color);
+  --local-text: var(--text-color);
+  --local-card: var(--card-color);
+
+  display: block;
+
+  background: var(--local-bg);
+  color: var(--local-text);
+
+  min-height: 100vh;
+}
+
 .admin-container {
   max-width: 1200px;
   margin: 0 auto;
   padding: 2rem 1rem;
+
+  background: var(--local-bg);
+  color: var(--local-text);
+
+  min-height: 100vh;
 }
 
 .admin-header {
@@ -52,18 +71,11 @@
   }
 
   .input-busqueda {
-    width: 100%;
-    padding: 0.75rem 2.5rem 0.75rem 1rem;
-    border: 1px solid #ddd;
-    border-radius: 0.5rem;
-    font-size: 0.95rem;
-    transition: border-color 0.2s;
 
-    &:focus {
-      outline: none;
-      border-color: #0066cc;
-      box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
-    }
+    background: var(--local-card);
+    color: var(--local-text);
+
+    border: 1px solid #666;
   }
 
   .btn-limpiar {
@@ -113,48 +125,42 @@
 }
 
 .tabla-container {
-  background: white;
+  background: var(--local-card);
+  color: var(--local-text);
+
   border-radius: 0.5rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   overflow-x: auto;
 }
 
 .tabla-usuarios {
+
   width: 100%;
   border-collapse: collapse;
   font-size: 0.95rem;
+  color: var(--local-text);
 
   thead {
-    background-color: #f5f5f5;
-    border-bottom: 2px solid #ddd;
+
+    background-color: rgba(255,255,255,0.05);
 
     th {
-      padding: 1rem;
-      text-align: left;
-      font-weight: 600;
-      color: #333;
-      text-transform: uppercase;
-      font-size: 0.85rem;
-      letter-spacing: 0.5px;
+      color: var(--local-text);
     }
   }
 
   tbody {
+
     tr {
-      border-bottom: 1px solid #eee;
-      transition: background-color 0.2s;
+
+      border-bottom: 1px solid rgba(255,255,255,0.08);
 
       &:hover {
-        background-color: #f9f9f9;
-      }
-
-      &.inactivo {
-        opacity: 0.6;
+        background-color: rgba(255,255,255,0.05);
       }
 
       td {
-        padding: 1rem;
-        color: #333;
+        color: var(--local-text);
       }
     }
   }
@@ -232,16 +238,12 @@
 }
 
 .sin-resultados {
-  background: white;
-  border-radius: 0.5rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  padding: 3rem 1.5rem;
-  text-align: center;
+
+  background: var(--local-card);
+  color: var(--local-text);
 
   p {
-    color: #666;
-    font-size: 1.1rem;
-    margin: 0;
+    color: var(--local-text);
   }
 }
 
@@ -272,10 +274,12 @@
 }
 
 .grafico-card {
-  background: white;
+
+  background: var(--local-card);
+  color: var(--local-text);
+
   padding: 24px;
   border-radius: 12px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
 
   display: flex;
   flex-direction: column;

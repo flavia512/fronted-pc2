@@ -194,33 +194,34 @@
       Cargar reservas
     </button>
   </div>
-</div>
-<div class="graficos">
+  <div class="graficos">
 
-  <div class="grafico-card">
-    <h3>Tipos de usuarios</h3>
-    <canvas id="chartRoles"></canvas>
+    <div class="grafico-card">
+      <h3>Tipos de usuarios</h3>
+      <canvas id="chartRoles"></canvas>
+    </div>
+
+    <div class="grafico-card">
+      <h3>Usuarios activos</h3>
+      <canvas id="chartEstados"></canvas>
+    </div>
+
+    <div class="grafico-card">
+      <h3>Usuarios por inicial</h3>
+      <canvas id="chartIniciales"></canvas>
+    </div>
+
   </div>
+  <div class="btn-tema">
 
-  <div class="grafico-card">
-    <h3>Usuarios activos</h3>
-    <canvas id="chartEstados"></canvas>
+    <button (click)="oscuro()">
+      Modo oscuro
+    </button>
+
+    <button (click)="claro()">
+      Modo estándar
+    </button>
+
   </div>
-
-  <div class="grafico-card">
-    <h3>Usuarios por inicial</h3>
-    <canvas id="chartIniciales"></canvas>
-  </div>
-
-</div>
-<div class="theme-buttons">
-
-  <button (click)="oscuro()">
-    Modo oscuro
-  </button>
-
-  <button (click)="claro()">
-    Modo estándar
-  </button>
 
 </div>
