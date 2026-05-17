@@ -1,6 +1,6 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AdminService } from '../../core/services/admin.service';
 import { User } from '../../core/models/user.model';
 import { AuthService } from '../../core/services/auth.service';
@@ -9,7 +9,7 @@ import { Router } from '@angular/router';
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './profile.html',
   styleUrl: './profile.scss'
 })
@@ -17,13 +17,28 @@ export class Profile implements OnInit {
   private userService = inject(AdminService);
   private authService = inject(AuthService);
   private router = inject(Router);
+  private fb = inject(FormBuilder);
 
-  // Usamos directamente el modelo de la base de datos
-  usuario: Partial<User> = {};
+  usuarioId = signal<number | null>(null);
+  puntos = signal<number>(0);
+  isActive = signal<boolean>(false);
+  rol = signal<string>('');
 
   cargando = signal(true);
   guardando = signal(false);
-  error = signal('');
+  modificandoPuntos = signal(false);
+
+  mensajeExito = signal('');
+  mensajeError = signal('');
+
+  profileForm: FormGroup = this.fb.group({
+    full_name: ['', [
+      Validators.required,
+      Validators.minLength(2),
+      Validators.maxLength(100)
+    ]],
+    email: [{ value: '', disabled: true }]
+  });
 
   ngOnInit(): void {
     this.cargarDatosUsuario();
@@ -31,45 +46,101 @@ export class Profile implements OnInit {
 
   cargarDatosUsuario(): void {
     this.cargando.set(true);
-    this.error.set('');
+    this.limpiarMensajes();
 
     this.userService.getProfile().subscribe({
       next: (user: User) => {
-        this.usuario = {
+        this.usuarioId.set(user.id);
+        this.puntos.set(user.puntos);
+        this.isActive.set(user.is_active);
+        this.rol.set(user.rol);
+
+        this.profileForm.patchValue({
           full_name: user.full_name,
-          email: user.email,
-          puntos: user.puntos,
-          is_active: user.is_active,
-          rol: user.rol
-        };
+          email: user.email
+        });
+
         this.cargando.set(false);
       },
       error: () => {
-        this.error.set('No se pudo cargar el perfil. Intenta más tarde.');
+        this.mensajeError.set('No se pudo cargar el perfil. Intenta más tarde.');
         this.cargando.set(false);
       }
     });
   }
 
   guardarCambios(): void {
+    if (this.profileForm.invalid) {
+      this.profileForm.markAllAsTouched();
+      return;
+    }
+
+    const id = this.usuarioId();
+    if (id === null) return;
+
     this.guardando.set(true);
-    this.error.set('');
+    this.limpiarMensajes();
 
     const datosActualizados: Partial<User> = {
-      full_name: this.usuario.full_name
+      full_name: this.profileForm.get('full_name')?.value
     };
 
-    this.userService.updateProfile(datosActualizados).subscribe({
+    this.userService.updateUser(id, datosActualizados).subscribe({
       next: () => {
         this.guardando.set(false);
-        alert('Perfil actualizado correctamente');
+        this.mensajeExito.set('Perfil actualizado correctamente.');
       },
-      error: () => {
+      error: (err) => {
+        console.error('Error:', err.error);
         this.guardando.set(false);
-        this.error.set('No se pudo actualizar el perfil. Intenta más tarde.');
+        this.mensajeError.set('No se pudo actualizar el perfil.');
       }
     });
   }
+
+  aumentarPuntos(): void {
+    this.modificandoPuntos.set(true);
+    this.limpiarMensajes();
+
+    this.userService.aumentarPuntos(10).subscribe({
+      next: (res) => {
+        this.puntos.set(res.puntos_totales);
+        this.modificandoPuntos.set(false);
+        this.mensajeExito.set(`Puntos aumentados. Total: ${res.puntos_totales}`);
+      },
+      error: (err) => {
+        console.error('Error:', err.error);
+        this.modificandoPuntos.set(false);
+        this.mensajeError.set('No se pudieron aumentar los puntos.');
+      }
+    });
+  }
+
+  quitarPuntos(): void {
+    this.modificandoPuntos.set(true);
+    this.limpiarMensajes();
+
+    this.userService.quitarPuntos(10).subscribe({
+      next: (res) => {
+        this.puntos.set(res.usuario.puntos);
+        this.modificandoPuntos.set(false);
+        this.mensajeExito.set(`Puntos actualizados. Total: ${res.usuario.puntos}`);
+      },
+      error: (err) => {
+        console.error('Error:', err.error);
+        this.modificandoPuntos.set(false);
+        this.mensajeError.set('No se pudieron quitar los puntos.');
+      }
+    });
+  }
+
+  private limpiarMensajes(): void {
+    this.mensajeExito.set('');
+    this.mensajeError.set('');
+  }
+
+  // Helpers para el template
+  get fullNameCtrl() { return this.profileForm.get('full_name')!; }
 
   logout(): void {
     this.authService.logout();

@@ -1,8 +1,10 @@
-@import 'bootstrap/dist/css/bootstrap.min.css';
+@use 'bootstrap/dist/css/bootstrap.min.css';
 @import 'mapbox-gl/dist/mapbox-gl.css';
 
 /* RESET */
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;

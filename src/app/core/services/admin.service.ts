@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import {map, Observable} from 'rxjs';
+import { map, Observable } from 'rxjs';
 import { User } from '../models/user.model';
 
 @Injectable({
@@ -32,5 +32,19 @@ export class AdminService {
 
   deleteUser(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/users/eliminar/${id}`);
+  }
+
+  aumentarPuntos(cantidad: number): Observable<{ message: string; puntos_totales: number }> {
+    return this.http.put<{ message: string; puntos_totales: number }>(
+      `${this.apiUrl}/user/aumentar_puntos_usuario`,
+      { cantidad }
+    );
+  }
+
+  quitarPuntos(cantidad: number): Observable<{ ok: boolean; mensaje: string; usuario: User }> {
+    return this.http.put<{ ok: boolean; mensaje: string; usuario: User }>(
+      `${this.apiUrl}/user/quitar_punto_usuarios`,
+      { cantidad }
+    );
   }
 }

@@ -9,7 +9,7 @@ import { AuthService } from '../../core/services/auth.service';
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, RouterLink],
   templateUrl: './login.html',
-  
+
 })
 export class Login {
   private fb = inject(FormBuilder);
@@ -21,7 +21,7 @@ export class Login {
 
   form = this.fb.group({
     email: ['', [Validators.required, Validators.email]],
-    password: ['', [Validators.required]]
+    password: ['', [Validators.required, Validators.minLength(6)]]
   });
 
   onSubmit(): void {
