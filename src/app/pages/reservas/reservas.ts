@@ -1,5 +1,6 @@
 import { Component, OnInit, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { ReservaService } from '../../core/services/reserva.service';
 import { AuthService } from '../../core/services/auth.service';
 
@@ -13,6 +14,10 @@ export interface Reserva {
     origin: string;
     destiny: string;
     trip_datetime: string;
+    conductor?: {
+      full_name?: string;
+      email?: string;
+    };
   };
 }
 
@@ -30,18 +35,34 @@ export interface ReservasResponse {
 export class Reservas implements OnInit {
   private reservaService = inject(ReservaService);
   private authService = inject(AuthService);
+  private router = inject(Router);
 
   reservas = signal<Reserva[]>([]);
   toast = signal<{ tipo: 'exito' | 'error'; mensaje: string } | null>(null);
   private toastTimeout: any;
 
   ngOnInit(): void {
+    if (!this.authService.isLoggedIn()) {
+      this.mostrarToast('error', 'Para ver tus reservas tienes que iniciar sesión');
+
+      setTimeout(() => {
+        this.router.navigate(['/login']);
+      }, 1500);
+
+      return;
+    }
+
     this.cargarReservas();
   }
 
   cargarReservas(): void {
     const userId = this.authService.currentUser()?.id;
-    if (!userId) return;
+
+    if (!userId) {
+      this.mostrarToast('error', 'No se pudo identificar el usuario.');
+      return;
+    }
+
     this.reservaService.obtenerReservasPorUsuario(userId).subscribe({
       next: (res: ReservasResponse) => this.reservas.set(res.reservas ?? []),
       error: () => this.reservas.set([])
@@ -49,7 +70,18 @@ export class Reservas implements OnInit {
   }
 
   eliminarReserva(id: number): void {
+    if (!this.authService.isLoggedIn()) {
+      this.mostrarToast('error', 'Para cancelar una reserva tienes que iniciar sesión');
+
+      setTimeout(() => {
+        this.router.navigate(['/login']);
+      }, 1500);
+
+      return;
+    }
+
     if (!confirm('¿Cancelar esta reserva?')) return;
+
     this.reservaService.eliminarReserva(id).subscribe({
       next: () => {
         this.reservas.update(list => list.filter(r => r.id !== id));
@@ -61,12 +93,19 @@ export class Reservas implements OnInit {
 
   mostrarToast(tipo: 'exito' | 'error', mensaje: string): void {
     this.toast.set({ tipo, mensaje });
-    if (this.toastTimeout) clearTimeout(this.toastTimeout);
+
+    if (this.toastTimeout) {
+      clearTimeout(this.toastTimeout);
+    }
+
     this.toastTimeout = setTimeout(() => this.toast.set(null), 3000);
   }
 
   cerrarToast(): void {
     this.toast.set(null);
-    if (this.toastTimeout) clearTimeout(this.toastTimeout);
+
+    if (this.toastTimeout) {
+      clearTimeout(this.toastTimeout);
+    }
   }
 }

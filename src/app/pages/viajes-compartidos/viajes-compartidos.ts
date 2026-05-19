@@ -17,7 +17,15 @@ export interface ViajeCompartido {
   seats_total: number;
   seats_available: number;
   status: string;
-  conductor?: { id?: number; name?: string };
+  conductor?: { id?: number; name?: string; full_name?: string; email?: string };
+  reservas?: Array<{
+    id: number;
+    user_id: number;
+    trip_id: number;
+    seats: number;
+    status: string;
+    usuario?: { id?: number; full_name?: string; email?: string };
+  }>;
 }
 
 @Component({
@@ -38,10 +46,11 @@ export class ViajesCompartidos implements OnInit, OnDestroy {
   private authService     = inject(AuthService);
   private favoritoService = inject(FavoritoService);
 
-  viajes       = signal<ViajeCompartido[]>([]);
-  cargando     = signal(true);
-  favoritosIds = signal<Set<number>>(new Set());
-  toggling     = signal<number | null>(null);
+  viajes        = signal<ViajeCompartido[]>([]);
+  cargando      = signal(true);
+  favoritosIds  = signal<Set<number>>(new Set());
+  toggling      = signal<number | null>(null);
+  reservando    = signal<number | null>(null);
 
   filtroOrigen = '';
   filtroDestino = '';
@@ -58,28 +67,46 @@ export class ViajesCompartidos implements OnInit, OnDestroy {
       debounceTime(400),
       switchMap(() => {
         this.cargando.set(true);
-        const hayFiltros = this.filtroOrigen.trim() || this.filtroDestino.trim() || this.filtroFecha;
+
+        const hayFiltros =
+          this.filtroOrigen.trim() ||
+          this.filtroDestino.trim() ||
+          this.filtroFecha;
+
         if (hayFiltros) {
           return this.viajeService.buscarViajes({
-            origin:  this.filtroOrigen.trim()  || undefined,
+            origin: this.filtroOrigen.trim() || undefined,
             destiny: this.filtroDestino.trim() || undefined,
-            fecha:   this.filtroFecha          || undefined,
+            fecha: this.filtroFecha || undefined,
           });
         }
+
         return this.viajeService.listarViajes();
       })
     ).subscribe({
-      next: (res: any) => { this.viajes.set(res.data ?? []); this.cargando.set(false); },
-      error: () => { this.viajes.set([]); this.cargando.set(false); }
+      next: (res: any) => {
+        this.viajes.set(res.data ?? []);
+        this.cargando.set(false);
+      },
+      error: () => {
+        this.viajes.set([]);
+        this.cargando.set(false);
+      }
     });
 
-    this.filtros$.next(); // carga inicial
-    this.cargarFavoritos();
+    this.filtros$.next();
+
+    if (this.authService.isLoggedIn()) {
+      this.cargarFavoritos();
+    }
   }
 
   ngOnDestroy(): void {
     this.sub?.unsubscribe();
-    if (this.toastTimeout) clearTimeout(this.toastTimeout);
+
+    if (this.toastTimeout) {
+      clearTimeout(this.toastTimeout);
+    }
   }
 
   onFiltroChange(): void {
@@ -93,13 +120,18 @@ export class ViajesCompartidos implements OnInit, OnDestroy {
     this.filtros$.next();
   }
 
-  reservando = signal<number | null>(null);
-
   cargarFavoritos(): void {
+    if (!this.authService.isLoggedIn()) {
+      return;
+    }
+
     this.favoritoService.listarFavoritos().subscribe({
       next: (res) => {
         const ids = new Set(res.favoritos.map(f => f.route_id));
         this.favoritosIds.set(ids);
+      },
+      error: () => {
+        this.favoritosIds.set(new Set());
       }
     });
   }
@@ -108,67 +140,149 @@ export class ViajesCompartidos implements OnInit, OnDestroy {
     return this.favoritosIds().has(routeId);
   }
 
-  toggleFavorito(viaje: ViajeCompartido): void {
+  nombreConductor(viaje: ViajeCompartido): string {
+    return viaje.conductor?.full_name || viaje.conductor?.name || viaje.conductor?.email || 'Conductor';
+  }
+
+  esMiViaje(viaje: ViajeCompartido): boolean {
+    return this.authService.currentUser()?.id === viaje.driver_user_id;
+  }
+
+  yaReservado(viaje: ViajeCompartido): boolean {
     const userId = this.authService.currentUser()?.id;
-    if (!userId || this.toggling() === viaje.route_id) return;
+    return !!userId && !!viaje.reservas?.some(reserva => reserva.user_id === userId);
+  }
+
+  totalReservado(viaje: ViajeCompartido): number {
+    return viaje.reservas?.reduce((total, reserva) => total + reserva.seats, 0) ?? 0;
+  }
+
+  toggleFavorito(viaje: ViajeCompartido): void {
+    if (!this.authService.isLoggedIn()) {
+      this.mostrarToast('error', 'Debes iniciar sesión para guardar favoritos.');
+      return;
+    }
+
+    const userId = this.authService.currentUser()?.id;
+
+    if (!userId || this.toggling() === viaje.route_id) {
+      return;
+    }
+
     this.toggling.set(viaje.route_id);
+
     if (this.esFavorito(viaje.route_id)) {
       this.favoritoService.eliminarFavorito(userId, viaje.route_id).subscribe({
         next: () => {
-          this.favoritosIds.update(s => { const n = new Set(s); n.delete(viaje.route_id); return n; });
+          this.favoritosIds.update(s => {
+            const n = new Set(s);
+            n.delete(viaje.route_id);
+            return n;
+          });
+
           this.toggling.set(null);
         },
-        error: () => this.toggling.set(null)
+        error: () => {
+          this.toggling.set(null);
+        }
       });
     } else {
-      this.favoritoService.agregarFavorito({ user_id: userId, route_id: viaje.route_id }).subscribe({
+      this.favoritoService.agregarFavorito({
+        user_id: userId,
+        route_id: viaje.route_id
+      }).subscribe({
         next: () => {
           this.favoritosIds.update(s => new Set([...s, viaje.route_id]));
           this.toggling.set(null);
         },
-        error: () => this.toggling.set(null)
+        error: () => {
+          this.toggling.set(null);
+        }
       });
     }
   }
 
   reservarViaje(viaje: ViajeCompartido): void {
+    if (!this.authService.isLoggedIn()) {
+      this.mostrarToast('error', 'Debes iniciar sesión para reservar viajes.');
+      return;
+    }
+
     const userId = this.authService.currentUser()?.id;
-    if (!userId) return;
+
+    if (!userId) {
+      this.mostrarToast('error', 'No se pudo identificar el usuario.');
+      return;
+    }
+
     if (viaje.seats_available < 1) {
       this.mostrarToast('error', 'No quedan asientos disponibles.');
       return;
     }
+
+    if (this.esMiViaje(viaje)) {
+      this.mostrarToast('error', 'No puedes reservar tu propio viaje.');
+      return;
+    }
+
+    if (this.yaReservado(viaje)) {
+      this.mostrarToast('error', 'Ya tienes una reserva para este viaje.');
+      return;
+    }
+
     this.reservando.set(viaje.id);
+
     this.reservaService.crearReserva({
       user_id: userId,
       trip_id: viaje.id,
       seats: 1,
       status: 'pending'
     }).subscribe({
-      next: () => {
+      next: (res: any) => {
         this.reservando.set(null);
         this.mostrarToast('exito', '¡Reserva realizada con éxito!');
-        // Decrementar visualmente los asientos
+        const nuevaReserva = res?.data;
+
         this.viajes.update(list =>
-          list.map(v => v.id === viaje.id ? { ...v, seats_available: v.seats_available - 1 } : v)
+          list.map(v =>
+            v.id === viaje.id
+              ? {
+                  ...v,
+                  seats_available: v.seats_available - 1,
+                  reservas: nuevaReserva ? [...(v.reservas ?? []), nuevaReserva] : v.reservas
+                }
+              : v
+          )
         );
       },
-      error: () => {
+      error: (err) => {
         this.reservando.set(null);
-        this.mostrarToast('error', 'No se pudo realizar la reserva. Inténtalo de nuevo.');
+
+        if (err.status === 401) {
+          this.mostrarToast('error', 'Debes iniciar sesión para reservar viajes.');
+          return;
+        }
+
+        this.mostrarToast('error', err?.error?.message ?? 'No se pudo realizar la reserva. Inténtalo de nuevo.');
       }
     });
   }
 
   mostrarToast(tipo: 'exito' | 'error', mensaje: string): void {
     this.toast.set({ tipo, mensaje });
-    if (this.toastTimeout) clearTimeout(this.toastTimeout);
+
+    if (this.toastTimeout) {
+      clearTimeout(this.toastTimeout);
+    }
+
     this.toastTimeout = setTimeout(() => this.toast.set(null), 5000);
   }
 
   cerrarToast(): void {
     this.toast.set(null);
-    if (this.toastTimeout) clearTimeout(this.toastTimeout);
+
+    if (this.toastTimeout) {
+      clearTimeout(this.toastTimeout);
+    }
   }
 }
-

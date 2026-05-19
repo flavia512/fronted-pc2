@@ -17,12 +17,42 @@
   <!-- HEADER -->
   <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-end gap-3 mb-5">
     <div>
-      <h1 class="fw-bold mb-1" style="font-size: 2rem;">Mis Rutas</h1>
-      <p class="text-secondary mb-0">Gestiona tus trayectos habituales y recibe alertas de tráfico</p>
+      <h1 class="fw-bold mb-1" style="font-size: 2rem;">{{ tituloPagina() }}</h1>
+      <p class="text-secondary mb-0">{{ descripcionPagina() }}</p>
     </div>
     <button class="btn btn-primary rounded-pill px-4 align-self-start align-self-sm-auto" (click)="abrirModal()">
       <i class="bi bi-plus-lg me-1"></i> Nueva Ruta
     </button>
+  </div>
+
+  <!-- FILTROS -->
+  <div class="card border-0 shadow-sm rounded-4 mb-4">
+    <div class="card-body px-4 py-3">
+      <div class="row g-2 align-items-end">
+        <div class="col-12 col-sm-5">
+          <label class="form-label text-secondary small fw-medium mb-1">Origen</label>
+          <div class="input-group input-group-sm">
+            <span class="input-group-text bg-white border-end-0"><i class="bi bi-geo-alt text-secondary"></i></span>
+            <input type="text" class="form-control border-start-0 rounded-end-3 ps-0"
+                   placeholder="Buscar origen" [(ngModel)]="filtroOrigen">
+          </div>
+        </div>
+        <div class="col-12 col-sm-5">
+          <label class="form-label text-secondary small fw-medium mb-1">Destino</label>
+          <div class="input-group input-group-sm">
+            <span class="input-group-text bg-white border-end-0"><i class="bi bi-geo text-secondary"></i></span>
+            <input type="text" class="form-control border-start-0 rounded-end-3 ps-0"
+                   placeholder="Buscar destino" [(ngModel)]="filtroDestino">
+          </div>
+        </div>
+        <div class="col-12 col-sm-2">
+          <button class="btn btn-light btn-sm rounded-3 w-100 border" title="Limpiar"
+                  (click)="filtroOrigen = ''; filtroDestino = ''">
+            <i class="bi bi-x-lg"></i>
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- LISTA DE RUTAS -->
@@ -33,7 +63,7 @@
     </div>
   } @else {
     <div class="row g-3">
-      @for (ruta of rutas(); track ruta.id) {
+      @for (ruta of rutasFiltradas(); track ruta.id) {
         <div class="col-12">
           <div class="card border-0 shadow-sm rounded-3">
             <div class="card-body px-4 py-3">
@@ -59,11 +89,13 @@
                   @if (ruta.pasa_por_m30) {
                     <span class="badge bg-warning text-dark rounded-pill px-3 py-2">M-30</span>
                   }
-                  <button class="btn btn-sm btn-light border rounded-circle p-0 d-flex align-items-center justify-content-center"
+                  @if (!esInvitado()) {
+                    <button class="btn btn-sm btn-light border rounded-circle p-0 d-flex align-items-center justify-content-center"
                           style="width:34px;height:34px;"
                           (click)="eliminarRuta(ruta.id)" title="Eliminar ruta">
-                    <i class="bi bi-trash text-danger"></i>
-                  </button>
+                      <i class="bi bi-trash text-danger"></i>
+                    </button>
+                  }
                 </div>
               </div>
             </div>
@@ -73,10 +105,14 @@
         <div class="col-12">
           <div class="card border-0 bg-light rounded-4 text-center py-5 px-3">
             <i class="bi bi-map text-secondary mb-3" style="font-size:2.5rem;"></i>
-            <h6 class="fw-semibold">Aún no tienes rutas guardadas</h6>
-            <p class="text-secondary small mb-3">Guarda tus trayectos recurrentes para recibir alertas de tráfico en la M-30.</p>
+            <h6 class="fw-semibold">{{ esInvitado() ? 'No hay rutas con esos filtros' : 'Aún no tienes rutas guardadas' }}</h6>
+            <p class="text-secondary small mb-3">
+              {{ esInvitado() ? 'Prueba con otro origen o destino.' : 'Guarda tus trayectos recurrentes para recibir alertas de tráfico en la M-30.' }}
+            </p>
             <div>
-              <button class="btn btn-primary rounded-pill px-4" (click)="abrirModal()">Crear mi primera ruta</button>
+              <button class="btn btn-primary rounded-pill px-4" (click)="abrirModal()">
+                {{ esInvitado() ? 'Guardar una ruta' : 'Crear mi primera ruta' }}
+              </button>
             </div>
           </div>
         </div>

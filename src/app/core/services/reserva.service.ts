@@ -21,8 +21,8 @@ export class ReservaService {
   }
 
   // Endpoint 12: Crear reserva
-  crearReserva(data: { user_id: number; trip_id: number; seats: number; status: string }): Observable<Reserva> {
-    return this.http.post<Reserva>(`${this.apiUrl}/users/crear_reserva`, data);
+  crearReserva(data: { user_id: number; trip_id: number; seats: number; status: string }): Observable<{ success: boolean; message: string; data: Reserva }> {
+    return this.http.post<{ success: boolean; message: string; data: Reserva }>(`${this.apiUrl}/users/crear_reserva`, data);
   }
 
   // Endpoint 13: Eliminar reserva

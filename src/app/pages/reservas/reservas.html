@@ -30,6 +30,9 @@
               @if (reserva.viaje?.trip_datetime) {
                 {{ reserva.viaje!.trip_datetime | date:'dd MMM · HH:mm' }} &nbsp;·&nbsp;
               }
+              @if (reserva.viaje?.conductor?.full_name || reserva.viaje?.conductor?.email) {
+                {{ reserva.viaje?.conductor?.full_name || reserva.viaje?.conductor?.email }} &nbsp;·&nbsp;
+              }
               {{ reserva.seats }} asiento{{ reserva.seats !== 1 ? 's' : '' }} &nbsp;·&nbsp;
               <span [class.text-warning]="reserva.status === 'pending'"
                     [class.text-success]="reserva.status === 'confirmed'">
@@ -47,4 +50,3 @@
   }
 
 </div>
-

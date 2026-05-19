@@ -6,9 +6,13 @@ export const authGuard: CanActivateFn = (route, state) => {
   const authService = inject(AuthService);
   const router = inject(Router);
 
-  // Está logueado? 
+  if (route.data['allowGuest'] && authService.canExplore()) {
+    return true;
+  }
+
+  // Está logueado?
   if (!authService.isLoggedIn()) {
-    router.navigate(['/login']);
+    router.navigate(['/login'], { queryParams: { required: '1', returnUrl: state.url } });
     return false;
   }
   //Exige un rol específico esta ruta?

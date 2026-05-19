@@ -14,13 +14,18 @@ export class AuthService {
   private apiUrl = environment.apiUrl;
   private tokenKey = 'token';
   private userKey = 'user';
+  private guestKey = 'guestMode';
 // se creo para que el header solo sea visto por los autenticados y para mostrar el nombre del usuario en el header
   readonly currentUser = signal<User | null>(this.getStoredUser());
+  readonly guestMode = signal(this.getStoredGuestMode());
   readonly isLoggedIn = computed(() => !!this.currentUser());
+  readonly isGuest = computed(() => this.guestMode() && !this.currentUser());
+  readonly canExplore = computed(() => this.isLoggedIn() || this.isGuest());
 
   login(data: { email: string; password: string }): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${this.apiUrl}/login`, data).pipe(
       tap((response) => {
+        this.clearGuestMode();
         this.saveToken(response.access_token);
         if (response.user) {
           this.saveUser(response.user);
@@ -33,6 +38,7 @@ export class AuthService {
   register(data: { full_name: string; email: string; password: string; password_confirmation: string }): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${this.apiUrl}/register`, data).pipe(
       tap((response) => {
+        this.clearGuestMode();
         if (response.access_token || response.access_token) {
           this.saveToken(response.access_token || response.access_token);
         }
@@ -47,7 +53,17 @@ export class AuthService {
   logout(): void {
     localStorage.removeItem(this.tokenKey);
     localStorage.removeItem(this.userKey);
+    localStorage.removeItem(this.guestKey);
     this.currentUser.set(null);
+    this.guestMode.set(false);
+  }
+
+  continueAsGuest(): void {
+    localStorage.removeItem(this.tokenKey);
+    localStorage.removeItem(this.userKey);
+    localStorage.setItem(this.guestKey, '1');
+    this.currentUser.set(null);
+    this.guestMode.set(true);
   }
 
   saveToken(token: string): void {
@@ -65,6 +81,15 @@ export class AuthService {
   getStoredUser(): User | null {
     const user = localStorage.getItem(this.userKey);
     return user ? JSON.parse(user) : null;
+  }
+
+  private getStoredGuestMode(): boolean {
+    return localStorage.getItem(this.guestKey) === '1';
+  }
+
+  private clearGuestMode(): void {
+    localStorage.removeItem(this.guestKey);
+    this.guestMode.set(false);
   }
 
   getRolUsuario(): string | null {

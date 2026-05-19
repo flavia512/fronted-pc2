@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ViewChild, ElementRef, NgZone, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, ElementRef, NgZone, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import mapboxgl from 'mapbox-gl';
@@ -13,6 +13,7 @@ import { MapboxService, MapboxFeature, RouteInfo } from '../../core/services/map
 import { RutaService } from '../../core/services/ruta.service';
 import { Ruta } from '../../core/models/ruta.model';
 import { environment } from '../../../environments/environment';
+import { AuthService } from '../../core/services/auth.service';
 
 @Component({
   selector: 'app-rutas',
@@ -28,6 +29,25 @@ export class Rutas implements OnInit, OnDestroy {
   errorCarga = signal(false);
   mostrarModal = signal(false);
   guardandoRuta = signal(false);
+  esInvitado = computed(() => this.authService.isGuest());
+  tituloPagina = computed(() => this.esInvitado() ? 'Rutas' : 'Mis Rutas');
+  descripcionPagina = computed(() => this.esInvitado()
+    ? 'Explora rutas disponibles y filtra por origen o destino'
+    : 'Gestiona tus trayectos habituales y recibe alertas de tráfico'
+  );
+
+  filtroOrigen = '';
+  filtroDestino = '';
+  rutasFiltradas = computed(() => {
+    const origen = this.filtroOrigen.trim().toLowerCase();
+    const destino = this.filtroDestino.trim().toLowerCase();
+
+    return this.rutas().filter(ruta => {
+      const coincideOrigen = !origen || ruta.origin_text.toLowerCase().includes(origen);
+      const coincideDestino = !destino || ruta.dest_text.toLowerCase().includes(destino);
+      return coincideOrigen && coincideDestino;
+    });
+  });
 
   // Toast de feedback
   toast = signal<{ tipo: 'exito' | 'error'; mensaje: string } | null>(null);
@@ -55,7 +75,8 @@ export class Rutas implements OnInit, OnDestroy {
   constructor(
     private mapboxService: MapboxService,
     private rutaService: RutaService,
-    private ngZone: NgZone
+    private ngZone: NgZone,
+    private authService: AuthService
   ) {}
 
   ngOnInit(): void {
@@ -175,7 +196,11 @@ export class Rutas implements OnInit, OnDestroy {
   cargarRutasUsuario(): void {
     this.cargando.set(true);
     this.errorCarga.set(false);
-    this.rutaService.obtenerRutas().subscribe({
+    const request$ = this.authService.isGuest()
+      ? this.rutaService.listarRutasPublicas()
+      : this.rutaService.obtenerRutas();
+
+    request$.subscribe({
       next: (rutas: Ruta[]) => {
         this.rutas.set(rutas);
         this.cargando.set(false);
@@ -194,6 +219,11 @@ export class Rutas implements OnInit, OnDestroy {
   }
 
   eliminarRuta(id: number): void {
+    if (!this.authService.isLoggedIn()) {
+      this.mostrarToast('error', 'Debes iniciar sesión para eliminar rutas.');
+      return;
+    }
+
     const ruta = this.rutas().find(r => r.id === id);
     const nombre = ruta?.nombre || 'esta ruta';
     if (!confirm(`¿Eliminar "${nombre}"? Esta acción no se puede deshacer.`)) return;
@@ -221,6 +251,11 @@ export class Rutas implements OnInit, OnDestroy {
   }
 
   abrirModal(): void {
+    if (!this.authService.isLoggedIn()) {
+      this.mostrarToast('error', 'Debes iniciar sesión para guardar rutas.');
+      return;
+    }
+
     this.mostrarModal.set(true);
     if (!this.mapa) {
       // Primera apertura: inicializar mapa vacío para que el canvas esté listo
@@ -254,6 +289,11 @@ export class Rutas implements OnInit, OnDestroy {
   }
 
   guardarRutaBackend(): void {
+    if (!this.authService.isLoggedIn()) {
+      this.mostrarToast('error', 'Debes iniciar sesión para guardar rutas.');
+      return;
+    }
+
     if (!this.coordOrigen() || !this.coordDestino() || !this.rutaInfo()) return;
     this.guardandoRuta.set(true);
 

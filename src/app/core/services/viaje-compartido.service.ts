@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { environment } from '../../../environments/environment'; // Ajusta esta ruta si es diferente en tu proyecto
 
 // Interfaz para tipar lo que nos devuelve el backend (puedes moverla a un archivo model si lo prefieres)
@@ -32,7 +33,10 @@ export class ViajeCompartidoService {
    * Ahora recibe el route_id en lugar de los textos de origen y destino.
    */
   crearViaje(data: {
+    driver_user_id: number;
     route_id: number;
+    origin: string;
+    destiny: string;
     trip_datetime: string;
     seats_total: number;
     seats_available: number;
@@ -73,7 +77,7 @@ export class ViajeCompartidoService {
 
   listarViajes(): Observable<{ success: boolean; data: ViajeCompartido[] }> {
     return this.http.get<{ success: boolean; data: ViajeCompartido[] }>
-      (`${this.apiUrl}/user/listar_viajes`);
+      (`${this.apiUrl}/users/viajes_compartidos`);
   }
 
   /**
@@ -81,13 +85,22 @@ export class ViajeCompartidoService {
    * GET /api/driver/buscar_viajes?origin=X&destiny=Y&fecha=YYYY-MM-DD
    */
   buscarViajes(filtros: { origin?: string; destiny?: string; fecha?: string }): Observable<{ success: boolean; data: ViajeCompartido[] }> {
-    let params = new HttpParams();
-    if (filtros.origin)  params = params.set('origin', filtros.origin);
-    if (filtros.destiny) params = params.set('destiny', filtros.destiny);
-    if (filtros.fecha)   params = params.set('fecha', filtros.fecha);
-    return this.http.get<{ success: boolean; data: ViajeCompartido[] }>(
-      `${this.apiUrl}/user/buscar_viajes`,
-      { params }
+    return this.listarViajes().pipe(
+      map(res => {
+        const origin = filtros.origin?.trim().toLowerCase();
+        const destiny = filtros.destiny?.trim().toLowerCase();
+        const fecha = filtros.fecha;
+
+        const data = res.data.filter(viaje => {
+          const coincideOrigen = !origin || (viaje.origin ?? '').toLowerCase().includes(origin);
+          const coincideDestino = !destiny || (viaje.destiny ?? '').toLowerCase().includes(destiny);
+          const coincideFecha = !fecha || viaje.trip_datetime?.startsWith(fecha);
+
+          return coincideOrigen && coincideDestino && coincideFecha;
+        });
+
+        return { ...res, data };
+      })
     );
   }
 }

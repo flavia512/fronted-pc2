@@ -5,6 +5,7 @@ import { Router, RouterLink } from '@angular/router';
 import { ViajeCompartidoService } from '../../core/services/viaje-compartido.service';
 import { RutaService } from '../../core/services/ruta.service';
 import { Ruta } from '../../core/models/ruta.model';
+import { AuthService } from '../../core/services/auth.service';
 
 @Component({
   selector: 'app-crear-viaje',
@@ -17,13 +18,13 @@ export class CrearViaje implements OnInit {
   private viajeService = inject(ViajeCompartidoService);
   private rutaService = inject(RutaService);
   private router = inject(Router);
+  private authService = inject(AuthService);
 
   form: FormGroup;
   loading = false;
   misRutas: Ruta[] = [];
   rutaSeleccionada = signal<Ruta | null>(null);
 
-  // Sistema de notificaciones (Toast)
   toast = signal<{ tipo: 'exito' | 'error'; mensaje: string } | null>(null);
   private toastTimeout: any = null;
 
@@ -37,50 +38,89 @@ export class CrearViaje implements OnInit {
   }
 
   ngOnInit() {
-    // 1. Cargar las rutas del usuario al iniciar la pantalla
+    if (!this.authService.isLoggedIn()) {
+      this.mostrarToast('error', 'Para publicar un viaje tienes que iniciar sesión');
+
+      setTimeout(() => {
+        this.router.navigate(['/login']);
+      }, 1500);
+
+      return;
+    }
+
     this.rutaService.obtenerRutas().subscribe({
-      next: (rutas) => { this.misRutas = rutas; },
-      error: () => { this.mostrarToast('error', 'No se pudieron cargar tus rutas guardadas.'); }
+      next: (rutas) => {
+        this.misRutas = rutas;
+      },
+      error: () => {
+        this.mostrarToast('error', 'No se pudieron cargar tus rutas guardadas.');
+      }
     });
 
     this.form.get('route_id')!.valueChanges.subscribe((id: number | null) => {
       const ruta = id ? this.misRutas.find(r => r.id === Number(id)) ?? null : null;
       this.rutaSeleccionada.set(ruta);
+
       if (ruta?.hora_salida) {
-        // Normalizar a HH:MM (el input type=time no acepta segundos)
         const hora = ruta.hora_salida.substring(0, 5);
         this.form.get('hora')!.setValue(hora);
       }
     });
   }
 
-  // --- MÉTODOS DEL TOAST ---
   mostrarToast(tipo: 'exito' | 'error', mensaje: string): void {
     this.toast.set({ tipo, mensaje });
-    if (this.toastTimeout) clearTimeout(this.toastTimeout);
+
+    if (this.toastTimeout) {
+      clearTimeout(this.toastTimeout);
+    }
+
     this.toastTimeout = setTimeout(() => this.toast.set(null), 3000);
   }
 
   cerrarToast(): void {
     this.toast.set(null);
-    if (this.toastTimeout) clearTimeout(this.toastTimeout);
+
+    if (this.toastTimeout) {
+      clearTimeout(this.toastTimeout);
+    }
   }
 
-  // --- ENVÍO DEL FORMULARIO ---
   onSubmit() {
+    if (!this.authService.isLoggedIn()) {
+      this.mostrarToast('error', 'Para publicar un viaje tienes que iniciar sesión');
+
+      setTimeout(() => {
+        this.router.navigate(['/login']);
+      }, 1500);
+
+      return;
+    }
+
     if (this.form.valid) {
       this.loading = true;
+
       const formValues = this.form.value;
-      // Asegurar formato HH:MM limpio (sin segundos extra)
+      const ruta = this.rutaSeleccionada();
+      const userId = this.authService.currentUser()?.id;
+
+      if (!ruta || !userId) {
+        this.loading = false;
+        this.mostrarToast('error', 'No se pudo preparar el viaje. Selecciona una ruta e inicia sesión.');
+        return;
+      }
+
       const horaLimpia = String(formValues.hora).substring(0, 5);
       const formattedDatetime = `${formValues.fecha} ${horaLimpia}:00`;
 
-      // Payload limpio y estructurado con el ID de la ruta
       const payloadViaje = {
+        driver_user_id: userId,
         route_id: Number(formValues.route_id),
+        origin: ruta.origin_text,
+        destiny: ruta.dest_text,
         trip_datetime: formattedDatetime,
         seats_total: formValues.seats_total,
-        seats_available: formValues.seats_total // Mismo valor inicial
+        seats_available: formValues.seats_total
       };
 
       this.viajeService.crearViaje(payloadViaje).subscribe({
@@ -88,7 +128,6 @@ export class CrearViaje implements OnInit {
           this.loading = false;
           this.mostrarToast('exito', '¡Viaje publicado con éxito!');
 
-          // Redirigimos a la pantalla principal tras 1.5 segundos
           setTimeout(() => {
             this.router.navigate(['/viajes-compartidos']);
           }, 1500);
@@ -100,7 +139,6 @@ export class CrearViaje implements OnInit {
         }
       });
     } else {
-      // Marcar todos los campos como tocados para que salgan en rojo si faltan datos
       this.form.markAllAsTouched();
     }
   }

@@ -16,6 +16,12 @@ export class RutaService {
     );
   }
 
+  listarRutasPublicas(): Observable<Ruta[]> {
+    return this.http.get<any>(`${this.apiUrl}/rutas`).pipe(
+      map(res => Array.isArray(res) ? res : res.data ?? [])
+    );
+  }
+
   // Endpoint 6 - POST /api/users/crear_rutas
   crearRuta(data: {
     nombre: string | null;
