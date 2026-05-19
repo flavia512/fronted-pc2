@@ -12,17 +12,27 @@ import { AuthService } from '../../core/services/auth.service';
 
 })
 export class Login {
-  private fb = inject(FormBuilder);
+  private fb          = inject(FormBuilder);
   private authService = inject(AuthService);
+<<<<<<< HEAD
   private router = inject(Router);
   private route = inject(ActivatedRoute);
+=======
+  private router      = inject(Router);
+  private route       = inject(ActivatedRoute);
+>>>>>>> 217a6f310f99b2ffa12e3ff5d74683b842555c9f
 
+  returnUrl    = this.route.snapshot.queryParamMap.get('returnUrl') ?? '';
   errorMessage = signal('');
+<<<<<<< HEAD
   loading = signal(false);
   infoMessage = signal('');
+=======
+  loading      = signal(false);
+>>>>>>> 217a6f310f99b2ffa12e3ff5d74683b842555c9f
 
   form = this.fb.group({
-    email: ['', [Validators.required, Validators.email]],
+    email:    ['', [Validators.required, Validators.email]],
     password: ['', [Validators.required, Validators.minLength(6)]]
   });
 
@@ -46,8 +56,13 @@ export class Login {
     this.authService.login(this.form.getRawValue() as { email: string; password: string }).subscribe({
       next: () => {
         this.loading.set(false);
+<<<<<<< HEAD
         const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
         this.router.navigateByUrl(returnUrl || '/rutas');
+=======
+        const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') ?? '/rutas';
+        this.router.navigateByUrl(returnUrl);
+>>>>>>> 217a6f310f99b2ffa12e3ff5d74683b842555c9f
       },
       error: () => {
         this.loading.set(false);

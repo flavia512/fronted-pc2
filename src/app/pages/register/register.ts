@@ -1,7 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { HttpErrorResponse } from '@angular/common/http';
 
@@ -15,6 +15,9 @@ export class Register {
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
+
+  returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') ?? '';
 
   errorMessage = signal('');
   successMessage = signal('');
@@ -46,8 +49,8 @@ export class Register {
       next: () => {
         this.loading.set(false);
         this.successMessage.set('Usuario registrado correctamente');
-        // Redirige automáticamente al home (o dashboard) porque ya está autenticado
-        this.router.navigate(['/']);
+        const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') ?? '/rutas';
+        this.router.navigateByUrl(returnUrl);
       },
       // MEJORA: Ahora capturamos el error que manda Laravel
       error: (err: HttpErrorResponse) => {
