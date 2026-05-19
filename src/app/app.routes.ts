@@ -11,19 +11,21 @@ import { CrearViaje } from './pages/crear-viaje/crear-viaje';
 import { Home } from './pages/home/home';
 import { Alertas } from './pages/alertas/alertas';
 import { Favoritos } from './pages/favoritos/favoritos';
-
+import { ConductorDetalle } from './pages/conductor-detalle/conductor-detalle';
+import { ViajesDisponibles } from './pages/viajes-disponibles/viajes-disponibles';
 export const routes: Routes = [
   { path: 'home', component: Home },
+  { path: 'viajes-disponibles', component: ViajesDisponibles },
   { path: 'login', component: Login },
   { path: 'register', component: Register },
   { path: 'profile', component: Profile, canActivate: [authGuard] },
   { path: 'admin-users', component: AdminUsers, canActivate: [authGuard], data: { rolEsperado: 'admin' } },
   { path: 'crear-viaje', component: CrearViaje, canActivate: [authGuard] },
-  { path: 'rutas', component: Rutas, canActivate: [authGuard] },
+  { path: 'rutas', component: Rutas },
   { path: 'reservas', component: Reservas, canActivate: [authGuard] },
-  { path: 'viajes-compartidos', component: ViajesCompartidos, canActivate: [authGuard] },
+  { path: 'viajes-compartidos', component: ViajesCompartidos },
   { path: 'alertas', component: Alertas, canActivate: [authGuard] },
   { path: 'favoritos', component: Favoritos, canActivate: [authGuard] },
+  { path: 'conductor-detalle', component: ConductorDetalle, canActivate: [authGuard] },
   { path: '', redirectTo: 'home', pathMatch: 'full' }
 ];
-

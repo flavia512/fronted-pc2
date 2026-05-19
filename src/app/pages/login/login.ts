@@ -1,7 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 
 @Component({
@@ -12,15 +12,17 @@ import { AuthService } from '../../core/services/auth.service';
 
 })
 export class Login {
-  private fb = inject(FormBuilder);
+  private fb          = inject(FormBuilder);
   private authService = inject(AuthService);
-  private router = inject(Router);
+  private router      = inject(Router);
+  private route       = inject(ActivatedRoute);
 
+  returnUrl    = this.route.snapshot.queryParamMap.get('returnUrl') ?? '';
   errorMessage = signal('');
-  loading = signal(false);
+  loading      = signal(false);
 
   form = this.fb.group({
-    email: ['', [Validators.required, Validators.email]],
+    email:    ['', [Validators.required, Validators.email]],
     password: ['', [Validators.required, Validators.minLength(6)]]
   });
 
@@ -36,7 +38,8 @@ export class Login {
     this.authService.login(this.form.getRawValue() as { email: string; password: string }).subscribe({
       next: () => {
         this.loading.set(false);
-        this.router.navigate(['/rutas']);
+        const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') ?? '/rutas';
+        this.router.navigateByUrl(returnUrl);
       },
       error: () => {
         this.loading.set(false);

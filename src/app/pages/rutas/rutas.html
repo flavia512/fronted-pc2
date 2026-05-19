@@ -26,7 +26,21 @@
   </div>
 
   <!-- LISTA DE RUTAS -->
-  @if (errorCarga()) {
+  @if (!authService.isLoggedIn()) {
+    <div class="card border-0 bg-light rounded-4 text-center py-5 px-3">
+      <i class="bi bi-person-lock text-secondary mb-3" style="font-size:2.5rem;"></i>
+      <h6 class="fw-semibold">Inicia sesión para ver tus rutas</h6>
+      <p class="text-secondary small mb-3">Guarda tus trayectos recurrentes y recibe alertas de tráfico en la M-30.</p>
+      <div class="d-flex justify-content-center gap-2 flex-wrap">
+        <a routerLink="/login" [queryParams]="{returnUrl: '/rutas'}" class="btn btn-primary rounded-pill px-4">
+          <i class="bi bi-box-arrow-in-right me-1"></i>Iniciar sesión
+        </a>
+        <a routerLink="/register" [queryParams]="{returnUrl: '/rutas'}" class="btn btn-outline-primary rounded-pill px-4">
+          <i class="bi bi-person-plus me-1"></i>Registrarse
+        </a>
+      </div>
+    </div>
+  } @else if (errorCarga()) {
     <div class="alert alert-danger border-0 rounded-3 text-center py-4">
       <p class="mb-2">No se pudieron cargar tus rutas. ¿Tienes sesión activa?</p>
       <button class="btn btn-sm btn-danger rounded-pill px-3" (click)="cargarRutasUsuario()">Reintentar</button>

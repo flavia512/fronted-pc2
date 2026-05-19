@@ -1,6 +1,7 @@
-import { Component, OnInit, OnDestroy, ViewChild, ElementRef, NgZone, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, ElementRef, NgZone, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router, RouterModule } from '@angular/router';
 import mapboxgl from 'mapbox-gl';
 
 // Reducir el worker pool a 1 para evitar la race condition de glyph loading en Mapbox GL JS v3.
@@ -11,12 +12,13 @@ import mapboxgl from 'mapbox-gl';
 import { Subject, debounceTime, switchMap, of } from 'rxjs';
 import { MapboxService, MapboxFeature, RouteInfo } from '../../core/services/mapbox.service';
 import { RutaService } from '../../core/services/ruta.service';
+import { AuthService } from '../../core/services/auth.service';
 import { Ruta } from '../../core/models/ruta.model';
 import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-rutas',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './rutas.html',
   styleUrl: './rutas.scss'
 })
@@ -35,6 +37,9 @@ export class Rutas implements OnInit, OnDestroy {
 
   // Centro de Madrid por defecto
   private readonly MADRID_CENTER: [number, number] = [-3.7038, 40.4168];
+
+  protected authService = inject(AuthService);
+  private router        = inject(Router);
 
   nuevaRuta = { nombre: '', origen: '', destino: '', horaSalida: '' };
 
@@ -59,7 +64,11 @@ export class Rutas implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    this.cargarRutasUsuario();
+    if (this.authService.isLoggedIn()) {
+      this.cargarRutasUsuario();
+    } else {
+      this.cargando.set(false);
+    }
 
     this.origenSubject.pipe(
       debounceTime(300),
@@ -194,6 +203,10 @@ export class Rutas implements OnInit, OnDestroy {
   }
 
   eliminarRuta(id: number): void {
+    if (!this.authService.isLoggedIn()) {
+      this.router.navigate(['/login'], { queryParams: { returnUrl: '/rutas' } });
+      return;
+    }
     const ruta = this.rutas().find(r => r.id === id);
     const nombre = ruta?.nombre || 'esta ruta';
     if (!confirm(`¿Eliminar "${nombre}"? Esta acción no se puede deshacer.`)) return;
@@ -221,6 +234,10 @@ export class Rutas implements OnInit, OnDestroy {
   }
 
   abrirModal(): void {
+    if (!this.authService.isLoggedIn()) {
+      this.router.navigate(['/login'], { queryParams: { returnUrl: '/rutas' } });
+      return;
+    }
     this.mostrarModal.set(true);
     if (!this.mapa) {
       // Primera apertura: inicializar mapa vacío para que el canvas esté listo

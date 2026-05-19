@@ -1,6 +1,7 @@
 import { Component, inject, OnInit, OnDestroy, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { Subject, Subscription, debounceTime, switchMap } from 'rxjs';
 import { ViajeCompartidoService } from '../../core/services/viaje-compartido.service';
 import { ReservaService } from '../../core/services/reserva.service';
@@ -37,6 +38,7 @@ export class ViajesCompartidos implements OnInit, OnDestroy {
   private reservaService  = inject(ReservaService);
   private authService     = inject(AuthService);
   private favoritoService = inject(FavoritoService);
+  private router          = inject(Router);
 
   viajes       = signal<ViajeCompartido[]>([]);
   cargando     = signal(true);
@@ -74,7 +76,9 @@ export class ViajesCompartidos implements OnInit, OnDestroy {
     });
 
     this.filtros$.next(); // carga inicial
-    this.cargarFavoritos();
+    if (this.authService.isLoggedIn()) {
+      this.cargarFavoritos();
+    }
   }
 
   ngOnDestroy(): void {
@@ -109,6 +113,10 @@ export class ViajesCompartidos implements OnInit, OnDestroy {
   }
 
   toggleFavorito(viaje: ViajeCompartido): void {
+    if (!this.authService.isLoggedIn()) {
+      this.router.navigate(['/login'], { queryParams: { returnUrl: '/viajes-compartidos' } });
+      return;
+    }
     const userId = this.authService.currentUser()?.id;
     if (!userId || this.toggling() === viaje.route_id) return;
     this.toggling.set(viaje.route_id);
@@ -132,6 +140,10 @@ export class ViajesCompartidos implements OnInit, OnDestroy {
   }
 
   reservarViaje(viaje: ViajeCompartido): void {
+    if (!this.authService.isLoggedIn()) {
+      this.router.navigate(['/login'], { queryParams: { returnUrl: '/viajes-compartidos' } });
+      return;
+    }
     const userId = this.authService.currentUser()?.id;
     if (!userId) return;
     if (viaje.seats_available < 1) {

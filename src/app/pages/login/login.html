@@ -49,8 +49,10 @@
     </form>
 
     <p class="text-center mt-3 mb-0">
-      ¿No tienes cuenta? <a routerLink="/register" class="text-primary text-decoration-none fw-semibold">Regístrate
+      ¿No tienes cuenta? <a routerLink="/register" [queryParams]="returnUrl ? {returnUrl: returnUrl} : {}" class="text-primary text-decoration-none fw-semibold">Regístrate
         aquí</a>
     </p>
+
+
   </div>
 </div>
