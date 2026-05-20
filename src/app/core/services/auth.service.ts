@@ -39,8 +39,8 @@ export class AuthService {
     return this.http.post<AuthResponse>(`${this.apiUrl}/auth/registro`, data).pipe(
       tap((response) => {
         this.clearGuestMode();
-        if (response.access_token || response.access_token) {
-          this.saveToken(response.access_token || response.access_token);
+        if (response.access_token) {
+          this.saveToken(response.access_token);
         }
         if (response.user) {
           this.saveUser(response.user);
