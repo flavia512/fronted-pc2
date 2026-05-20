@@ -2,16 +2,15 @@ import { HttpInterceptorFn, HttpErrorResponse } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { catchError, throwError } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const router = inject(Router);
   const token = localStorage.getItem('token');
 
-  const isApiRequest =
-    req.url.includes('localhost:8000') ||
-    req.url.includes('127.0.0.1:8000');
+  const esLlamadaAlApi = req.url.startsWith(environment.apiUrl);
 
-  const authReq = token && isApiRequest
+  const peticionConToken = token && esLlamadaAlApi
     ? req.clone({
         setHeaders: {
           Authorization: `Bearer ${token}`
@@ -19,18 +18,17 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
       })
     : req;
 
-  return next(authReq).pipe(
-    catchError((err: HttpErrorResponse) => {
-      if (err.status === 401 && isApiRequest) {
+  return next(peticionConToken).pipe(
+    catchError((error: HttpErrorResponse) => {
+      if (error.status === 401 && esLlamadaAlApi) {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
 
         if (!router.url.includes('/login')) {
-          router.navigate(['/login'], { queryParams: { expired: '1' } });
+          router.navigate(['/login'], { queryParams: { expirado: '1' } });
         }
       }
-
-      return throwError(() => err);
+      return throwError(() => error);
     })
   );
 };
