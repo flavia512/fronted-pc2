@@ -22,9 +22,6 @@ export const routes: Routes = [
   { path: 'rutas', component: Rutas, canActivate: [authGuard], data: { allowGuest: true } },
   { path: 'reservas', component: Reservas, canActivate: [authGuard] },
   { path: 'viajes-compartidos', component: ViajesCompartidos, canActivate: [authGuard], data: { allowGuest: true } },
-  { path: 'rutas', component: Rutas },
-  { path: 'reservas', component: Reservas, canActivate: [authGuard] },
-  { path: 'viajes-compartidos', component: ViajesCompartidos },
   { path: 'alertas', component: Alertas, canActivate: [authGuard] },
   { path: 'favoritos', component: Favoritos, canActivate: [authGuard] },
   { path: '', redirectTo: 'home', pathMatch: 'full' }

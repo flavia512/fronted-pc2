@@ -256,6 +256,20 @@
     }
 }
 
+@media (max-width: 576px) {
+    .profile-container {
+        padding: 20px 12px;
+    }
+
+    .header-section h1 {
+        font-size: 22px;
+    }
+
+    .profile-card {
+        padding: 20px 16px;
+    }
+}
+
 .loading-state {
     text-align: center;
     padding: 40px;

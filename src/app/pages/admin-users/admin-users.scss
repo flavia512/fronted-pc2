@@ -294,3 +294,25 @@
   max-width: 100%;
   max-height: 400px;
 }
+
+@media (max-width: 576px) {
+  .admin-container {
+    padding: 1rem 0.75rem;
+  }
+
+  .admin-header h1 {
+    font-size: 1.4rem;
+  }
+
+  .controles {
+    flex-direction: column;
+
+    .busqueda {
+      min-width: unset;
+    }
+
+    .btn-recargar {
+      width: 100%;
+    }
+  }
+}
