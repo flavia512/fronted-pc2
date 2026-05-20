@@ -2,5 +2,9 @@
   "typescript.tsdk": "node_modules/typescript/lib",
   "typescript.tsserver.watchOptions": {
     "excludeDirectories": ["**/node_modules"]
+  },
+  "typescript.tsconfig.autoDetect": "off",
+  "search.exclude": {
+    "**/node_modules": true
   }
 }
