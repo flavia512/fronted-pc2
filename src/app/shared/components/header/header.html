@@ -25,9 +25,9 @@
         <a routerLink="/alertas" routerLinkActive="fw-semibold text-primary" class="text-secondary text-decoration-none small">Mis Alertas</a>
         <a routerLink="/favoritos" routerLinkActive="fw-semibold text-primary" class="text-secondary text-decoration-none small">Favoritos</a>
       } @else {
-        <button class="btn btn-link text-secondary text-decoration-none small p-0" (click)="pedirLogin()">Crear Viaje</button>
-        <button class="btn btn-link text-secondary text-decoration-none small p-0" (click)="pedirLogin()">Mis Reservas</button>
-        <button class="btn btn-link text-secondary text-decoration-none small p-0" (click)="pedirLogin()">Favoritos</button>
+        <a routerLink="/crear-viaje" routerLinkActive="fw-semibold text-primary" class="text-secondary text-decoration-none small">Crear Viaje</a>
+        <a routerLink="/reservas" routerLinkActive="fw-semibold text-primary" class="text-secondary text-decoration-none small">Mis Reservas</a>
+        <a routerLink="/favoritos" routerLinkActive="fw-semibold text-primary" class="text-secondary text-decoration-none small">Favoritos</a>
       }
 
       @if (isAdmin()) {
@@ -46,9 +46,9 @@
           <i class="bi bi-box-arrow-right"></i>
         </button>
       } @else {
-        <button class="btn btn-link text-secondary p-0" style="font-size:1.4rem;" (click)="pedirLogin()" title="Mi perfil">
+        <a routerLink="/profile" class="text-secondary" style="font-size:1.4rem;" title="Mi perfil">
           <i class="bi bi-person"></i>
-        </button>
+        </a>
         <span class="vr d-none d-md-block"></span>
         <button class="btn btn-outline-primary btn-sm rounded-pill px-3" (click)="irLogin()">Iniciar sesion</button>
       }
@@ -110,18 +110,21 @@
             <i class="bi bi-heart fs-5"></i> Favoritos
           </a>
         } @else {
-          <button class="btn btn-link text-secondary text-decoration-none py-2 px-3 rounded-3 d-flex align-items-center gap-3 text-start"
-                  style="font-size:.97rem;" (click)="pedirLogin()">
+          <a routerLink="/crear-viaje" routerLinkActive="text-primary fw-semibold"
+             class="text-secondary text-decoration-none py-2 px-3 rounded-3 d-flex align-items-center gap-3"
+             style="font-size:.97rem;" (click)="cerrarMenu()">
             <i class="bi bi-plus-circle fs-5"></i> Crear Viaje
-          </button>
-          <button class="btn btn-link text-secondary text-decoration-none py-2 px-3 rounded-3 d-flex align-items-center gap-3 text-start"
-                  style="font-size:.97rem;" (click)="pedirLogin()">
+          </a>
+          <a routerLink="/reservas" routerLinkActive="text-primary fw-semibold"
+             class="text-secondary text-decoration-none py-2 px-3 rounded-3 d-flex align-items-center gap-3"
+             style="font-size:.97rem;" (click)="cerrarMenu()">
             <i class="bi bi-ticket-perforated fs-5"></i> Mis Reservas
-          </button>
-          <button class="btn btn-link text-secondary text-decoration-none py-2 px-3 rounded-3 d-flex align-items-center gap-3 text-start"
-                  style="font-size:.97rem;" (click)="pedirLogin()">
+          </a>
+          <a routerLink="/favoritos" routerLinkActive="text-primary fw-semibold"
+             class="text-secondary text-decoration-none py-2 px-3 rounded-3 d-flex align-items-center gap-3"
+             style="font-size:.97rem;" (click)="cerrarMenu()">
             <i class="bi bi-heart fs-5"></i> Favoritos
-          </button>
+          </a>
         }
 
         @if (isAdmin()) {
@@ -144,10 +147,11 @@
             <i class="bi bi-box-arrow-right fs-5"></i> Cerrar Sesion
           </button>
         } @else {
-          <button class="btn btn-link text-secondary text-decoration-none py-2 px-3 rounded-3 d-flex align-items-center gap-3 text-start"
-                  style="font-size:.97rem;" (click)="pedirLogin()">
+          <a routerLink="/profile" routerLinkActive="text-primary fw-semibold"
+             class="text-secondary text-decoration-none py-2 px-3 rounded-3 d-flex align-items-center gap-3"
+             style="font-size:.97rem;" (click)="cerrarMenu()">
             <i class="bi bi-person fs-5"></i> Mi Perfil
-          </button>
+          </a>
           <button class="btn btn-link text-primary text-decoration-none py-2 px-3 rounded-3 d-flex align-items-center gap-3 text-start"
                   style="font-size:.97rem;" (click)="irLogin()">
             <i class="bi bi-box-arrow-in-right fs-5"></i> Iniciar sesion
