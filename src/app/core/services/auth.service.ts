@@ -51,6 +51,8 @@ export class AuthService {
   }
 
   logout(): void {
+    // Invalida token
+    this.http.post(`${this.apiUrl}/auth/logout`, {}).subscribe({ error: () => {} });
     localStorage.removeItem(this.tokenKey);
     localStorage.removeItem(this.userKey);
     localStorage.removeItem(this.guestKey);
