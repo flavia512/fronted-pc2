@@ -9,13 +9,14 @@ import { AuthService } from '../../../core/services/auth.service';
   templateUrl: './header.html',
 })
 export class Header {
-  private authService = inject(AuthService);
+  authService = inject(AuthService);
   private router = inject(Router);
 
   es_logeado = computed(() => !!this.authService.currentUser());
   puedeExplorar = computed(() => this.authService.canExplore());
   esInvitado = computed(() => this.authService.isGuest());
   isAdmin = computed(() => this.authService.getRolUsuario() === 'admin');
+  nombreUsuario = computed(() => this.authService.currentUser()?.full_name ?? '');
   menuAbierto = signal(false);
   aviso = signal('');
   private avisoTimeout: any;

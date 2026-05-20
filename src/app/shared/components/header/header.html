@@ -37,6 +37,7 @@
 
     <div class="d-flex align-items-center gap-2 gap-md-3">
       @if (es_logeado()) {
+        <span class="text-secondary small d-none d-md-inline">Hola, {{ nombreUsuario() }}</span>
         <a routerLink="/profile" class="text-secondary" style="font-size:1.4rem;" title="Mi perfil">
           <i class="bi bi-person"></i>
         </a>
