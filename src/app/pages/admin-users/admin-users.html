@@ -13,6 +13,27 @@
     <div class="mensaje mensaje-exito">{{ exito() }}</div>
   }
 
+  @if (estadisticas()) {
+    <div class="stats-cards">
+      <div class="stat-card">
+        <span class="stat-valor">{{ estadisticas()!.total }}</span>
+        <span class="stat-label">Total usuarios</span>
+      </div>
+      <div class="stat-card stat-admin">
+        <span class="stat-valor">{{ estadisticas()!.admins }}</span>
+        <span class="stat-label">Administradores</span>
+      </div>
+      <div class="stat-card stat-activo">
+        <span class="stat-valor">{{ estadisticas()!.activos }}</span>
+        <span class="stat-label">Activos</span>
+      </div>
+      <div class="stat-card stat-inactivo">
+        <span class="stat-valor">{{ estadisticas()!.total - estadisticas()!.activos }}</span>
+        <span class="stat-label">Inactivos</span>
+      </div>
+    </div>
+  }
+
   <div class="controles">
     <div class="busqueda">
       <input
@@ -31,6 +52,12 @@
       class="btn-recargar"
       [disabled]="cargando()">
       Recargar
+    </button>
+
+    <button
+      (click)="abrirModalCrear()"
+      class="btn-nuevo-usuario">
+      + Nuevo Usuario
     </button>
   </div>
 
@@ -78,6 +105,13 @@
               </td>
 
               <td class="acciones">
+
+                <button
+                  (click)="abrirModalEditar(usuario)"
+                  class="btn-accion btn-editar"
+                  title="Editar">
+                  ✏️
+                </button>
 
                 <button
                   (click)="toggleEstado(usuario)"
@@ -225,3 +259,90 @@
   </div>
 
 </div>
+
+<!-- ─── MODAL CREAR USUARIO ─────────────────────────────────────── -->
+@if (mostrarModalCrear()) {
+  <div class="modal-overlay" (click)="cerrarModalCrear()">
+    <div class="modal" (click)="$event.stopPropagation()">
+
+      <div class="modal-header">
+        <h2>Nuevo Usuario</h2>
+        <button class="btn-cerrar" (click)="cerrarModalCrear()">✕</button>
+      </div>
+
+      @if (error()) {
+        <div class="mensaje mensaje-error">{{ error() }}</div>
+      }
+
+      <div class="modal-body">
+        <label>Nombre completo *</label>
+        <input type="text" [(ngModel)]="formCrear.full_name" placeholder="Nombre completo" class="input-modal">
+
+        <label>Email *</label>
+        <input type="email" [(ngModel)]="formCrear.email" placeholder="correo@ejemplo.com" class="input-modal">
+
+        <label>Contraseña *</label>
+        <input type="password" [(ngModel)]="formCrear.password" placeholder="Mínimo 6 caracteres" class="input-modal">
+
+        <label>Rol</label>
+        <select [(ngModel)]="formCrear.rol" class="input-modal">
+          <option value="user">Usuario</option>
+          <option value="admin">Administrador</option>
+        </select>
+      </div>
+
+      <div class="modal-footer">
+        <button (click)="cerrarModalCrear()" class="btn-cancelar">Cancelar</button>
+        <button (click)="crearUsuario()" class="btn-guardar" [disabled]="guardandoCrear()">
+          {{ guardandoCrear() ? 'Creando...' : 'Crear Usuario' }}
+        </button>
+      </div>
+
+    </div>
+  </div>
+}
+
+<!-- ─── MODAL EDITAR USUARIO ─────────────────────────────────────── -->
+@if (mostrarModalEditar()) {
+  <div class="modal-overlay" (click)="cerrarModalEditar()">
+    <div class="modal" (click)="$event.stopPropagation()">
+
+      <div class="modal-header">
+        <h2>Editar Usuario</h2>
+        <button class="btn-cerrar" (click)="cerrarModalEditar()">✕</button>
+      </div>
+
+      @if (error()) {
+        <div class="mensaje mensaje-error">{{ error() }}</div>
+      }
+
+      <div class="modal-body">
+        <label>Nombre completo</label>
+        <input type="text" [(ngModel)]="formEditar.full_name" class="input-modal">
+
+        <label>Email</label>
+        <input type="email" [(ngModel)]="formEditar.email" class="input-modal">
+
+        <label>Rol</label>
+        <select [(ngModel)]="formEditar.rol" class="input-modal">
+          <option value="user">Usuario</option>
+          <option value="admin">Administrador</option>
+        </select>
+
+        <label>Estado</label>
+        <select [(ngModel)]="formEditar.is_active" class="input-modal">
+          <option [ngValue]="true">Activo</option>
+          <option [ngValue]="false">Inactivo</option>
+        </select>
+      </div>
+
+      <div class="modal-footer">
+        <button (click)="cerrarModalEditar()" class="btn-cancelar">Cancelar</button>
+        <button (click)="guardarEdicion()" class="btn-guardar" [disabled]="guardandoEditar()">
+          {{ guardandoEditar() ? 'Guardando...' : 'Guardar Cambios' }}
+        </button>
+      </div>
+
+    </div>
+  </div>
+}

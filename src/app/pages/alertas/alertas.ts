@@ -110,6 +110,16 @@ export class Alertas implements OnInit {
     this.error.set('');
     const forDatetime = this.fechaAlerta() + ' ' + this.horaAlerta() + ':00';
     const pred = this.prediccion();
+
+    // Guardar predicción en Laravel si existe (fire-and-forget, no bloquea la alerta)
+    if (pred) {
+      this.alertaService.guardarPrediccion({
+        route_id:    routeId,
+        resultado:   JSON.stringify(pred),
+        ml_model_id: 'fastapi-v1'
+      }).subscribe({ error: () => {} });
+    }
+
     this.alertaService.crearAlerta({ route_id: routeId, for_datetime: forDatetime }).subscribe({
       next: (res) => {
         const nueva: AlertaEnriquecida = {

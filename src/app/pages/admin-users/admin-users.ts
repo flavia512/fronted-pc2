@@ -32,15 +32,40 @@ export class AdminUsers implements OnInit {
 
   rutaSeleccionadaId: number | null = null;
 
+  // ESTADÍSTICAS (backend)
+  estadisticas = signal<{ total: number; admins: number; activos: number } | null>(null);
+
   // UI STATE
   cargando = signal(false);
   error = signal('');
   exito = signal('');
 
+  // MODAL CREAR
+  mostrarModalCrear = signal(false);
+  formCrear = { full_name: '', email: '', password: '', rol: 'user' };
+  guardandoCrear = signal(false);
+
+  // MODAL EDITAR
+  mostrarModalEditar = signal(false);
+  usuarioEditando = signal<User | null>(null);
+  formEditar: { full_name: string; email: string; rol: string; is_active: boolean } = { full_name: '', email: '', rol: 'user', is_active: true };
+  guardandoEditar = signal(false);
+
   ngOnInit(): void {
     this.cargarUsuarios();
+    this.cargarEstadisticas();
   }
 
+
+  cargarEstadisticas(): void {
+    this.userService.getEstadisticas().subscribe({
+      next: (stats) => {
+        this.estadisticas.set(stats);
+        if (this.usuarios().length > 0) this.crearGraficos();
+      },
+      error: () => {} // no bloquea la UI
+    });
+  }
 
   cargarUsuarios(): void {
     this.cargando.set(true);
@@ -60,10 +85,11 @@ export class AdminUsers implements OnInit {
   crearGraficos(): void {
 
     const usuarios = this.usuarios();
+    const stats    = this.estadisticas();
 
- //grafico
-    const admins = usuarios.filter(u => u.rol === 'admin').length;
-    const normales = usuarios.filter(u => u.rol !== 'admin').length;
+    // Usar datos del backend si disponibles, sino calcular localmente
+    const admins   = stats?.admins   ?? usuarios.filter(u => u.rol === 'admin').length;
+    const normales = stats ? stats.total - stats.admins : usuarios.filter(u => u.rol !== 'admin').length;
 
     if (this.chartRoles) {
       this.chartRoles.destroy();
@@ -86,8 +112,8 @@ export class AdminUsers implements OnInit {
     });
 
 //grafico
-    const activos = usuarios.filter(u => u.is_active).length;
-    const inactivos = usuarios.filter(u => !u.is_active).length;
+    const activos   = stats?.activos ?? usuarios.filter(u => u.is_active).length;
+    const inactivos  = stats ? stats.total - stats.activos : usuarios.filter(u => !u.is_active).length;
 
     if (this.chartEstados) {
       this.chartEstados.destroy();
@@ -159,6 +185,7 @@ export class AdminUsers implements OnInit {
       next: () => {
         usuario.is_active = nuevoEstado;
         this.exito.set('Estado actualizado correctamente');
+        this.cargarEstadisticas();
       },
       error: () => {
         this.error.set('Error actualizando usuario');
@@ -174,8 +201,8 @@ export class AdminUsers implements OnInit {
         this.usuarios.update(list =>
           list.filter(u => u.id !== usuario.id)
         );
-
         this.exito.set('Usuario eliminado correctamente');
+        this.cargarEstadisticas();
       },
       error: () => {
         this.error.set('Error eliminando usuario');
@@ -205,6 +232,80 @@ export class AdminUsers implements OnInit {
       }
     });
   }
+  // ── CREAR USUARIO ─────────────────────────────────────────────────────────
+  abrirModalCrear(): void {
+    this.formCrear = { full_name: '', email: '', password: '', rol: 'user' };
+    this.error.set('');
+    this.exito.set('');
+    this.mostrarModalCrear.set(true);
+  }
+
+  cerrarModalCrear(): void {
+    this.mostrarModalCrear.set(false);
+  }
+
+  crearUsuario(): void {
+    if (!this.formCrear.full_name.trim() || !this.formCrear.email.trim() || !this.formCrear.password.trim()) {
+      this.error.set('Rellena todos los campos obligatorios');
+      return;
+    }
+    this.guardandoCrear.set(true);
+    this.error.set('');
+    this.userService.crearUsuario(this.formCrear).subscribe({
+      next: (nuevo) => {
+        this.usuarios.update(list => [...list, nuevo]);
+        this.cargarEstadisticas();
+        this.exito.set(`Usuario ${nuevo.full_name} creado correctamente`);
+        this.mostrarModalCrear.set(false);
+        this.guardandoCrear.set(false);
+      },
+      error: () => {
+        this.error.set('Error creando usuario. El email puede estar en uso.');
+        this.guardandoCrear.set(false);
+      }
+    });
+  }
+
+  // ── EDITAR USUARIO ─────────────────────────────────────────────────────────
+  abrirModalEditar(usuario: User): void {
+    this.usuarioEditando.set(usuario);
+    this.formEditar = {
+      full_name: usuario.full_name,
+      email: usuario.email,
+      rol: usuario.rol,
+      is_active: usuario.is_active
+    };
+    this.error.set('');
+    this.exito.set('');
+    this.mostrarModalEditar.set(true);
+  }
+
+  cerrarModalEditar(): void {
+    this.mostrarModalEditar.set(false);
+    this.usuarioEditando.set(null);
+  }
+
+  guardarEdicion(): void {
+    const usuario = this.usuarioEditando();
+    if (!usuario) return;
+    this.guardandoEditar.set(true);
+    this.error.set('');
+    this.userService.updateUser(usuario.id, this.formEditar).subscribe({
+      next: (actualizado) => {
+        this.usuarios.update(list => list.map(u => u.id === actualizado.id ? actualizado : u));
+        this.cargarEstadisticas();
+        this.exito.set('Usuario actualizado correctamente');
+        this.mostrarModalEditar.set(false);
+        this.usuarioEditando.set(null);
+        this.guardandoEditar.set(false);
+      },
+      error: () => {
+        this.error.set('Error actualizando usuario');
+        this.guardandoEditar.set(false);
+      }
+    });
+  }
+
   oscuro(): void {
     document.body.classList.add('dark-theme');
   }

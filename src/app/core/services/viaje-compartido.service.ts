@@ -78,25 +78,18 @@ export class ViajeCompartidoService {
   }
 
   /**
-   * buscarViajes: filtra client-side sobre listarViajes()
+   * GET /viajes/buscar — filtra en el servidor por origin, destiny y fecha
+   * Usado en: viajes-compartidos.ts, favoritos.ts
    */
   buscarViajes(filtros: { origin?: string; destiny?: string; fecha?: string }): Observable<{ success: boolean; data: ViajeCompartido[] }> {
-    return this.listarViajes().pipe(
-      map(res => {
-        const origin = filtros.origin?.trim().toLowerCase();
-        const destiny = filtros.destiny?.trim().toLowerCase();
-        const fecha = filtros.fecha;
+    let params: Record<string, string> = {};
+    if (filtros.origin?.trim())  params['origin']  = filtros.origin.trim();
+    if (filtros.destiny?.trim()) params['destiny'] = filtros.destiny.trim();
+    if (filtros.fecha)           params['fecha']   = filtros.fecha;
 
-        const data = res.data.filter(viaje => {
-          const coincideOrigen = !origin || (viaje.origin ?? '').toLowerCase().includes(origin);
-          const coincideDestino = !destiny || (viaje.destiny ?? '').toLowerCase().includes(destiny);
-          const coincideFecha = !fecha || viaje.trip_datetime?.startsWith(fecha);
-
-          return coincideOrigen && coincideDestino && coincideFecha;
-        });
-
-        return { ...res, data };
-      })
-    );
+    return this.http.get<{ exito: boolean; datos: ViajeCompartido[] }>(
+      `${this.apiUrl}/viajes/buscar`,
+      { params }
+    ).pipe(map(res => ({ success: res.exito, data: res.datos ?? [] })));
   }
 }

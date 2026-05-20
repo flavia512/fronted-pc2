@@ -42,4 +42,9 @@ export class AlertaService {
     const params = new HttpParams().set('fecha', fecha).set('hora', hora);
     return this.http.get<any>('http://localhost:8001/predict', { params });
   }
+
+  // POST /predicciones — Usado en: alertas.ts (crearAlerta, fire-and-forget)
+  guardarPrediccion(data: { route_id: number; resultado: string; ml_model_id?: string }): Observable<any> {
+    return this.http.post(`${this.apiUrl}/predicciones`, data);
+  }
 }
