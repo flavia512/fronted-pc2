@@ -96,12 +96,7 @@ export class ViajesCompartidos implements OnInit, OnDestroy {
       }
     });
 
-<<<<<<< HEAD
-    this.filtros$.next();
-
-=======
     this.filtros$.next(); // carga inicial
->>>>>>> 217a6f310f99b2ffa12e3ff5d74683b842555c9f
     if (this.authService.isLoggedIn()) {
       this.cargarFavoritos();
     }
@@ -146,7 +141,6 @@ export class ViajesCompartidos implements OnInit, OnDestroy {
     return this.favoritosIds().has(routeId);
   }
 
-<<<<<<< HEAD
   nombreConductor(viaje: ViajeCompartido): string {
     return viaje.conductor?.full_name || viaje.conductor?.name || viaje.conductor?.email || 'Conductor';
   }
@@ -156,13 +150,6 @@ export class ViajesCompartidos implements OnInit, OnDestroy {
   }
 
   yaReservado(viaje: ViajeCompartido): boolean {
-=======
-  toggleFavorito(viaje: ViajeCompartido): void {
-    if (!this.authService.isLoggedIn()) {
-      this.router.navigate(['/login'], { queryParams: { returnUrl: '/viajes-compartidos' } });
-      return;
-    }
->>>>>>> 217a6f310f99b2ffa12e3ff5d74683b842555c9f
     const userId = this.authService.currentUser()?.id;
     return !!userId && !!viaje.reservas?.some(reserva => reserva.user_id === userId);
   }
@@ -173,7 +160,7 @@ export class ViajesCompartidos implements OnInit, OnDestroy {
 
   toggleFavorito(viaje: ViajeCompartido): void {
     if (!this.authService.isLoggedIn()) {
-      this.mostrarToast('error', 'Debes iniciar sesión para guardar favoritos.');
+      this.router.navigate(['/login'], { queryParams: { returnUrl: '/viajes-compartidos' } });
       return;
     }
 
@@ -218,16 +205,9 @@ export class ViajesCompartidos implements OnInit, OnDestroy {
 
   reservarViaje(viaje: ViajeCompartido): void {
     if (!this.authService.isLoggedIn()) {
-<<<<<<< HEAD
-      this.mostrarToast('error', 'Debes iniciar sesión para reservar viajes.');
-      return;
-    }
-
-=======
       this.router.navigate(['/login'], { queryParams: { returnUrl: '/viajes-compartidos' } });
       return;
     }
->>>>>>> 217a6f310f99b2ffa12e3ff5d74683b842555c9f
     const userId = this.authService.currentUser()?.id;
 
     if (!userId) {

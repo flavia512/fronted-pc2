@@ -1,18 +1,9 @@
 <nav class="navbar bg-white border-bottom px-3 px-md-4" style="min-height:64px;">
 
-<<<<<<< HEAD
-  @if (puedeExplorar()) {
-    <!-- Hamburguesa izquierda (solo móvil) -->
-    <button class="btn btn-link text-secondary p-0 me-3 d-md-none" (click)="toggleMenu()" aria-label="Menú">
-      <i class="bi bi-list" style="font-size:1.7rem;"></i>
-    </button>
-  }
-=======
   <!-- Hamburguesa izquierda (solo móvil) -->
   <button class="btn btn-link text-secondary p-0 me-3 d-md-none" (click)="toggleMenu()" aria-label="Menú">
     <i class="bi bi-list" style="font-size:1.7rem;"></i>
   </button>
->>>>>>> 217a6f310f99b2ffa12e3ff5d74683b842555c9f
 
   <!-- Logo -->
   <a routerLink="/" class="navbar-brand d-flex align-items-center gap-2 text-decoration-none" (click)="cerrarMenu()">
@@ -22,13 +13,10 @@
     <span class="fw-bold fs-5 text-primary">VoyContigo</span>
   </a>
 
-<<<<<<< HEAD
-  @if (puedeExplorar()) {
-=======
-  <!-- Enlace público siempre visible -->
-  <a routerLink="/viajes-disponibles" routerLinkActive="fw-semibold text-primary"
+  <!-- Links públicos siempre visibles (desktop) -->
+  <a routerLink="/rutas" routerLinkActive="fw-semibold text-primary"
      class="text-secondary text-decoration-none small d-none d-md-inline ms-4">
-    Viajes Disponibles
+    Rutas
   </a>
   <a routerLink="/viajes-compartidos" routerLinkActive="fw-semibold text-primary"
      class="text-secondary text-decoration-none small d-none d-md-inline ms-4 me-auto">
@@ -36,169 +24,17 @@
   </a>
 
   @if (es_logeado()) {
->>>>>>> 217a6f310f99b2ffa12e3ff5d74683b842555c9f
     <!-- Nav escritorio (md+) -->
     <div class="d-none d-md-flex align-items-center gap-4 me-4">
-      <a routerLink="/viajes-compartidos" routerLinkActive="fw-semibold text-primary" class="text-secondary text-decoration-none small">Viajes</a>
-      <a routerLink="/rutas" routerLinkActive="fw-semibold text-primary" class="text-secondary text-decoration-none small">{{ esInvitado() ? 'Rutas' : 'Mis Rutas' }}</a>
-      @if (es_logeado()) {
-        <a routerLink="/crear-viaje" routerLinkActive="fw-semibold text-primary" class="text-secondary text-decoration-none small">Crear Viaje</a>
-        <a routerLink="/reservas" routerLinkActive="fw-semibold text-primary" class="text-secondary text-decoration-none small">Mis Reservas</a>
-        <a routerLink="/alertas" routerLinkActive="fw-semibold text-primary" class="text-secondary text-decoration-none small">Mis Alertas</a>
-        <a routerLink="/favoritos" routerLinkActive="fw-semibold text-primary" class="text-secondary text-decoration-none small">Favoritos</a>
-      } @else {
-        <button class="btn btn-link text-secondary text-decoration-none small p-0" (click)="pedirLogin()">Crear Viaje</button>
-        <button class="btn btn-link text-secondary text-decoration-none small p-0" (click)="pedirLogin()">Mis Reservas</button>
-        <button class="btn btn-link text-secondary text-decoration-none small p-0" (click)="pedirLogin()">Favoritos</button>
-      }
+      <a routerLink="/crear-viaje" routerLinkActive="fw-semibold text-primary" class="text-secondary text-decoration-none small">Crear Viaje</a>
+      <a routerLink="/reservas" routerLinkActive="fw-semibold text-primary" class="text-secondary text-decoration-none small">Mis Reservas</a>
+      <a routerLink="/alertas" routerLinkActive="fw-semibold text-primary" class="text-secondary text-decoration-none small">Mis Alertas</a>
+      <a routerLink="/favoritos" routerLinkActive="fw-semibold text-primary" class="text-secondary text-decoration-none small">Favoritos</a>
       @if (isAdmin()) {
         <a routerLink="/admin-users" routerLinkActive="fw-semibold text-primary" class="text-secondary text-decoration-none small">Admin Users</a>
       }
     </div>
 
-<<<<<<< HEAD
-    <!-- Perfil + logout (siempre visibles) -->
-    <div class="d-flex align-items-center gap-2 gap-md-3">
-      @if (es_logeado()) {
-        <a routerLink="/profile" class="text-secondary" style="font-size:1.4rem;">
-          <i class="bi bi-person"></i>
-        </a>
-      } @else {
-        <button class="btn btn-link text-secondary p-0" style="font-size:1.4rem;" (click)="pedirLogin()" title="Mi perfil">
-          <i class="bi bi-person"></i>
-        </button>
-      }
-      <span class="vr d-none d-md-block"></span>
-      @if (es_logeado()) {
-        <button class="btn btn-link text-secondary p-0" (click)="logout()" routerLink="/login" style="font-size:1.4rem;">
-          <i class="bi bi-box-arrow-right"></i>
-        </button>
-      } @else {
-        <button class="btn btn-outline-primary btn-sm rounded-pill px-3" (click)="irLogin()">Iniciar sesión</button>
-      }
-    </div>
-
-    @if (aviso()) {
-      <div class="position-fixed top-0 end-0 p-3" style="z-index:1090;">
-        <div class="alert alert-warning shadow-sm mb-0 py-2 small">{{ aviso() }}</div>
-      </div>
-    }
-
-    <!-- OVERLAY (fondo oscuro al abrir sidebar) -->
-    @if (menuAbierto()) {
-      <div class="position-fixed top-0 start-0 w-100 h-100 d-md-none"
-           style="background:rgba(0,0,0,.4);z-index:1040;"
-           (click)="cerrarMenu()"></div>
-    }
-
-=======
->>>>>>> 217a6f310f99b2ffa12e3ff5d74683b842555c9f
-    <!-- SIDEBAR -->
-    <div class="position-fixed top-0 start-0 h-100 bg-white shadow d-md-none"
-         style="width:270px;z-index:1050;transition:transform .25s ease;"
-         [style.transform]="menuAbierto() ? 'translateX(0)' : 'translateX(-100%)'">
-
-      <!-- Cabecera sidebar -->
-      <div class="d-flex align-items-center justify-content-between px-3 py-3 border-bottom">
-        <span class="fw-bold fs-5 text-primary">Menú</span>
-        <button class="btn btn-link text-secondary p-0" (click)="cerrarMenu()">
-          <i class="bi bi-x-lg" style="font-size:1.3rem;"></i>
-        </button>
-      </div>
-
-      <!-- Links -->
-      <div class="p-3 d-flex flex-column gap-1">
-        <a routerLink="/viajes-compartidos" routerLinkActive="text-primary fw-semibold"
-           class="text-secondary text-decoration-none py-2 px-3 rounded-3 d-flex align-items-center gap-3"
-           style="font-size:.97rem;" (click)="cerrarMenu()">
-          <i class="bi bi-car-front fs-5"></i> Viajes
-        </a>
-        @if (es_logeado()) {
-          <a routerLink="/crear-viaje" routerLinkActive="text-primary fw-semibold"
-             class="text-secondary text-decoration-none py-2 px-3 rounded-3 d-flex align-items-center gap-3"
-             style="font-size:.97rem;" (click)="cerrarMenu()">
-            <i class="bi bi-plus-circle fs-5"></i> Crear Viaje
-          </a>
-        } @else {
-          <button class="btn btn-link text-secondary text-decoration-none py-2 px-3 rounded-3 d-flex align-items-center gap-3 text-start"
-                  style="font-size:.97rem;" (click)="pedirLogin()">
-            <i class="bi bi-plus-circle fs-5"></i> Crear Viaje
-          </button>
-        }
-        <a routerLink="/rutas" routerLinkActive="text-primary fw-semibold"
-           class="text-secondary text-decoration-none py-2 px-3 rounded-3 d-flex align-items-center gap-3"
-           style="font-size:.97rem;" (click)="cerrarMenu()">
-          <i class="bi bi-signpost-2 fs-5"></i> {{ esInvitado() ? 'Rutas' : 'Mis Rutas' }}
-        </a>
-<<<<<<< HEAD
-        @if (es_logeado()) {
-          <a routerLink="/reservas" routerLinkActive="text-primary fw-semibold"
-             class="text-secondary text-decoration-none py-2 px-3 rounded-3 d-flex align-items-center gap-3"
-             style="font-size:.97rem;" (click)="cerrarMenu()">
-            <i class="bi bi-ticket-perforated fs-5"></i> Mis Reservas
-          </a>
-          <a routerLink="/alertas" routerLinkActive="text-primary fw-semibold"
-             class="text-secondary text-decoration-none py-2 px-3 rounded-3 d-flex align-items-center gap-3"
-             style="font-size:.97rem;" (click)="cerrarMenu()">
-            <i class="bi bi-bell fs-5"></i> Mis Alertas
-          </a>
-          <a routerLink="/favoritos" routerLinkActive="text-primary fw-semibold"
-             class="text-secondary text-decoration-none py-2 px-3 rounded-3 d-flex align-items-center gap-3"
-             style="font-size:.97rem;" (click)="cerrarMenu()">
-            <i class="bi bi-heart fs-5"></i> Favoritos
-          </a>
-        } @else {
-          <button class="btn btn-link text-secondary text-decoration-none py-2 px-3 rounded-3 d-flex align-items-center gap-3 text-start"
-                  style="font-size:.97rem;" (click)="pedirLogin()">
-            <i class="bi bi-ticket-perforated fs-5"></i> Mis Reservas
-          </button>
-          <button class="btn btn-link text-secondary text-decoration-none py-2 px-3 rounded-3 d-flex align-items-center gap-3 text-start"
-                  style="font-size:.97rem;" (click)="pedirLogin()">
-            <i class="bi bi-heart fs-5"></i> Favoritos
-          </button>
-        }
-=======
-        <a routerLink="/viajes-disponibles" routerLinkActive="text-primary fw-semibold"
-           class="text-secondary text-decoration-none py-2 px-3 rounded-3 d-flex align-items-center gap-3"
-           style="font-size:.97rem;" (click)="cerrarMenu()">
-          <i class="bi bi-car-front fs-5"></i> Viajes Disponibles
-        </a>
->>>>>>> 217a6f310f99b2ffa12e3ff5d74683b842555c9f
-        @if (isAdmin()) {
-          <a routerLink="/admin-users" routerLinkActive="text-primary fw-semibold"
-             class="text-secondary text-decoration-none py-2 px-3 rounded-3 d-flex align-items-center gap-3"
-             style="font-size:.97rem;" (click)="cerrarMenu()">
-            <i class="bi bi-shield-check fs-5"></i> Admin Users
-          </a>
-        }
-
-        <hr class="my-2">
-
-        @if (es_logeado()) {
-          <a routerLink="/profile" class="text-secondary text-decoration-none py-2 px-3 rounded-3 d-flex align-items-center gap-3"
-             style="font-size:.97rem;" (click)="cerrarMenu()">
-            <i class="bi bi-person fs-5"></i> Mi Perfil
-          </a>
-          <button class="btn btn-link text-danger text-decoration-none py-2 px-3 rounded-3 d-flex align-items-center gap-3 text-start"
-                  style="font-size:.97rem;" (click)="logout()" routerLink="/login">
-            <i class="bi bi-box-arrow-right fs-5"></i> Cerrar Sesión
-          </button>
-        } @else {
-          <button class="btn btn-link text-secondary text-decoration-none py-2 px-3 rounded-3 d-flex align-items-center gap-3 text-start"
-                  style="font-size:.97rem;" (click)="pedirLogin()">
-            <i class="bi bi-person fs-5"></i> Mi Perfil
-          </button>
-          <button class="btn btn-link text-primary text-decoration-none py-2 px-3 rounded-3 d-flex align-items-center gap-3 text-start"
-                  style="font-size:.97rem;" (click)="irLogin()">
-            <i class="bi bi-box-arrow-in-right fs-5"></i> Iniciar sesión
-          </button>
-        }
-      </div>
-    </div>
-
-<<<<<<< HEAD
-</nav>
-=======
     <!-- Overlay móvil -->
     @if (menuAbierto()) {
       <div class="position-fixed top-0 start-0 w-100 h-100 d-md-none"
@@ -215,7 +51,73 @@
         <i class="bi bi-box-arrow-right" style="font-size:1.4rem;"></i>
       </button>
     </div>
+
+    <!-- SIDEBAR móvil (logueado) -->
+    <div class="position-fixed top-0 start-0 h-100 bg-white shadow d-md-none"
+         style="width:270px;z-index:1050;transition:transform .25s ease;"
+         [style.transform]="menuAbierto() ? 'translateX(0)' : 'translateX(-100%)'">
+
+      <div class="d-flex align-items-center justify-content-between px-3 py-3 border-bottom">
+        <span class="fw-bold fs-5 text-primary">Menú</span>
+        <button class="btn btn-link text-secondary p-0" (click)="cerrarMenu()">
+          <i class="bi bi-x-lg" style="font-size:1.3rem;"></i>
+        </button>
+      </div>
+
+      <div class="p-3 d-flex flex-column gap-1">
+        <a routerLink="/rutas" routerLinkActive="text-primary fw-semibold"
+           class="text-secondary text-decoration-none py-2 px-3 rounded-3 d-flex align-items-center gap-3"
+           style="font-size:.97rem;" (click)="cerrarMenu()">
+          <i class="bi bi-signpost-2 fs-5"></i> Mis Rutas
+        </a>
+        <a routerLink="/viajes-compartidos" routerLinkActive="text-primary fw-semibold"
+           class="text-secondary text-decoration-none py-2 px-3 rounded-3 d-flex align-items-center gap-3"
+           style="font-size:.97rem;" (click)="cerrarMenu()">
+          <i class="bi bi-car-front fs-5"></i> Viajes
+        </a>
+        <a routerLink="/crear-viaje" routerLinkActive="text-primary fw-semibold"
+           class="text-secondary text-decoration-none py-2 px-3 rounded-3 d-flex align-items-center gap-3"
+           style="font-size:.97rem;" (click)="cerrarMenu()">
+          <i class="bi bi-plus-circle fs-5"></i> Crear Viaje
+        </a>
+        <a routerLink="/reservas" routerLinkActive="text-primary fw-semibold"
+           class="text-secondary text-decoration-none py-2 px-3 rounded-3 d-flex align-items-center gap-3"
+           style="font-size:.97rem;" (click)="cerrarMenu()">
+          <i class="bi bi-ticket-perforated fs-5"></i> Mis Reservas
+        </a>
+        <a routerLink="/alertas" routerLinkActive="text-primary fw-semibold"
+           class="text-secondary text-decoration-none py-2 px-3 rounded-3 d-flex align-items-center gap-3"
+           style="font-size:.97rem;" (click)="cerrarMenu()">
+          <i class="bi bi-bell fs-5"></i> Mis Alertas
+        </a>
+        <a routerLink="/favoritos" routerLinkActive="text-primary fw-semibold"
+           class="text-secondary text-decoration-none py-2 px-3 rounded-3 d-flex align-items-center gap-3"
+           style="font-size:.97rem;" (click)="cerrarMenu()">
+          <i class="bi bi-heart fs-5"></i> Favoritos
+        </a>
+        @if (isAdmin()) {
+          <a routerLink="/admin-users" routerLinkActive="text-primary fw-semibold"
+             class="text-secondary text-decoration-none py-2 px-3 rounded-3 d-flex align-items-center gap-3"
+             style="font-size:.97rem;" (click)="cerrarMenu()">
+            <i class="bi bi-shield-check fs-5"></i> Admin Users
+          </a>
+        }
+
+        <hr class="my-2">
+
+        <a routerLink="/profile" class="text-secondary text-decoration-none py-2 px-3 rounded-3 d-flex align-items-center gap-3"
+           style="font-size:.97rem;" (click)="cerrarMenu()">
+          <i class="bi bi-person fs-5"></i> Mi Perfil
+        </a>
+        <button class="btn btn-link text-danger text-decoration-none py-2 px-3 rounded-3 d-flex align-items-center gap-3 text-start"
+                style="font-size:.97rem;" (click)="logout()" routerLink="/login">
+          <i class="bi bi-box-arrow-right fs-5"></i> Cerrar Sesión
+        </button>
+      </div>
+    </div>
+
   } @else {
+
     <!-- SIDEBAR móvil (no logueado) -->
     <div class="position-fixed top-0 start-0 h-100 bg-white shadow d-md-none"
          style="width:270px;z-index:1050;transition:transform .25s ease;"
@@ -227,10 +129,10 @@
         </button>
       </div>
       <div class="p-3 d-flex flex-column gap-1">
-        <a routerLink="/viajes-disponibles" routerLinkActive="text-primary fw-semibold"
+        <a routerLink="/rutas" routerLinkActive="text-primary fw-semibold"
            class="text-secondary text-decoration-none py-2 px-3 rounded-3 d-flex align-items-center gap-3"
            style="font-size:.97rem;" (click)="cerrarMenu()">
-          <i class="bi bi-search fs-5"></i> Viajes Disponibles
+          <i class="bi bi-signpost-2 fs-5"></i> Rutas
         </a>
         <a routerLink="/viajes-compartidos" routerLinkActive="text-primary fw-semibold"
            class="text-secondary text-decoration-none py-2 px-3 rounded-3 d-flex align-items-center gap-3"
@@ -261,6 +163,6 @@
       <a routerLink="/login" class="btn btn-outline-primary btn-sm px-3">Iniciar sesión</a>
       <a routerLink="/register" class="btn btn-primary btn-sm px-3">Registrarse</a>
     </div>
+
   }
 </nav>
->>>>>>> 217a6f310f99b2ffa12e3ff5d74683b842555c9f

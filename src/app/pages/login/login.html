@@ -9,93 +9,44 @@
   </div>
 
   @if (infoMessage()) {
-    <div class="alert alert-info py-2 small mb-3" style="max-width: 860px; width: 100%;">
+    <div class="alert alert-info py-2 small mb-3" style="max-width: 480px; width: 100%;">
       {{ infoMessage() }}
     </div>
   }
 
-  <div class="row g-3 justify-content-center align-items-stretch" style="max-width: 860px; width: 100%;">
-    <div class="col-12 col-md-6">
-      <div class="card shadow-sm p-4 h-100">
-        <form [formGroup]="form" (ngSubmit)="onSubmit()">
-          <div class="mb-3">
-            <label class="form-label">Correo Electrónico</label>
-            <div class="input-group">
-              <span class="input-group-text bg-light"><i class="bi bi-envelope"></i></span>
-              <input type="email" class="form-control"
-                [class.is-invalid]="form.get('email')?.invalid && form.get('email')?.touched" formControlName="email"
-                placeholder="tu@email.com">
-            </div>
-            @if (form.get('email')?.touched && form.get('email')?.hasError('required')) {
-              <div class="text-danger small mt-1">El correo es obligatorio</div>
-            }
-            @if (form.get('email')?.touched && form.get('email')?.hasError('email')) {
-              <div class="text-danger small mt-1">Ingresa un correo válido</div>
-            }
-          </div>
-
-          <div class="mb-3">
-            <label class="form-label">Contraseña</label>
-            <div class="input-group">
-              <span class="input-group-text bg-light"><i class="bi bi-lock"></i></span>
-              <input type="password" class="form-control"
-                [class.is-invalid]="form.get('password')?.invalid && form.get('password')?.touched"
-                formControlName="password" placeholder="••••••••">
-            </div>
-            @if (form.get('password')?.touched && form.get('password')?.hasError('required')) {
-              <div class="text-danger small mt-1">La contraseña es obligatoria</div>
-            }
-          </div>
-
-          @if (errorMessage()) {
-            <div class="alert alert-danger py-2 small mb-2">{{ errorMessage() }}</div>
-          }
-
-          <button type="submit" class="btn btn-primary w-100" [disabled]="loading()">
-            {{ loading() ? 'Ingresando...' : 'Iniciar Sesión' }}
-          </button>
-        </form>
-
-        <p class="text-center mt-3 mb-0">
-          ¿No tienes cuenta?
-          <a routerLink="/register" class="text-primary text-decoration-none fw-semibold">Regístrate aquí</a>
-        </p>
-      </div>
-    </div>
-
-    <div class="col-12 col-md-6">
-      <div class="card shadow-sm p-4 h-100 border-primary border-opacity-25">
-        <div class="d-flex align-items-center gap-3 mb-3">
-          <span class="d-flex align-items-center justify-content-center rounded-circle bg-primary bg-opacity-10 text-primary"
-            style="width:48px;height:48px;">
-            <i class="bi bi-compass fs-4"></i>
-          </span>
-          <div>
-            <h2 class="h5 fw-bold mb-1">Entrar como invitado</h2>
-            <p class="text-secondary small mb-0">Explora VoyContigo sin crear una cuenta.</p>
-          </div>
+  <div class="card shadow-sm p-4" style="max-width: 480px; width: 100%;">
+    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+      <div class="mb-3">
+        <label class="form-label">Correo Electrónico</label>
+        <div class="input-group">
+          <span class="input-group-text bg-light"><i class="bi bi-envelope"></i></span>
+          <input type="email" class="form-control"
+            [class.is-invalid]="form.get('email')?.invalid && form.get('email')?.touched"
+            formControlName="email" placeholder="tu@email.com">
         </div>
-
-        <p class="text-secondary mb-3">
-          Podrás ver viajes compartidos, buscar rutas, aplicar filtros y navegar por la app. Las acciones personales se activan al iniciar sesión.
-        </p>
-
-        <div class="d-flex flex-column gap-2 small text-secondary mb-4">
-          <div><i class="bi bi-check-circle text-success me-2"></i>Ver viajes compartidos y rutas disponibles</div>
-          <div><i class="bi bi-check-circle text-success me-2"></i>Buscar por origen, destino y fecha</div>
-          <div><i class="bi bi-lock text-warning me-2"></i>Reservar, crear viajes, guardar favoritos, “Mis reservas” y “Mi perfil” requieren cuenta</div>
-        </div>
-
-        <button type="button" class="btn btn-outline-primary w-100 mt-auto" (click)="entrarComoInvitado()">
-          <i class="bi bi-eye me-1"></i> Continuar como invitado
-        </button>
+        @if (form.get('email')?.touched && form.get('email')?.hasError('required')) {
+          <div class="text-danger small mt-1">El correo es obligatorio</div>
+        }
+        @if (form.get('email')?.touched && form.get('email')?.hasError('email')) {
+          <div class="text-danger small mt-1">Ingresa un correo válido</div>
+        }
       </div>
-<<<<<<< HEAD
-    </div>
-=======
+
+      <div class="mb-3">
+        <label class="form-label">Contraseña</label>
+        <div class="input-group">
+          <span class="input-group-text bg-light"><i class="bi bi-lock"></i></span>
+          <input type="password" class="form-control"
+            [class.is-invalid]="form.get('password')?.invalid && form.get('password')?.touched"
+            formControlName="password" placeholder="••••••••">
+        </div>
+        @if (form.get('password')?.touched && form.get('password')?.hasError('required')) {
+          <div class="text-danger small mt-1">La contraseña es obligatoria</div>
+        }
+      </div>
 
       @if (errorMessage()) {
-      <div class="alert alert-danger py-2 small mb-2">{{ errorMessage() }}</div>
+        <div class="alert alert-danger py-2 small mb-2">{{ errorMessage() }}</div>
       }
 
       <button type="submit" class="btn btn-primary w-100" [disabled]="loading()">
@@ -104,11 +55,9 @@
     </form>
 
     <p class="text-center mt-3 mb-0">
-      ¿No tienes cuenta? <a routerLink="/register" [queryParams]="returnUrl ? {returnUrl: returnUrl} : {}" class="text-primary text-decoration-none fw-semibold">Regístrate
-        aquí</a>
+      ¿No tienes cuenta?
+      <a routerLink="/register" [queryParams]="returnUrl ? {returnUrl: returnUrl} : {}"
+         class="text-primary text-decoration-none fw-semibold">Regístrate aquí</a>
     </p>
-
-
->>>>>>> 217a6f310f99b2ffa12e3ff5d74683b842555c9f
   </div>
 </div>

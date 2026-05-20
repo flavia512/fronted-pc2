@@ -19,15 +19,9 @@ export const routes: Routes = [
   { path: 'profile', component: Profile, canActivate: [authGuard] },
   { path: 'admin-users', component: AdminUsers, canActivate: [authGuard], data: { rolEsperado: 'admin' } },
   { path: 'crear-viaje', component: CrearViaje, canActivate: [authGuard] },
-<<<<<<< HEAD
-  { path: 'rutas', component: Rutas, canActivate: [authGuard], data: { allowGuest: true } },
-  { path: 'reservas', component: Reservas, canActivate: [authGuard] },
-  { path: 'viajes-compartidos', component: ViajesCompartidos, canActivate: [authGuard], data: { allowGuest: true } },
-=======
   { path: 'rutas', component: Rutas },
   { path: 'reservas', component: Reservas, canActivate: [authGuard] },
   { path: 'viajes-compartidos', component: ViajesCompartidos },
->>>>>>> 217a6f310f99b2ffa12e3ff5d74683b842555c9f
   { path: 'alertas', component: Alertas, canActivate: [authGuard] },
   { path: 'favoritos', component: Favoritos, canActivate: [authGuard] },
 ];

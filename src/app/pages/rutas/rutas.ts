@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-import { Component, OnInit, OnDestroy, ViewChild, ElementRef, NgZone, signal, computed } from '@angular/core';
-=======
-import { Component, OnInit, OnDestroy, ViewChild, ElementRef, NgZone, signal, inject } from '@angular/core';
->>>>>>> 217a6f310f99b2ffa12e3ff5d74683b842555c9f
+import { Component, OnInit, OnDestroy, ViewChild, ElementRef, NgZone, signal, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
@@ -19,7 +15,6 @@ import { RutaService } from '../../core/services/ruta.service';
 import { AuthService } from '../../core/services/auth.service';
 import { Ruta } from '../../core/models/ruta.model';
 import { environment } from '../../../environments/environment';
-import { AuthService } from '../../core/services/auth.service';
 
 @Component({
   selector: 'app-rutas',
@@ -84,8 +79,7 @@ export class Rutas implements OnInit, OnDestroy {
   constructor(
     private mapboxService: MapboxService,
     private rutaService: RutaService,
-    private ngZone: NgZone,
-    private authService: AuthService
+    private ngZone: NgZone
   ) {}
 
   ngOnInit(): void {
@@ -209,11 +203,8 @@ export class Rutas implements OnInit, OnDestroy {
   cargarRutasUsuario(): void {
     this.cargando.set(true);
     this.errorCarga.set(false);
-    const request$ = this.authService.isGuest()
-      ? this.rutaService.listarRutasPublicas()
-      : this.rutaService.obtenerRutas();
 
-    request$.subscribe({
+    this.rutaService.obtenerRutas().subscribe({
       next: (rutas: Ruta[]) => {
         this.rutas.set(rutas);
         this.cargando.set(false);
@@ -233,16 +224,9 @@ export class Rutas implements OnInit, OnDestroy {
 
   eliminarRuta(id: number): void {
     if (!this.authService.isLoggedIn()) {
-<<<<<<< HEAD
-      this.mostrarToast('error', 'Debes iniciar sesión para eliminar rutas.');
-      return;
-    }
-
-=======
       this.router.navigate(['/login'], { queryParams: { returnUrl: '/rutas' } });
       return;
     }
->>>>>>> 217a6f310f99b2ffa12e3ff5d74683b842555c9f
     const ruta = this.rutas().find(r => r.id === id);
     const nombre = ruta?.nombre || 'esta ruta';
     if (!confirm(`¿Eliminar "${nombre}"? Esta acción no se puede deshacer.`)) return;
@@ -271,16 +255,9 @@ export class Rutas implements OnInit, OnDestroy {
 
   abrirModal(): void {
     if (!this.authService.isLoggedIn()) {
-<<<<<<< HEAD
-      this.mostrarToast('error', 'Debes iniciar sesión para guardar rutas.');
-      return;
-    }
-
-=======
       this.router.navigate(['/login'], { queryParams: { returnUrl: '/rutas' } });
       return;
     }
->>>>>>> 217a6f310f99b2ffa12e3ff5d74683b842555c9f
     this.mostrarModal.set(true);
     if (!this.mapa) {
       // Primera apertura: inicializar mapa vacío para que el canvas esté listo
