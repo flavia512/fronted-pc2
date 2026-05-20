@@ -11,8 +11,8 @@ export interface ViajeCompartido {
   id: number;
   driver_user_id: number;
   route_id: number;
-  origin: string;
-  destiny: string;
+  origin?: string;
+  destiny?: string;
   trip_datetime: string;
   seats_total: number;
   seats_available: number;
@@ -27,6 +27,9 @@ export interface ViajeCompartido {
     usuario?: { id?: number; full_name?: string; email?: string };
   }>;
 }
+
+type ToastTipo = 'exito' | 'error';
+type ViajesResponse = { success?: boolean; data?: ViajeCompartido[]; viajes?: ViajeCompartido[] };
 
 @Component({
   selector: 'app-viajes-compartidos',
@@ -59,7 +62,7 @@ export class ViajesCompartidos implements OnInit, OnDestroy {
   private filtros$ = new Subject<void>();
   private sub?: Subscription;
 
-  toast = signal<{ tipo: 'exito' | 'error'; mensaje: string } | null>(null);
+  toast = signal<{ tipo: ToastTipo; mensaje: string } | null>(null);
   private toastTimeout: any;
 
   ngOnInit(): void {
@@ -84,8 +87,8 @@ export class ViajesCompartidos implements OnInit, OnDestroy {
         return this.viajeService.listarViajes();
       })
     ).subscribe({
-      next: (res: any) => {
-        this.viajes.set(res.data ?? []);
+      next: (res: ViajesResponse) => {
+        this.viajes.set(this.extraerViajes(res));
         this.cargando.set(false);
       },
       error: () => {
@@ -94,8 +97,7 @@ export class ViajesCompartidos implements OnInit, OnDestroy {
       }
     });
 
-    this.filtros$.next();
-
+    this.filtros$.next(); // carga inicial
     if (this.authService.isLoggedIn()) {
       this.cargarFavoritos();
     }
@@ -127,7 +129,8 @@ export class ViajesCompartidos implements OnInit, OnDestroy {
 
     this.favoritoService.listarFavoritos().subscribe({
       next: (res) => {
-        const ids = new Set(res.favoritos.map(f => f.route_id));
+        const favoritos = res?.favoritos ?? [];
+        const ids = new Set(favoritos.map(f => f.route_id));
         this.favoritosIds.set(ids);
       },
       error: () => {
@@ -150,11 +153,11 @@ export class ViajesCompartidos implements OnInit, OnDestroy {
 
   yaReservado(viaje: ViajeCompartido): boolean {
     const userId = this.authService.currentUser()?.id;
-    return !!userId && !!viaje.reservas?.some(reserva => reserva.user_id === userId);
+    return !!userId && this.reservasActivas(viaje).some(reserva => reserva.user_id === userId);
   }
 
   totalReservado(viaje: ViajeCompartido): number {
-    return viaje.reservas?.reduce((total, reserva) => total + reserva.seats, 0) ?? 0;
+    return this.reservasActivas(viaje).reduce((total, reserva) => total + reserva.seats, 0);
   }
 
   toggleFavorito(viaje: ViajeCompartido): void {
@@ -242,13 +245,14 @@ export class ViajesCompartidos implements OnInit, OnDestroy {
         this.reservando.set(null);
         this.mostrarToast('exito', '¡Reserva realizada con éxito!');
         const nuevaReserva = res?.data;
+        const plazasReservadas = nuevaReserva?.seats ?? 1;
 
         this.viajes.update(list =>
           list.map(v =>
             v.id === viaje.id
               ? {
                   ...v,
-                  seats_available: v.seats_available - 1,
+                  seats_available: Math.max(0, v.seats_available - plazasReservadas),
                   reservas: nuevaReserva ? [...(v.reservas ?? []), nuevaReserva] : v.reservas
                 }
               : v
@@ -268,7 +272,16 @@ export class ViajesCompartidos implements OnInit, OnDestroy {
     });
   }
 
-  mostrarToast(tipo: 'exito' | 'error', mensaje: string): void {
+  private extraerViajes(res: ViajesResponse | ViajeCompartido[] | null | undefined): ViajeCompartido[] {
+    if (Array.isArray(res)) return res;
+    return res?.data ?? res?.viajes ?? [];
+  }
+
+  private reservasActivas(viaje: ViajeCompartido): NonNullable<ViajeCompartido['reservas']> {
+    return (viaje.reservas ?? []).filter(reserva => reserva.status !== 'cancelled' && reserva.status !== 'cancelada');
+  }
+
+  mostrarToast(tipo: ToastTipo, mensaje: string): void {
     this.toast.set({ tipo, mensaje });
 
     if (this.toastTimeout) {

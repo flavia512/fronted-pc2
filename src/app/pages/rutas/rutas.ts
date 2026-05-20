@@ -1,17 +1,16 @@
 import { Component, OnInit, OnDestroy, ViewChild, ElementRef, NgZone, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterModule } from '@angular/router';
+import { RouterModule } from '@angular/router';
 import mapboxgl from 'mapbox-gl';
-
-(mapboxgl as any).workerCount = 1;
-
 import { Subject, debounceTime, switchMap, of } from 'rxjs';
 import { MapboxService, MapboxFeature, RouteInfo } from '../../core/services/mapbox.service';
 import { RutaService } from '../../core/services/ruta.service';
 import { AuthService } from '../../core/services/auth.service';
 import { Ruta } from '../../core/models/ruta.model';
 import { environment } from '../../../environments/environment';
+
+(mapboxgl as any).workerCount = 1;
 
 @Component({
   selector: 'app-rutas',
@@ -27,6 +26,7 @@ export class Rutas implements OnInit, OnDestroy {
   errorCarga = signal(false);
   mostrarModal = signal(false);
   guardandoRuta = signal(false);
+  toast = signal<{ tipo: 'exito' | 'error'; mensaje: string } | null>(null);
 
   esInvitado = computed(() => this.authService.isGuest());
   tituloPagina = computed(() => this.esInvitado() ? 'Rutas' : 'Mis Rutas');
@@ -48,31 +48,25 @@ export class Rutas implements OnInit, OnDestroy {
     });
   });
 
-  toast = signal<{ tipo: 'exito' | 'error'; mensaje: string } | null>(null);
-  private toastTimeout: any = null;
-
-  private readonly MADRID_CENTER: [number, number] = [-3.7038, 40.4168];
-
   nuevaRuta = { nombre: '', origen: '', destino: '', horaSalida: '' };
-
   sugerenciasOrigen = signal<MapboxFeature[]>([]);
   sugerenciasDestino = signal<MapboxFeature[]>([]);
   coordOrigen = signal<[number, number] | null>(null);
   coordDestino = signal<[number, number] | null>(null);
-
   rutaInfo = signal<RouteInfo | null>(null);
   calculandoRuta = signal(false);
 
+  private readonly MADRID_CENTER: [number, number] = [-3.7038, 40.4168];
   private mapa: mapboxgl.Map | null = null;
   private origenSubject = new Subject<string>();
   private destinoSubject = new Subject<string>();
+  private toastTimeout: any = null;
 
   constructor(
     private mapboxService: MapboxService,
     private rutaService: RutaService,
     private ngZone: NgZone,
-    protected authService: AuthService,
-    private router: Router
+    protected authService: AuthService
   ) {}
 
   ngOnInit(): void {
@@ -132,9 +126,7 @@ export class Rutas implements OnInit, OnDestroy {
         this.calculandoRuta.set(false);
         setTimeout(() => this.inicializarMapa(info), 150);
       },
-      error: () => {
-        this.calculandoRuta.set(false);
-      }
+      error: () => this.calculandoRuta.set(false)
     });
   }
 
@@ -145,9 +137,11 @@ export class Rutas implements OnInit, OnDestroy {
       if (!this.mapa) return;
       try {
         if (this.mapa.getSource('ruta')) {
-          (this.mapa.getSource('ruta') as mapboxgl.GeoJSONSource).setData(
-            { type: 'Feature', geometry: info.geometry, properties: {} }
-          );
+          (this.mapa.getSource('ruta') as mapboxgl.GeoJSONSource).setData({
+            type: 'Feature',
+            geometry: info.geometry,
+            properties: {}
+          });
         } else {
           this.mapa.addSource('ruta', {
             type: 'geojson',
@@ -162,6 +156,7 @@ export class Rutas implements OnInit, OnDestroy {
           new mapboxgl.Marker({ color: '#16a34a' }).setLngLat(this.coordOrigen()!).addTo(this.mapa);
           new mapboxgl.Marker({ color: '#dc2626' }).setLngLat(this.coordDestino()!).addTo(this.mapa);
         }
+
         const coords = info.geometry.coordinates as [number, number][];
         const bounds = coords.reduce(
           (b, c) => b.extend(c),
@@ -232,21 +227,8 @@ export class Rutas implements OnInit, OnDestroy {
         this.rutas.update(list => list.filter(r => r.id !== id));
         this.mostrarToast('exito', 'Ruta eliminada correctamente');
       },
-      error: () => {
-        this.mostrarToast('error', 'No se pudo eliminar la ruta. Inténtalo de nuevo.');
-      }
+      error: () => this.mostrarToast('error', 'No se pudo eliminar la ruta. Inténtalo de nuevo.')
     });
-  }
-
-  mostrarToast(tipo: 'exito' | 'error', mensaje: string): void {
-    this.toast.set({ tipo, mensaje });
-    if (this.toastTimeout) clearTimeout(this.toastTimeout);
-    this.toastTimeout = setTimeout(() => this.toast.set(null), 5000);
-  }
-
-  cerrarToast(): void {
-    this.toast.set(null);
-    if (this.toastTimeout) clearTimeout(this.toastTimeout);
   }
 
   abrirModal(): void {
@@ -311,20 +293,9 @@ export class Rutas implements OnInit, OnDestroy {
     this.rutaService.crearRuta(payload).subscribe({
       next: (res) => {
         this.ngZone.run(() => {
-          this.mostrarModal.set(false);
-          this.guardandoRuta.set(false);
-          this.rutaInfo.set(null);
-          this.coordOrigen.set(null);
-          this.coordDestino.set(null);
-          this.sugerenciasOrigen.set([]);
-          this.sugerenciasDestino.set([]);
-          this.nuevaRuta = { nombre: '', origen: '', destino: '', horaSalida: '' };
-
+          this.cerrarModal();
           const r = res?.data;
-          if (r) {
-            this.rutas.update(list => [r, ...list]);
-          }
-
+          if (r) this.rutas.update(list => [r, ...list]);
           this.mostrarToast('exito', `✓ Ruta "${r?.nombre ?? 'Nueva ruta'}" guardada correctamente`);
         });
       },
@@ -339,5 +310,16 @@ export class Rutas implements OnInit, OnDestroy {
         }
       }
     });
+  }
+
+  mostrarToast(tipo: 'exito' | 'error', mensaje: string): void {
+    this.toast.set({ tipo, mensaje });
+    if (this.toastTimeout) clearTimeout(this.toastTimeout);
+    this.toastTimeout = setTimeout(() => this.toast.set(null), 5000);
+  }
+
+  cerrarToast(): void {
+    this.toast.set(null);
+    if (this.toastTimeout) clearTimeout(this.toastTimeout);
   }
 }

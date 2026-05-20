@@ -3,9 +3,9 @@
         <div class="bg-primary bg-gradient rounded-4 shadow-lg p-5 mb-4 text-white position-relative overflow-hidden">
             <div class="position-absolute top-0 start-0 w-100 h-100 opacity-25" style="background: url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80') center/cover no-repeat;"></div>
             <div class="position-relative">
-                <h1 class="display-3 fw-bold mb-3">Viaja inteligente,<br>viaja con VoyContigo</h1>
-                <p class="lead mb-4">
-                    Comparte trayectos hacia Príncipe Pío y otras estaciones de transporte.<br>
+                <h1 class="fw-bold mb-3" style="font-size: clamp(1.6rem, 6vw, 4.5rem); line-height: 1.2;">Viaja inteligente,<br>viaja con VoyContigo</h1>
+                <p class="mb-4" style="font-size: clamp(0.95rem, 2.5vw, 1.25rem);">
+                    Comparte trayectos hacia Príncipe Pío y otras estaciones de transporte.<br class="d-none d-sm-inline">
                     Ahorra tiempo y dinero con predicciones de tráfico de la M-30 en tiempo real.
                 </p>
                 <div *ngIf="!auth.isLoggedIn()" class="d-flex justify-content-center gap-3 flex-wrap">

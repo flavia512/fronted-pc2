@@ -23,8 +23,8 @@
             <div class="input-group">
               <span class="input-group-text bg-light"><i class="bi bi-envelope"></i></span>
               <input type="email" class="form-control"
-                [class.is-invalid]="form.get('email')?.invalid && form.get('email')?.touched" formControlName="email"
-                placeholder="tu@email.com">
+                [class.is-invalid]="form.get('email')?.invalid && form.get('email')?.touched"
+                formControlName="email" placeholder="tu@email.com">
             </div>
             @if (form.get('email')?.touched && form.get('email')?.hasError('required')) {
               <div class="text-danger small mt-1">El correo es obligatorio</div>
