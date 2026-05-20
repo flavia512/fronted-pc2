@@ -23,7 +23,7 @@ export class AuthService {
   readonly canExplore = computed(() => this.isLoggedIn() || this.isGuest());
 
   login(data: { email: string; password: string }): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.apiUrl}/login`, data).pipe(
+    return this.http.post<AuthResponse>(`${this.apiUrl}/auth/login`, data).pipe(
       tap((response) => {
         this.clearGuestMode();
         this.saveToken(response.access_token);
@@ -36,7 +36,7 @@ export class AuthService {
   }
 
   register(data: { full_name: string; email: string; password: string; password_confirmation: string }): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.apiUrl}/register`, data).pipe(
+    return this.http.post<AuthResponse>(`${this.apiUrl}/auth/registro`, data).pipe(
       tap((response) => {
         this.clearGuestMode();
         if (response.access_token || response.access_token) {

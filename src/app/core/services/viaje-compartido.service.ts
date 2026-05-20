@@ -29,60 +29,56 @@ export class ViajeCompartidoService {
   constructor(private http: HttpClient) { }
 
   /**
-   * ENDPOINT 21: Crear viaje compartido
-   * Ahora recibe el route_id en lugar de los textos de origen y destino.
+   * POST /viajes
    */
   crearViaje(data: {
-    driver_user_id: number;
     route_id: number;
-    origin: string;
-    destiny: string;
     trip_datetime: string;
     seats_total: number;
     seats_available: number;
   }): Observable<{ success: boolean; message: string; data: ViajeCompartido }> {
-    return this.http.post<{ success: boolean; message: string; data: ViajeCompartido }>(
-      `${this.apiUrl}/conductor/crear_viaje`,
+    return this.http.post<{ exito: boolean; mensaje: string; datos: ViajeCompartido }>(
+      `${this.apiUrl}/viajes`,
       data
-    );
+    ).pipe(map(res => ({ success: res.exito, message: res.mensaje, data: res.datos })));
   }
 
   /**
-   * ENDPOINT 17: Obtener datos de viaje compartido
+   * GET /viajes/{idViaje}
    */
   obtenerViaje(idViaje: number): Observable<{ success: boolean; data: ViajeCompartido }> {
-    return this.http.get<{ success: boolean; data: ViajeCompartido }>(
-      `${this.apiUrl}/users/obtener_viajecompartido?idviaje=${idViaje}`
-    );
+    return this.http.get<{ exito: boolean; datos: ViajeCompartido }>(
+      `${this.apiUrl}/viajes/${idViaje}`
+    ).pipe(map(res => ({ success: res.exito, data: res.datos })));
   }
 
   /**
-   * ENDPOINT 20: Actualizar datos de viaje compartido
+   * PUT /viajes/{idViaje}
    */
   actualizarViaje(idViaje: number, data: any): Observable<any> {
     return this.http.put(
-      `${this.apiUrl}/conductor/actualizar_viaje?idviaje=${idViaje}`,
+      `${this.apiUrl}/viajes/${idViaje}`,
       data
     );
   }
 
   /**
-   * ENDPOINT 20: Eliminar viaje compartido
+   * DELETE /viajes/{idViaje}
    */
   eliminarViaje(idViaje: number): Observable<{ success: boolean; message: string }> {
     return this.http.delete<{ success: boolean; message: string }>(
-      `${this.apiUrl}/conductor/eliminar_viaje/${idViaje}`
+      `${this.apiUrl}/viajes/${idViaje}`
     );
   }
 
+  // GET /viajes
   listarViajes(): Observable<{ success: boolean; data: ViajeCompartido[] }> {
-    return this.http.get<{ success: boolean; data: ViajeCompartido[] }>
-      (`${this.apiUrl}/user/listar_viajes`);
+    return this.http.get<{ exito: boolean; datos: ViajeCompartido[] }>(`${this.apiUrl}/viajes`)
+      .pipe(map(res => ({ success: res.exito, data: res.datos ?? [] })));
   }
 
   /**
-   * ENDPOINT buscarViajes: Buscar viajes con filtros server-side
-   * GET /api/driver/buscar_viajes?origin=X&destiny=Y&fecha=YYYY-MM-DD
+   * buscarViajes: filtra client-side sobre listarViajes()
    */
   buscarViajes(filtros: { origin?: string; destiny?: string; fecha?: string }): Observable<{ success: boolean; data: ViajeCompartido[] }> {
     return this.listarViajes().pipe(

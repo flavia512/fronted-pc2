@@ -9,20 +9,19 @@ export class RutaService {
   private http = inject(HttpClient);
   private apiUrl = environment.apiUrl;
 
-  // Endpoint 5 - GET /api/users/obtener_rutas
+  // GET /rutas — rutas del usuario autenticado
   obtenerRutas(): Observable<Ruta[]> {
-    return this.http.get<any>(`${this.apiUrl}/users/obtener_rutas`).pipe(
-      map(res => Array.isArray(res) ? res : res.data ?? [])
-    );
+    return this.http.get<{ exito: boolean; datos: Ruta[] }>(`${this.apiUrl}/rutas`)
+      .pipe(map(res => res.datos ?? []));
   }
 
+  // GET /rutas/todas — todas las rutas públicas
   listarRutasPublicas(): Observable<Ruta[]> {
-    return this.http.get<any>(`${this.apiUrl}/rutas`).pipe(
-      map(res => Array.isArray(res) ? res : res.data ?? [])
-    );
+    return this.http.get<{ exito: boolean; datos: Ruta[] }>(`${this.apiUrl}/rutas/todas`)
+      .pipe(map(res => res.datos ?? []));
   }
 
-  // Endpoint 6 - POST /api/users/crear_rutas
+  // POST /rutas
   crearRuta(data: {
     nombre: string | null;
     origin_text: string;
@@ -35,13 +34,12 @@ export class RutaService {
     duration_min: number;
     pasa_por_m30: boolean;
   }): Observable<{ success: boolean; data: Ruta }> {
-    return this.http.post<{ success: boolean; data: Ruta }>(
-      `${this.apiUrl}/users/crear_rutas`, data
-    );
+    return this.http.post<{ exito: boolean; datos: Ruta }>(`${this.apiUrl}/rutas`, data)
+      .pipe(map(res => ({ success: res.exito, data: res.datos })));
   }
 
-  // Endpoint 8 - DELETE /api/users/eliminar_rutas/{id}
+  // DELETE /rutas/{id}
   eliminarRuta(id: number): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/users/eliminar_rutas/${id}`);
+    return this.http.delete(`${this.apiUrl}/rutas/${id}`);
   }
 }

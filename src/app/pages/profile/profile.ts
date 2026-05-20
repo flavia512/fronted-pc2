@@ -75,9 +75,6 @@ export class Profile implements OnInit {
       return;
     }
 
-    const id = this.usuarioId();
-    if (id === null) return;
-
     this.guardando.set(true);
     this.limpiarMensajes();
 
@@ -85,7 +82,7 @@ export class Profile implements OnInit {
       full_name: this.profileForm.get('full_name')?.value
     };
 
-    this.userService.updateUser(id, datosActualizados).subscribe({
+    this.userService.updateProfile(datosActualizados).subscribe({
       next: () => {
         this.guardando.set(false);
         this.mensajeExito.set('Perfil actualizado correctamente.');

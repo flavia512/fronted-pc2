@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { Reserva } from '../models/reserva.model';
 import { environment } from '../../../environments/environment';
 import {ReservasResponse} from '../../pages/reservas/reservas';
@@ -12,26 +13,32 @@ export class ReservaService {
   private http = inject(HttpClient);
   private apiUrl = environment.apiUrl;
 
-  obtenerReservasPorUsuario(userId: number): Observable<ReservasResponse> {
-    return this.http.get<ReservasResponse>(`${this.apiUrl}/users/obtener_reservas`, {params: { user_id: userId }});
+  // GET /reservas — reservas del usuario autenticado
+  obtenerReservasPorUsuario(_userId?: number): Observable<ReservasResponse> {
+    return this.http.get<{ exito: boolean; datos: Reserva[] }>(`${this.apiUrl}/reservas`)
+      .pipe(map(res => ({ ok: res.exito, reservas: res.datos ?? [] })));
   }
-  // Endpoint 11: Actualizar reserva
+
+  // PUT /reservas/{id}
   actualizarReserva(id: number, data: Partial<Reserva>): Observable<Reserva> {
-    return this.http.put<Reserva>(`${this.apiUrl}/reservas/${id}`, data);
+    return this.http.put<{ exito: boolean; datos: Reserva }>(`${this.apiUrl}/reservas/${id}`, data)
+      .pipe(map(res => res.datos));
   }
 
-  // Endpoint 12: Crear reserva
+  // POST /reservas
   crearReserva(data: { user_id: number; trip_id: number; seats: number; status: string }): Observable<{ success: boolean; message: string; data: Reserva }> {
-    return this.http.post<{ success: boolean; message: string; data: Reserva }>(`${this.apiUrl}/users/crear_reserva`, data);
+    return this.http.post<{ exito: boolean; mensaje: string; datos: Reserva }>(`${this.apiUrl}/reservas`, data)
+      .pipe(map(res => ({ success: res.exito, message: res.mensaje, data: res.datos })));
   }
 
-  // Endpoint 13: Eliminar reserva
+  // DELETE /reservas/{id}
   eliminarReserva(id: number): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/users/eliminar_reserva/${id}`);
+    return this.http.delete(`${this.apiUrl}/reservas/${id}`);
   }
 
-  // Endpoint 14: Reservas por ruta (driver)
+  // GET /admin/reservas/ruta?ruta_id=X
   reservasPorRuta(rutaId: number): Observable<{ success: boolean; data: any[] }> {
-    return this.http.get<{ success: boolean; data: any[] }>(`${this.apiUrl}/conductor/reservas`, {params: { ruta_id: rutaId }});
+    return this.http.get<{ exito: boolean; datos: any[] }>(`${this.apiUrl}/admin/reservas/ruta`, { params: { ruta_id: rutaId } })
+      .pipe(map(res => ({ success: res.exito, data: res.datos ?? [] })));
   }
 }

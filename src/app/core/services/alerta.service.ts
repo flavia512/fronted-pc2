@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { Alerta } from '../models/alerta.model';
 import { environment } from '../../../environments/environment';
 
@@ -11,21 +12,22 @@ export class AlertaService {
   private http = inject(HttpClient);
   private apiUrl = environment.apiUrl;
 
-  // Endpoint 15: POST /api/users/desactivar_alerta?idruta=X
+  // PUT /alertas/desactivar?idruta=X
   desactivarAlerta(idruta: number): Observable<any> {
     const params = new HttpParams().set('idruta', idruta.toString());
-    return this.http.post(`${this.apiUrl}/users/desactivar_alerta`, {}, { params });
+    return this.http.put(`${this.apiUrl}/alertas/desactivar`, {}, { params });
   }
 
-  // Endpoint 16: GET /api/users/obtener_alerta?user_id=X
-  obtenerAlertaUsuario(user_id: number): Observable<{ ok: boolean; alertas: Alerta[] }> {
-    const params = new HttpParams().set('user_id', user_id.toString());
-    return this.http.get<{ ok: boolean; alertas: Alerta[] }>(`${this.apiUrl}/users/obtener_alerta`, { params });
+  // GET /alertas — alertas del usuario autenticado
+  obtenerAlertaUsuario(_user_id?: number): Observable<{ ok: boolean; alertas: Alerta[] }> {
+    return this.http.get<{ exito: boolean; datos: Alerta[] }>(`${this.apiUrl}/alertas`)
+      .pipe(map(res => ({ ok: res.exito, alertas: res.datos ?? [] })));
   }
 
-  // Endpoint 5: POST /api/users/crear_alerta
+  // POST /alertas
   crearAlerta(data: { route_id: number; for_datetime: string }): Observable<{ ok: boolean; alerta: Alerta }> {
-    return this.http.post<{ ok: boolean; alerta: Alerta }>(`${this.apiUrl}/users/crear_alerta`, data);
+    return this.http.post<{ exito: boolean; datos: Alerta }>(`${this.apiUrl}/alertas`, data)
+      .pipe(map(res => ({ ok: res.exito, alerta: res.datos })));
   }
 
   // PC1 FastAPI: GET http://localhost:8001/predict?fecha=YYYY-MM-DD&hora=HH:MM
