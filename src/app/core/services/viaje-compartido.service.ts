@@ -42,7 +42,7 @@ export class ViajeCompartidoService {
     seats_available: number;
   }): Observable<{ success: boolean; message: string; data: ViajeCompartido }> {
     return this.http.post<{ success: boolean; message: string; data: ViajeCompartido }>(
-      `${this.apiUrl}/driver/crear_viaje`,
+      `${this.apiUrl}/conductor/crear_viaje`,
       data
     );
   }
@@ -61,7 +61,7 @@ export class ViajeCompartidoService {
    */
   actualizarViaje(idViaje: number, data: any): Observable<any> {
     return this.http.put(
-      `${this.apiUrl}/driver/actualizar_viaje?idviaje=${idViaje}`,
+      `${this.apiUrl}/conductor/actualizar_viaje?idviaje=${idViaje}`,
       data
     );
   }
@@ -71,13 +71,13 @@ export class ViajeCompartidoService {
    */
   eliminarViaje(idViaje: number): Observable<{ success: boolean; message: string }> {
     return this.http.delete<{ success: boolean; message: string }>(
-      `${this.apiUrl}/driver/eliminar_viaje?idviaje=${idViaje}`
+      `${this.apiUrl}/conductor/eliminar_viaje?idviaje=${idViaje}`
     );
   }
 
   listarViajes(): Observable<{ success: boolean; data: ViajeCompartido[] }> {
     return this.http.get<{ success: boolean; data: ViajeCompartido[] }>
-      (`${this.apiUrl}/users/viajes_compartidos`);
+      (`${this.apiUrl}/user/listar_viajes`);
   }
 
   /**

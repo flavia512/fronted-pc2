@@ -40,8 +40,8 @@ export class RutaService {
     );
   }
 
-  // Endpoint 8 - DELETE /api/users/delete_rutas/{id}
+  // Endpoint 8 - DELETE /api/users/eliminar_rutas/{id}
   eliminarRuta(id: number): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/users/delete_rutas/${id}`);
+    return this.http.delete(`${this.apiUrl}/users/eliminar_rutas/${id}`);
   }
 }

@@ -18,7 +18,7 @@ export class FavoritoService {
 
   // Endpoint 24: Añadir a favoritos
   agregarFavorito(data: { user_id: number; route_id: number }): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/users/agregarFavorito`, data);
+    return this.http.post<any>(`${this.apiUrl}/users/agregar_favorito`, data);
   }
 
   // Endpoint 25: Eliminar de favoritos (query params, no body)

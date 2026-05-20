@@ -32,6 +32,6 @@ export class ReservaService {
 
   // Endpoint 14: Reservas por ruta (driver)
   reservasPorRuta(rutaId: number): Observable<{ success: boolean; data: any[] }> {
-    return this.http.get<{ success: boolean; data: any[] }>(`${this.apiUrl}/driver/reservas`, {params: { ruta_id: rutaId }});
+    return this.http.get<{ success: boolean; data: any[] }>(`${this.apiUrl}/conductor/reservas`, {params: { ruta_id: rutaId }});
   }
 }
