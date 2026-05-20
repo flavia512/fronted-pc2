@@ -43,7 +43,7 @@ export class AdminService {
 
   quitarPuntos(cantidad: number): Observable<{ ok: boolean; mensaje: string; usuario: User }> {
     return this.http.put<{ ok: boolean; mensaje: string; usuario: User }>(
-      `${this.apiUrl}/user/quitar_punto_usuarios`,
+      `${this.apiUrl}/user/quitar_puntos_usuario`,
       { cantidad }
     );
   }
