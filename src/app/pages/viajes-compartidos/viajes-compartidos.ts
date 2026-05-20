@@ -1,7 +1,6 @@
 import { Component, inject, OnInit, OnDestroy, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
 import { Subject, Subscription, debounceTime, switchMap } from 'rxjs';
 import { ViajeCompartidoService } from '../../core/services/viaje-compartido.service';
 import { ReservaService } from '../../core/services/reserva.service';
@@ -42,17 +41,16 @@ export interface ViajeCompartido {
   `]
 })
 export class ViajesCompartidos implements OnInit, OnDestroy {
-  private viajeService    = inject(ViajeCompartidoService);
-  private reservaService  = inject(ReservaService);
-  private authService     = inject(AuthService);
+  private viajeService = inject(ViajeCompartidoService);
+  private reservaService = inject(ReservaService);
+  private authService = inject(AuthService);
   private favoritoService = inject(FavoritoService);
-  private router          = inject(Router);
 
-  viajes        = signal<ViajeCompartido[]>([]);
-  cargando      = signal(true);
-  favoritosIds  = signal<Set<number>>(new Set());
-  toggling      = signal<number | null>(null);
-  reservando    = signal<number | null>(null);
+  viajes = signal<ViajeCompartido[]>([]);
+  cargando = signal(true);
+  favoritosIds = signal<Set<number>>(new Set());
+  toggling = signal<number | null>(null);
+  reservando = signal<number | null>(null);
 
   filtroOrigen = '';
   filtroDestino = '';
@@ -96,12 +94,8 @@ export class ViajesCompartidos implements OnInit, OnDestroy {
       }
     });
 
-<<<<<<< HEAD
     this.filtros$.next();
 
-=======
-    this.filtros$.next(); // carga inicial
->>>>>>> 217a6f310f99b2ffa12e3ff5d74683b842555c9f
     if (this.authService.isLoggedIn()) {
       this.cargarFavoritos();
     }
@@ -146,7 +140,6 @@ export class ViajesCompartidos implements OnInit, OnDestroy {
     return this.favoritosIds().has(routeId);
   }
 
-<<<<<<< HEAD
   nombreConductor(viaje: ViajeCompartido): string {
     return viaje.conductor?.full_name || viaje.conductor?.name || viaje.conductor?.email || 'Conductor';
   }
@@ -156,13 +149,6 @@ export class ViajesCompartidos implements OnInit, OnDestroy {
   }
 
   yaReservado(viaje: ViajeCompartido): boolean {
-=======
-  toggleFavorito(viaje: ViajeCompartido): void {
-    if (!this.authService.isLoggedIn()) {
-      this.router.navigate(['/login'], { queryParams: { returnUrl: '/viajes-compartidos' } });
-      return;
-    }
->>>>>>> 217a6f310f99b2ffa12e3ff5d74683b842555c9f
     const userId = this.authService.currentUser()?.id;
     return !!userId && !!viaje.reservas?.some(reserva => reserva.user_id === userId);
   }
@@ -218,16 +204,10 @@ export class ViajesCompartidos implements OnInit, OnDestroy {
 
   reservarViaje(viaje: ViajeCompartido): void {
     if (!this.authService.isLoggedIn()) {
-<<<<<<< HEAD
       this.mostrarToast('error', 'Debes iniciar sesión para reservar viajes.');
       return;
     }
 
-=======
-      this.router.navigate(['/login'], { queryParams: { returnUrl: '/viajes-compartidos' } });
-      return;
-    }
->>>>>>> 217a6f310f99b2ffa12e3ff5d74683b842555c9f
     const userId = this.authService.currentUser()?.id;
 
     if (!userId) {

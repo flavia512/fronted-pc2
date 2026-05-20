@@ -1,16 +1,9 @@
-<<<<<<< HEAD
 import { Component, OnInit, OnDestroy, ViewChild, ElementRef, NgZone, signal, computed } from '@angular/core';
-=======
-import { Component, OnInit, OnDestroy, ViewChild, ElementRef, NgZone, signal, inject } from '@angular/core';
->>>>>>> 217a6f310f99b2ffa12e3ff5d74683b842555c9f
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import mapboxgl from 'mapbox-gl';
 
-// Reducir el worker pool a 1 para evitar la race condition de glyph loading en Mapbox GL JS v3.
-// Debe ser antes de cualquier instancia de Map. Si ya hay otro Map creado en otro contexto,
-// esta línea no tiene efecto (la Dispatcher pool es un singleton).
 (mapboxgl as any).workerCount = 1;
 
 import { Subject, debounceTime, switchMap, of } from 'rxjs';
@@ -19,7 +12,6 @@ import { RutaService } from '../../core/services/ruta.service';
 import { AuthService } from '../../core/services/auth.service';
 import { Ruta } from '../../core/models/ruta.model';
 import { environment } from '../../../environments/environment';
-import { AuthService } from '../../core/services/auth.service';
 
 @Component({
   selector: 'app-rutas',
@@ -35,6 +27,7 @@ export class Rutas implements OnInit, OnDestroy {
   errorCarga = signal(false);
   mostrarModal = signal(false);
   guardandoRuta = signal(false);
+
   esInvitado = computed(() => this.authService.isGuest());
   tituloPagina = computed(() => this.esInvitado() ? 'Rutas' : 'Mis Rutas');
   descripcionPagina = computed(() => this.esInvitado()
@@ -55,25 +48,18 @@ export class Rutas implements OnInit, OnDestroy {
     });
   });
 
-  // Toast de feedback
   toast = signal<{ tipo: 'exito' | 'error'; mensaje: string } | null>(null);
   private toastTimeout: any = null;
 
-  // Centro de Madrid por defecto
   private readonly MADRID_CENTER: [number, number] = [-3.7038, 40.4168];
-
-  protected authService = inject(AuthService);
-  private router        = inject(Router);
 
   nuevaRuta = { nombre: '', origen: '', destino: '', horaSalida: '' };
 
-  // Autocomplete
   sugerenciasOrigen = signal<MapboxFeature[]>([]);
   sugerenciasDestino = signal<MapboxFeature[]>([]);
   coordOrigen = signal<[number, number] | null>(null);
   coordDestino = signal<[number, number] | null>(null);
 
-  // Ruta calculada
   rutaInfo = signal<RouteInfo | null>(null);
   calculandoRuta = signal(false);
 
@@ -85,15 +71,12 @@ export class Rutas implements OnInit, OnDestroy {
     private mapboxService: MapboxService,
     private rutaService: RutaService,
     private ngZone: NgZone,
-    private authService: AuthService
+    protected authService: AuthService,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
-    if (this.authService.isLoggedIn()) {
-      this.cargarRutasUsuario();
-    } else {
-      this.cargando.set(false);
-    }
+    this.cargarRutasUsuario();
 
     this.origenSubject.pipe(
       debounceTime(300),
@@ -149,14 +132,15 @@ export class Rutas implements OnInit, OnDestroy {
         this.calculandoRuta.set(false);
         setTimeout(() => this.inicializarMapa(info), 150);
       },
-      error: () => { this.calculandoRuta.set(false); }
+      error: () => {
+        this.calculandoRuta.set(false);
+      }
     });
   }
 
   inicializarMapa(info: RouteInfo): void {
     if (!this.mapaContainer?.nativeElement) return;
 
-    // Lógica reutilizable para añadir/actualizar la ruta en el mapa
     const renderRoute = () => {
       if (!this.mapa) return;
       try {
@@ -170,7 +154,9 @@ export class Rutas implements OnInit, OnDestroy {
             data: { type: 'Feature', geometry: info.geometry, properties: {} }
           });
           this.mapa.addLayer({
-            id: 'ruta-line', type: 'line', source: 'ruta',
+            id: 'ruta-line',
+            type: 'line',
+            source: 'ruta',
             paint: { 'line-color': '#1d4ed8', 'line-width': 4, 'line-opacity': 0.9 }
           });
           new mapboxgl.Marker({ color: '#16a34a' }).setLngLat(this.coordOrigen()!).addTo(this.mapa);
@@ -186,7 +172,6 @@ export class Rutas implements OnInit, OnDestroy {
     };
 
     if (this.mapa) {
-      // Mapa ya existe (creado por inicializarMapaVacio u otra llamada anterior)
       this.mapa.resize();
       if (this.mapa.loaded()) {
         renderRoute();
@@ -205,10 +190,11 @@ export class Rutas implements OnInit, OnDestroy {
     });
     this.mapa.on('load', renderRoute);
   }
- 
+
   cargarRutasUsuario(): void {
     this.cargando.set(true);
     this.errorCarga.set(false);
+
     const request$ = this.authService.isGuest()
       ? this.rutaService.listarRutasPublicas()
       : this.rutaService.obtenerRutas();
@@ -233,16 +219,10 @@ export class Rutas implements OnInit, OnDestroy {
 
   eliminarRuta(id: number): void {
     if (!this.authService.isLoggedIn()) {
-<<<<<<< HEAD
       this.mostrarToast('error', 'Debes iniciar sesión para eliminar rutas.');
       return;
     }
 
-=======
-      this.router.navigate(['/login'], { queryParams: { returnUrl: '/rutas' } });
-      return;
-    }
->>>>>>> 217a6f310f99b2ffa12e3ff5d74683b842555c9f
     const ruta = this.rutas().find(r => r.id === id);
     const nombre = ruta?.nombre || 'esta ruta';
     if (!confirm(`¿Eliminar "${nombre}"? Esta acción no se puede deshacer.`)) return;
@@ -271,19 +251,12 @@ export class Rutas implements OnInit, OnDestroy {
 
   abrirModal(): void {
     if (!this.authService.isLoggedIn()) {
-<<<<<<< HEAD
       this.mostrarToast('error', 'Debes iniciar sesión para guardar rutas.');
       return;
     }
 
-=======
-      this.router.navigate(['/login'], { queryParams: { returnUrl: '/rutas' } });
-      return;
-    }
->>>>>>> 217a6f310f99b2ffa12e3ff5d74683b842555c9f
     this.mostrarModal.set(true);
     if (!this.mapa) {
-      // Primera apertura: inicializar mapa vacío para que el canvas esté listo
       setTimeout(() => this.inicializarMapaVacio(), 200);
     } else {
       setTimeout(() => this.mapa?.resize(), 50);
@@ -347,7 +320,6 @@ export class Rutas implements OnInit, OnDestroy {
           this.sugerenciasDestino.set([]);
           this.nuevaRuta = { nombre: '', origen: '', destino: '', horaSalida: '' };
 
-          // Añadir ruta al array
           const r = res?.data;
           if (r) {
             this.rutas.update(list => [r, ...list]);
