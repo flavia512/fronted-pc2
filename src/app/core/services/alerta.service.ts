@@ -30,7 +30,7 @@ export class AlertaService {
       .pipe(map(res => ({ ok: res.exito, alerta: res.datos })));
   }
 
-  // PC1 FastAPI: GET http://localhost:8001/predict?fecha=YYYY-MM-DD&hora=HH:MM
+  // PC1 FastAPI: GET /predict?fecha=YYYY-MM-DD&hora=HH:MM
   predecirTrafico(fecha: string, hora: string): Observable<{
     ok: boolean;
     nivel_gravedad: number;
@@ -40,7 +40,7 @@ export class AlertaService {
     color: string;
   }> {
     const params = new HttpParams().set('fecha', fecha).set('hora', hora);
-    return this.http.get<any>('http://localhost:8001/predict', { params });
+    return this.http.get<any>(`${environment.pc1Url}/predict`, { params });
   }
 
   // POST /predicciones — Usado en: alertas.ts (crearAlerta, fire-and-forget)

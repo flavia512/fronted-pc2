@@ -46,7 +46,8 @@ export class Login {
     this.authService.login(this.form.getRawValue() as { email: string; password: string }).subscribe({
       next: () => {
         this.loading.set(false);
-        this.router.navigateByUrl(this.returnUrl || '/rutas');
+        const esAdmin = this.authService.getRolUsuario() === 'admin';
+        this.router.navigateByUrl(this.returnUrl || (esAdmin ? '/admin-users' : '/rutas'));
       },
       error: () => {
         this.loading.set(false);
