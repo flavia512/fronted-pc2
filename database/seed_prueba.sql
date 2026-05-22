@@ -19,6 +19,9 @@
 
 USE voycontigo_prueba;
 
+SET NAMES utf8mb4;
+SET CHARACTER SET utf8mb4;
+
 SET FOREIGN_KEY_CHECKS = 0;
 
 TRUNCATE TABLE predicciones;
