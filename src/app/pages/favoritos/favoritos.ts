@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FavoritoService } from '../../core/services/favorito.service';
@@ -25,6 +25,8 @@ export class Favoritos implements OnInit {
   error           = signal('');
   exito           = signal('');
   eliminando      = signal<number | null>(null);
+  mostrarModalLogin = signal(false);
+  esInvitado      = computed(() => this.authService.isGuest());
 
   // viajes expandidos por route_id
   viajesMap       = signal<Map<number, ViajeCompartido[]>>(new Map());
@@ -33,7 +35,9 @@ export class Favoritos implements OnInit {
   reservando      = signal<number | null>(null);
 
   ngOnInit(): void {
-    this.cargarFavoritos();
+    if (!this.esInvitado()) {
+      this.cargarFavoritos();
+    }
   }
 
   cargarFavoritos(): void {

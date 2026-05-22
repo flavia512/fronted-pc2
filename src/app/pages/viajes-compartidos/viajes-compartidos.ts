@@ -1,6 +1,7 @@
 import { Component, inject, OnInit, OnDestroy, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { Subject, Subscription, debounceTime, switchMap } from 'rxjs';
 import { ViajeCompartidoService } from '../../core/services/viaje-compartido.service';
 import { ReservaService } from '../../core/services/reserva.service';
@@ -34,7 +35,7 @@ type ViajesResponse = { success?: boolean; data?: ViajeCompartido[]; viajes?: Vi
 @Component({
   selector: 'app-viajes-compartidos',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './viajes-compartidos.html',
   styles: [`
     .fav-btn { line-height:1; color: #d1d5db; transition: color .15s, transform .15s; }
@@ -63,6 +64,7 @@ export class ViajesCompartidos implements OnInit, OnDestroy {
   private sub?: Subscription;
 
   toast = signal<{ tipo: ToastTipo; mensaje: string } | null>(null);
+  mostrarModalLogin = signal(false);
   private toastTimeout: any;
 
   ngOnInit(): void {
@@ -162,7 +164,7 @@ export class ViajesCompartidos implements OnInit, OnDestroy {
 
   toggleFavorito(viaje: ViajeCompartido): void {
     if (!this.authService.isLoggedIn()) {
-      this.mostrarToast('error', 'Debes iniciar sesión para guardar favoritos.');
+      this.mostrarModalLogin.set(true);
       return;
     }
 
@@ -207,7 +209,7 @@ export class ViajesCompartidos implements OnInit, OnDestroy {
 
   reservarViaje(viaje: ViajeCompartido): void {
     if (!this.authService.isLoggedIn()) {
-      this.mostrarToast('error', 'Debes iniciar sesión para reservar viajes.');
+      this.mostrarModalLogin.set(true);
       return;
     }
 

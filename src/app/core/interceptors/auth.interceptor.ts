@@ -20,7 +20,8 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
 
   return next(peticionConToken).pipe(
     catchError((error: HttpErrorResponse) => {
-      if (error.status === 401 && esLlamadaAlApi) {
+      const esInvitado = sessionStorage.getItem('guestMode') === '1';
+      if (error.status === 401 && esLlamadaAlApi && !esInvitado) {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
 

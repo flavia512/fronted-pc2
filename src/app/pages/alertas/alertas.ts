@@ -1,6 +1,7 @@
 ﻿import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { AlertaService } from '../../core/services/alerta.service';
 import { AuthService } from '../../core/services/auth.service';
 import { RutaService } from '../../core/services/ruta.service';
@@ -14,7 +15,7 @@ interface AlertaEnriquecida extends Alerta {
 @Component({
   selector: 'app-alertas',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './alertas.html',
   styleUrl: './alertas.scss'
 })
@@ -44,10 +45,13 @@ export class Alertas implements OnInit {
   creando      = signal(false);
   desactivando = signal<number | null>(null);
 
+  esInvitado = computed(() => this.authService.isGuest());
+
   rutasM30     = computed(() => this.rutas().filter(r => r.pasa_por_m30));
   alertasActivas = computed(() => this.alertas().filter(a => a.status === 'activa'));
 
   ngOnInit(): void {
+    if (this.esInvitado()) return;
     this.cargarRutas();
     this.cargarAlertas();
   }

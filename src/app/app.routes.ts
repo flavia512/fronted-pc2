@@ -20,9 +20,9 @@ export const routes: Routes = [
   { path: 'admin-users', component: AdminUsers, canActivate: [authGuard], data: { rolEsperado: 'admin' } },
   { path: 'crear-viaje', component: CrearViaje, canActivate: [authGuard] },
   { path: 'rutas', component: Rutas, canActivate: [authGuard], data: { allowGuest: true } },
-  { path: 'reservas', component: Reservas, canActivate: [authGuard] },
+  { path: 'reservas', component: Reservas, canActivate: [authGuard], data: { allowGuest: true } },
   { path: 'viajes-compartidos', component: ViajesCompartidos, canActivate: [authGuard], data: { allowGuest: true } },
-  { path: 'alertas', component: Alertas, canActivate: [authGuard] },
-  { path: 'favoritos', component: Favoritos, canActivate: [authGuard] },
+  { path: 'alertas', component: Alertas, canActivate: [authGuard], data: { allowGuest: true } },
+  { path: 'favoritos', component: Favoritos, canActivate: [authGuard], data: { allowGuest: true } },
   { path: '', redirectTo: 'home', pathMatch: 'full' }
 ];

@@ -55,7 +55,7 @@ export class AuthService {
     this.http.post(`${this.apiUrl}/auth/logout`, {}).subscribe({ error: () => {} });
     localStorage.removeItem(this.tokenKey);
     localStorage.removeItem(this.userKey);
-    localStorage.removeItem(this.guestKey);
+    sessionStorage.removeItem(this.guestKey);
     this.currentUser.set(null);
     this.guestMode.set(false);
   }
@@ -63,7 +63,7 @@ export class AuthService {
   continueAsGuest(): void {
     localStorage.removeItem(this.tokenKey);
     localStorage.removeItem(this.userKey);
-    localStorage.setItem(this.guestKey, '1');
+    sessionStorage.setItem(this.guestKey, '1');
     this.currentUser.set(null);
     this.guestMode.set(true);
   }
@@ -86,11 +86,11 @@ export class AuthService {
   }
 
   private getStoredGuestMode(): boolean {
-    return localStorage.getItem(this.guestKey) === '1';
+    return sessionStorage.getItem(this.guestKey) === '1';
   }
 
   private clearGuestMode(): void {
-    localStorage.removeItem(this.guestKey);
+    sessionStorage.removeItem(this.guestKey);
     this.guestMode.set(false);
   }
 

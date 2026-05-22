@@ -26,14 +26,12 @@ export class Rutas implements OnInit, OnDestroy {
   errorCarga = signal(false);
   mostrarModal = signal(false);
   guardandoRuta = signal(false);
+  mostrarModalLogin = signal(false);
   toast = signal<{ tipo: 'exito' | 'error'; mensaje: string } | null>(null);
 
   esInvitado = computed(() => this.authService.isGuest());
-  tituloPagina = computed(() => this.esInvitado() ? 'Rutas' : 'Mis Rutas');
-  descripcionPagina = computed(() => this.esInvitado()
-    ? 'Explora rutas disponibles y filtra por origen o destino'
-    : 'Gestiona tus trayectos habituales y recibe alertas de tráfico'
-  );
+  tituloPagina = 'Mis Rutas';
+  descripcionPagina = 'Gestiona tus trayectos habituales y recibe alertas de tráfico';
 
   filtroOrigen = '';
   filtroDestino = '';
@@ -187,14 +185,11 @@ export class Rutas implements OnInit, OnDestroy {
   }
 
   cargarRutasUsuario(): void {
+    if (this.esInvitado() || !this.authService.isLoggedIn()) return;
     this.cargando.set(true);
     this.errorCarga.set(false);
 
-    const request$ = this.authService.isGuest()
-      ? this.rutaService.listarRutasPublicas()
-      : this.rutaService.obtenerRutas();
-
-    request$.subscribe({
+    this.rutaService.obtenerRutas().subscribe({
       next: (rutas: Ruta[]) => {
         this.rutas.set(rutas);
         this.cargando.set(false);
@@ -214,7 +209,7 @@ export class Rutas implements OnInit, OnDestroy {
 
   eliminarRuta(id: number): void {
     if (!this.authService.isLoggedIn()) {
-      this.mostrarToast('error', 'Debes iniciar sesión para eliminar rutas.');
+      this.mostrarModalLogin.set(true);
       return;
     }
 
@@ -233,7 +228,7 @@ export class Rutas implements OnInit, OnDestroy {
 
   abrirModal(): void {
     if (!this.authService.isLoggedIn()) {
-      this.mostrarToast('error', 'Debes iniciar sesión para guardar rutas.');
+      this.mostrarModalLogin.set(true);
       return;
     }
 
@@ -270,7 +265,7 @@ export class Rutas implements OnInit, OnDestroy {
 
   guardarRutaBackend(): void {
     if (!this.authService.isLoggedIn()) {
-      this.mostrarToast('error', 'Debes iniciar sesión para guardar rutas.');
+      this.mostrarModalLogin.set(true);
       return;
     }
 

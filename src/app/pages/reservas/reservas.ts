@@ -1,6 +1,6 @@
-import { Component, OnInit, signal, inject } from '@angular/core';
+import { Component, OnInit, signal, inject, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { ReservaService } from '../../core/services/reserva.service';
 import { AuthService } from '../../core/services/auth.service';
 
@@ -29,7 +29,7 @@ export interface ReservasResponse {
 @Component({
   selector: 'app-reservas',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterLink],
   templateUrl: './reservas.html',
 })
 export class Reservas implements OnInit {
@@ -39,19 +39,11 @@ export class Reservas implements OnInit {
 
   reservas = signal<Reserva[]>([]);
   toast = signal<{ tipo: 'exito' | 'error'; mensaje: string } | null>(null);
+  esInvitado = computed(() => this.authService.isGuest());
   private toastTimeout: any;
 
   ngOnInit(): void {
-    if (!this.authService.isLoggedIn()) {
-      this.mostrarToast('error', 'Para ver tus reservas tienes que iniciar sesión');
-
-      setTimeout(() => {
-        this.router.navigate(['/login']);
-      }, 1500);
-
-      return;
-    }
-
+    if (this.esInvitado() || !this.authService.isLoggedIn()) return;
     this.cargarReservas();
   }
 

@@ -26,7 +26,21 @@
     </button>
   </div>
 
-  <!-- Formulario nueva alerta -->
+  @if (esInvitado()) {
+    <div class="card border-0 bg-light rounded-4 text-center py-5 px-3">
+      <i class="bi bi-bell text-secondary d-block mb-3" style="font-size:2.5rem;"></i>
+      <h6 class="fw-semibold">Alertas de tráfico personalizadas</h6>
+      <p class="text-secondary small mb-4">Crea una cuenta para recibir alertas cuando haya cortes o incidencias en tu ruta habitual por la M-30.</p>
+      <div class="d-flex justify-content-center gap-2 flex-wrap">
+        <a routerLink="/login" [queryParams]="{returnUrl: '/alertas'}" class="btn btn-primary rounded-pill px-4">
+          <i class="bi bi-box-arrow-in-right me-1"></i>Iniciar sesión
+        </a>
+        <a routerLink="/register" [queryParams]="{returnUrl: '/alertas'}" class="btn btn-outline-primary rounded-pill px-4">
+          <i class="bi bi-person-plus me-1"></i>Registrarse
+        </a>
+      </div>
+    </div>
+  } @else {
   <div class="section-card mb-3">
     <div class="section-label">
       <i class="bi bi-plus-lg"></i> Nueva alerta
@@ -158,5 +172,6 @@
       </div>
     }
   </div>
+  }
 
 </div>
