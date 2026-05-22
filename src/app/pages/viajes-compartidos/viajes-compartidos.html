@@ -137,54 +137,22 @@
                     {{ esMiViaje(viaje) ? 'Tu viaje' : yaReservado(viaje) ? 'Reservado' : viaje.seats_available < 1 ? 'Completo' : 'Reservar' }}
                   </button>
 
+                  <!-- Favorito — alineado con el botón de reserva -->
+                  <button class="btn btn-link p-0 fav-btn"
+                          [class.fav-active]="esFavorito(viaje.route_id)"
+                          [disabled]="toggling() === viaje.route_id"
+                          (click)="toggleFavorito(viaje)"
+                          title="{{ esFavorito(viaje.route_id) ? 'Quitar de favoritos' : 'Añadir a favoritos' }}">
+                    @if (toggling() === viaje.route_id) {
+                      <span class="spinner-border spinner-border-sm" style="width:14px;height:14px"></span>
+                    } @else {
+                      <i class="bi {{ esFavorito(viaje.route_id) ? 'bi-heart-fill' : 'bi-heart' }} fs-5"></i>
+                    }
+                  </button>
+
                 </div>
 
               </div>
-
-              @if (esMiViaje(viaje)) {
-                <div class="mt-3 pt-3 border-top">
-                  <div class="d-flex align-items-center justify-content-between gap-2 mb-2">
-                    <span class="small fw-semibold text-secondary">
-                      <i class="bi bi-ticket-perforated me-1"></i>
-                      Reservas recibidas
-                    </span>
-                    <span class="badge bg-light text-secondary border rounded-pill">
-                      {{ totalReservado(viaje) }} asiento{{ totalReservado(viaje) !== 1 ? 's' : '' }} reservado{{ totalReservado(viaje) !== 1 ? 's' : '' }}
-                    </span>
-                  </div>
-
-                  @if ((viaje.reservas?.length ?? 0) > 0) {
-                    <div class="d-flex flex-column gap-2">
-                      @for (reserva of (viaje.reservas ?? []); track reserva.id) {
-                        <div class="d-flex justify-content-between align-items-center bg-light rounded-3 px-3 py-2">
-                          <span class="small">
-                            {{ reserva.usuario?.full_name || reserva.usuario?.email || ('Usuario #' + reserva.user_id) }}
-                          </span>
-                          <span class="small text-secondary">
-                            {{ reserva.seats }} asiento{{ reserva.seats !== 1 ? 's' : '' }} · {{ reserva.status === 'pending' ? 'Pendiente' : reserva.status }}
-                          </span>
-                        </div>
-                      }
-                    </div>
-                  } @else {
-                    <p class="small text-secondary mb-0">Todavía nadie ha reservado este viaje.</p>
-                  }
-                </div>
-              }
-
-              <!-- Favorito — esquina inferior derecha -->
-              <button class="btn btn-link p-0 fav-btn position-absolute"
-                      style="bottom:.65rem;right:.85rem;"
-                      [class.fav-active]="esFavorito(viaje.route_id)"
-                      [disabled]="toggling() === viaje.route_id"
-                      (click)="toggleFavorito(viaje)"
-                      title="{{ esFavorito(viaje.route_id) ? 'Quitar de favoritos' : 'Añadir a favoritos' }}">
-                @if (toggling() === viaje.route_id) {
-                  <span class="spinner-border spinner-border-sm" style="width:14px;height:14px"></span>
-                } @else {
-                  <i class="bi {{ esFavorito(viaje.route_id) ? 'bi-heart-fill' : 'bi-heart' }} fs-5"></i>
-                }
-              </button>
             </div>
           </div>
         </div>

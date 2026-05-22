@@ -17,6 +17,14 @@ export interface ViajeCompartido {
   status: string;
   created_at?: string;
   updated_at?: string;
+  reservas?: Array<{
+    id: number;
+    user_id: number;
+    trip_id: number;
+    seats: number;
+    status: string;
+    usuario?: { id?: number; full_name?: string; email?: string };
+  }>;
 }
 
 @Injectable({

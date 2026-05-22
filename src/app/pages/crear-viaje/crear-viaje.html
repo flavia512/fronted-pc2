@@ -1,4 +1,4 @@
-<div class="container py-4 py-md-5" style="max-width: 620px;">
+<div class="container py-4 py-md-5" style="max-width: 760px;">
 
   <!-- TOAST -->
   @if (toast()) {
@@ -15,8 +15,8 @@
 
   <!-- HEADER -->
   <div class="mb-4 mb-md-5">
-    <h1 class="fw-bold mb-1" style="font-size: 2rem;">Crear Viaje</h1>
-    <p class="text-secondary mb-0">Comparte tu trayecto y ayuda a otros a llegar a su destino</p>
+    <h1 class="fw-bold mb-1" style="font-size: 2rem;">Mis Viajes</h1>
+    <p class="text-secondary mb-0">Publica trayectos y gestiona los que ya has creado</p>
   </div>
 
   <!-- FORMULARIO -->
@@ -122,16 +122,147 @@
         <div class="d-grid">
           <button type="submit" class="btn btn-primary rounded-pill py-2 fw-semibold"
             [disabled]="loading || misRutas.length === 0">
-            @if (loading) {
-            <span class="spinner-border spinner-border-sm me-2"></span> Publicando...
-            } @else {
-            <i class="bi bi-send me-2"></i> Publicar Viaje
-            }
+            <i class="bi bi-send me-2"></i>
+            {{ loading ? 'Publicando...' : 'Publicar Viaje' }}
           </button>
         </div>
 
       </form>
     </div>
+  </div>
+
+  <!-- MIS VIAJES PUBLICADOS -->
+  <div class="mt-5">
+    <h2 class="fw-semibold mb-3" style="font-size: 1.25rem;">
+      <i class="bi bi-car-front me-2 text-primary"></i>Mis viajes publicados
+    </h2>
+
+    @if (cargandoViajes()) {
+      <div class="text-center py-4 text-secondary">
+        <span class="spinner-border spinner-border-sm me-2"></span> Cargando...
+      </div>
+    } @else if (misViajes().length === 0) {
+      <div class="card border-0 bg-light rounded-4 text-center py-5 px-3">
+        <i class="bi bi-car-front text-secondary mb-3" style="font-size:2.5rem;"></i>
+        <h6 class="fw-semibold">Aún no has publicado ningún viaje</h6>
+        <p class="text-secondary small mb-0">Usa el formulario de arriba para publicar tu primer trayecto.</p>
+      </div>
+    } @else {
+      <div class="d-flex flex-column gap-3">
+        @for (viaje of misViajes(); track viaje.id) {
+          <div class="card border-0 shadow-sm rounded-3">
+            <div class="card-body px-4 py-3">
+              <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-3">
+
+                <div class="d-flex align-items-start gap-3">
+                  <div class="bg-primary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
+                       style="width:42px;height:42px;">
+                    <i class="bi bi-car-front text-primary fs-5"></i>
+                  </div>
+                  <div>
+                    @if (nombreRuta(viaje.route_id)) {
+                      <p class="text-secondary small mb-0">{{ nombreRuta(viaje.route_id) }}</p>
+                    }
+                    <h6 class="fw-semibold mb-1">
+                      {{ viaje.origin || '—' }}
+                      <i class="bi bi-arrow-right text-secondary small mx-1"></i>
+                      {{ viaje.destiny || '—' }}
+                    </h6>
+                    <div class="d-flex flex-wrap gap-2">
+                      <span class="badge bg-light text-secondary border rounded-pill px-3 py-1">
+                        <i class="bi bi-calendar3 me-1"></i>{{ viaje.trip_datetime | date:'dd MMM yyyy' }}
+                      </span>
+                      <span class="badge bg-light text-secondary border rounded-pill px-3 py-1">
+                        <i class="bi bi-clock me-1"></i>{{ viaje.trip_datetime | date:'HH:mm' }}
+                      </span>
+                      <span class="badge bg-light text-secondary border rounded-pill px-3 py-1">
+                        <i class="bi bi-people me-1"></i>{{ viaje.seats_available }} / {{ viaje.seats_total }} libres
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <button class="btn btn-outline-danger btn-sm rounded-pill px-3 flex-shrink-0"
+                        [disabled]="eliminando() === viaje.id"
+                        (click)="cancelarViaje(viaje.id)">
+                  <i class="bi bi-x-circle me-1"></i>
+                  {{ eliminando() === viaje.id ? 'Cancelando...' : 'Cancelar viaje' }}
+                </button>
+
+              </div>
+
+              <!-- PASAJEROS -->
+              @if ((viaje.reservas?.length ?? 0) > 0) {
+                <div class="mt-3 pt-3 border-top">
+                  <p class="small fw-semibold text-secondary mb-2">
+                    <i class="bi bi-people me-1"></i>Pasajeros reservados
+                  </p>
+                  <div class="d-flex flex-column gap-2">
+                    @for (reserva of (viaje.reservas ?? []); track reserva.id) {
+                      <div class="d-flex justify-content-between align-items-center bg-light rounded-3 px-3 py-2">
+                        <div class="d-flex align-items-center gap-2">
+                          <div class="rounded-circle bg-secondary bg-opacity-25 d-flex align-items-center justify-content-center fw-semibold flex-shrink-0"
+                               style="width:28px;height:28px;font-size:.75rem;">
+                            {{ (reserva.usuario?.full_name || reserva.usuario?.email || '?').charAt(0).toUpperCase() }}
+                          </div>
+                          <span class="small fw-medium">
+                            {{ reserva.usuario?.full_name || reserva.usuario?.email || ('Pasajero #' + reserva.user_id) }}
+                          </span>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                          <span class="small text-secondary">
+                            {{ reserva.seats }} asiento{{ reserva.seats !== 1 ? 's' : '' }}
+                          </span>
+                          <span class="badge rounded-pill"
+                                [class.bg-success]="reserva.status === 'confirmed'"
+                                [class.bg-warning]="reserva.status === 'pending'"
+                                [class.text-dark]="reserva.status === 'pending'"
+                                [class.bg-secondary]="reserva.status !== 'confirmed' && reserva.status !== 'pending'">
+                            {{ reserva.status === 'confirmed' ? 'Confirmado' : reserva.status === 'pending' ? 'Pendiente' : reserva.status }}
+                          </span>
+                          @if (reserva.status === 'pending') {
+                            <button class="btn btn-success btn-sm rounded-pill px-2 py-0"
+                                    style="font-size:.75rem;"
+                                    [disabled]="gestionandoReserva() === reserva.id"
+                                    (click)="cambiarEstadoReserva(reserva.id, 'confirmed', viaje.id)"
+                                    title="Confirmar reserva">
+                              <i class="bi bi-check-lg"></i>
+                            </button>
+                            <button class="btn btn-outline-danger btn-sm rounded-pill px-2 py-0"
+                                    style="font-size:.75rem;"
+                                    [disabled]="gestionandoReserva() === reserva.id"
+                                    (click)="cambiarEstadoReserva(reserva.id, 'cancelled', viaje.id)"
+                                    title="Rechazar reserva">
+                              <i class="bi bi-x-lg"></i>
+                            </button>
+                          }
+                          @if (reserva.status === 'confirmed') {
+                            <button class="btn btn-outline-secondary btn-sm rounded-pill px-2 py-0"
+                                    style="font-size:.75rem;"
+                                    [disabled]="gestionandoReserva() === reserva.id"
+                                    (click)="cambiarEstadoReserva(reserva.id, 'cancelled', viaje.id)"
+                                    title="Revocar confirmación">
+                              <i class="bi bi-x-lg"></i>
+                            </button>
+                          }
+                        </div>
+                      </div>
+                    }
+                  </div>
+                </div>
+              } @else {
+                <div class="mt-3 pt-3 border-top">
+                  <p class="small text-secondary mb-0">
+                    <i class="bi bi-person-x me-1"></i>Aún nadie ha reservado este viaje.
+                  </p>
+                </div>
+              }
+
+            </div>
+          </div>
+        }
+      </div>
+    }
   </div>
 
 </div>

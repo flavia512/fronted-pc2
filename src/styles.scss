@@ -1,4 +1,5 @@
-@use 'bootstrap/dist/css/bootstrap.min.css';
+@use 'bootstrap/scss/bootstrap' as *;
+
 @import 'mapbox-gl/dist/mapbox-gl.css';
 
 /* RESET */
@@ -49,4 +50,4 @@ button {
 }
 
 /* IMPORT FINAL BOOTSTRAP SCSS */
-@import 'bootstrap/scss/bootstrap';
+/* (Bootstrap ya está cargado con @use al inicio del archivo) */

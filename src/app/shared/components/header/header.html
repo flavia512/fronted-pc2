@@ -14,18 +14,15 @@
 
   @if (puedeExplorar()) {
     <div class="d-none d-md-flex align-items-center gap-4 me-4">
-      <a routerLink="/viajes-compartidos" routerLinkActive="fw-semibold text-primary" class="text-secondary text-decoration-none small">Viajes</a>
-      <a routerLink="/rutas" routerLinkActive="fw-semibold text-primary" class="text-secondary text-decoration-none small">Mis Rutas</a>
-      <a routerLink="/reservas" routerLinkActive="fw-semibold text-primary" class="text-secondary text-decoration-none small">Mis Reservas</a>
-      <a routerLink="/alertas" routerLinkActive="fw-semibold text-primary" class="text-secondary text-decoration-none small">Mis Alertas</a>
-      <a routerLink="/favoritos" routerLinkActive="fw-semibold text-primary" class="text-secondary text-decoration-none small">Favoritos</a>
-
-      @if (es_logeado()) {
-        <a routerLink="/crear-viaje" routerLinkActive="fw-semibold text-primary" class="text-secondary text-decoration-none small">Crear Viaje</a>
-      }
-
-      @if (isAdmin()) {
-        <a routerLink="/admin-users" routerLinkActive="fw-semibold text-primary" class="text-secondary text-decoration-none small">Admin Users</a>
+      @if (!isAdmin()) {
+        <a routerLink="/viajes-compartidos" routerLinkActive="fw-semibold text-primary" class="text-secondary text-decoration-none small">Viajes</a>
+        <a routerLink="/rutas" routerLinkActive="fw-semibold text-primary" class="text-secondary text-decoration-none small">Mis Rutas</a>
+        <a routerLink="/reservas" routerLinkActive="fw-semibold text-primary" class="text-secondary text-decoration-none small">Mis Reservas</a>
+        <a routerLink="/alertas" routerLinkActive="fw-semibold text-primary" class="text-secondary text-decoration-none small">Mis Alertas</a>
+        <a routerLink="/favoritos" routerLinkActive="fw-semibold text-primary" class="text-secondary text-decoration-none small">Favoritos</a>
+        @if (es_logeado()) {
+          <a routerLink="/crear-viaje" routerLinkActive="fw-semibold text-primary" class="text-secondary text-decoration-none small">Crear Viaje</a>
+        }
       }
     </div>
 
@@ -71,47 +68,39 @@
       </div>
 
       <div class="p-3 d-flex flex-column gap-1">
-        <a routerLink="/viajes-compartidos" routerLinkActive="text-primary fw-semibold"
-           class="text-secondary text-decoration-none py-2 px-3 rounded-3 d-flex align-items-center gap-3"
-           style="font-size:.97rem;" (click)="cerrarMenu()">
-          <i class="bi bi-car-front fs-5"></i> Viajes
-        </a>
-        <a routerLink="/rutas" routerLinkActive="text-primary fw-semibold"
-           class="text-secondary text-decoration-none py-2 px-3 rounded-3 d-flex align-items-center gap-3"
-           style="font-size:.97rem;" (click)="cerrarMenu()">
-          <i class="bi bi-signpost-2 fs-5"></i> Mis Rutas
-        </a>
-
-        <a routerLink="/reservas" routerLinkActive="text-primary fw-semibold"
-           class="text-secondary text-decoration-none py-2 px-3 rounded-3 d-flex align-items-center gap-3"
-           style="font-size:.97rem;" (click)="cerrarMenu()">
-          <i class="bi bi-ticket-perforated fs-5"></i> Mis Reservas
-        </a>
-        <a routerLink="/alertas" routerLinkActive="text-primary fw-semibold"
-           class="text-secondary text-decoration-none py-2 px-3 rounded-3 d-flex align-items-center gap-3"
-           style="font-size:.97rem;" (click)="cerrarMenu()">
-          <i class="bi bi-bell fs-5"></i> Mis Alertas
-        </a>
-        <a routerLink="/favoritos" routerLinkActive="text-primary fw-semibold"
-           class="text-secondary text-decoration-none py-2 px-3 rounded-3 d-flex align-items-center gap-3"
-           style="font-size:.97rem;" (click)="cerrarMenu()">
-          <i class="bi bi-heart fs-5"></i> Favoritos
-        </a>
-
-        @if (es_logeado()) {
-          <a routerLink="/crear-viaje" routerLinkActive="text-primary fw-semibold"
+        @if (!isAdmin()) {
+          <a routerLink="/viajes-compartidos" routerLinkActive="text-primary fw-semibold"
              class="text-secondary text-decoration-none py-2 px-3 rounded-3 d-flex align-items-center gap-3"
              style="font-size:.97rem;" (click)="cerrarMenu()">
-            <i class="bi bi-plus-circle fs-5"></i> Crear Viaje
+            <i class="bi bi-car-front fs-5"></i> Viajes
           </a>
-        }
-
-        @if (isAdmin()) {
-          <a routerLink="/admin-users" routerLinkActive="text-primary fw-semibold"
+          <a routerLink="/rutas" routerLinkActive="text-primary fw-semibold"
              class="text-secondary text-decoration-none py-2 px-3 rounded-3 d-flex align-items-center gap-3"
              style="font-size:.97rem;" (click)="cerrarMenu()">
-            <i class="bi bi-shield-check fs-5"></i> Admin Users
+            <i class="bi bi-signpost-2 fs-5"></i> Mis Rutas
           </a>
+          <a routerLink="/reservas" routerLinkActive="text-primary fw-semibold"
+             class="text-secondary text-decoration-none py-2 px-3 rounded-3 d-flex align-items-center gap-3"
+             style="font-size:.97rem;" (click)="cerrarMenu()">
+            <i class="bi bi-ticket-perforated fs-5"></i> Mis Reservas
+          </a>
+          <a routerLink="/alertas" routerLinkActive="text-primary fw-semibold"
+             class="text-secondary text-decoration-none py-2 px-3 rounded-3 d-flex align-items-center gap-3"
+             style="font-size:.97rem;" (click)="cerrarMenu()">
+            <i class="bi bi-bell fs-5"></i> Mis Alertas
+          </a>
+          <a routerLink="/favoritos" routerLinkActive="text-primary fw-semibold"
+             class="text-secondary text-decoration-none py-2 px-3 rounded-3 d-flex align-items-center gap-3"
+             style="font-size:.97rem;" (click)="cerrarMenu()">
+            <i class="bi bi-heart fs-5"></i> Favoritos
+          </a>
+          @if (es_logeado()) {
+            <a routerLink="/crear-viaje" routerLinkActive="text-primary fw-semibold"
+               class="text-secondary text-decoration-none py-2 px-3 rounded-3 d-flex align-items-center gap-3"
+               style="font-size:.97rem;" (click)="cerrarMenu()">
+              <i class="bi bi-plus-circle fs-5"></i> Crear Viaje
+            </a>
+          }
         }
 
         <hr class="my-2">

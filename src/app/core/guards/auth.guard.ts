@@ -15,13 +15,21 @@ export const authGuard: CanActivateFn = (route, state) => {
     return false;
   }
 
+  const esAdmin = authService.getRolUsuario() === 'admin';
+
+  // Admin solo puede acceder a /admin-users (y perfil/login/register)
+  if (esAdmin && route.data['blockAdmin']) {
+    router.navigate(['/admin-users']);
+    return false;
+  }
+
   const rolEsperado = route.data['rolEsperado'];
   if (rolEsperado) {
     const miRol = authService.getRolUsuario();
 
     if (miRol !== rolEsperado) {
       console.warn(`Acceso denegado. Eres ${miRol}, se requiere ${rolEsperado}`);
-      router.navigate(['/']);
+      router.navigate(['/admin-users']);
       return false;
     }
   }

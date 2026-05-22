@@ -2,8 +2,9 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { ViajeCompartidoService } from '../../core/services/viaje-compartido.service';
+import { ViajeCompartidoService, ViajeCompartido } from '../../core/services/viaje-compartido.service';
 import { RutaService } from '../../core/services/ruta.service';
+import { ReservaService } from '../../core/services/reserva.service';
 import { Ruta } from '../../core/models/ruta.model';
 import { AuthService } from '../../core/services/auth.service';
 
@@ -17,6 +18,7 @@ export class CrearViaje implements OnInit {
   private fb = inject(FormBuilder);
   private viajeService = inject(ViajeCompartidoService);
   private rutaService = inject(RutaService);
+  private reservaService = inject(ReservaService);
   private router = inject(Router);
   private authService = inject(AuthService);
 
@@ -27,6 +29,11 @@ export class CrearViaje implements OnInit {
 
   toast = signal<{ tipo: 'exito' | 'error'; mensaje: string } | null>(null);
   private toastTimeout: any = null;
+
+  misViajes = signal<ViajeCompartido[]>([]);
+  cargandoViajes = signal(false);
+  eliminando = signal<number | null>(null);
+  gestionandoReserva = signal<number | null>(null);
 
   constructor() {
     this.form = this.fb.group({
@@ -56,6 +63,8 @@ export class CrearViaje implements OnInit {
         this.mostrarToast('error', 'No se pudieron cargar tus rutas guardadas.');
       }
     });
+
+    this.cargarMisViajes();
 
     this.form.get('route_id')!.valueChanges.subscribe((id: number | null) => {
       const ruta = id ? this.misRutas.find(r => r.id === Number(id)) ?? null : null;
@@ -126,11 +135,10 @@ export class CrearViaje implements OnInit {
       this.viajeService.crearViaje(payloadViaje).subscribe({
         next: () => {
           this.loading = false;
+          this.form.reset();
+          this.rutaSeleccionada.set(null);
           this.mostrarToast('exito', '¡Viaje publicado con éxito!');
-
-          setTimeout(() => {
-            this.router.navigate(['/viajes-compartidos']);
-          }, 1500);
+          this.cargarMisViajes();
         },
         error: (err) => {
           this.loading = false;
@@ -141,5 +149,66 @@ export class CrearViaje implements OnInit {
     } else {
       this.form.markAllAsTouched();
     }
+  }
+
+  cargarMisViajes(): void {
+    this.cargandoViajes.set(true);
+    const userId = this.authService.currentUser()?.id;
+
+    this.viajeService.listarViajes().subscribe({
+      next: ({ data }) => {
+        this.misViajes.set((data ?? []).filter(v => v.driver_user_id === userId));
+        this.cargandoViajes.set(false);
+      },
+      error: () => {
+        this.cargandoViajes.set(false);
+      }
+    });
+  }
+
+  cancelarViaje(id: number): void {
+    this.eliminando.set(id);
+    this.viajeService.eliminarViaje(id).subscribe({
+      next: () => {
+        this.misViajes.update(viajes => viajes.filter(v => v.id !== id));
+        this.eliminando.set(null);
+        this.mostrarToast('exito', 'Viaje cancelado correctamente.');
+      },
+      error: () => {
+        this.eliminando.set(null);
+        this.mostrarToast('error', 'Error al cancelar el viaje.');
+      }
+    });
+  }
+
+  nombreRuta(routeId: number): string {
+    const ruta = this.misRutas.find(r => r.id === routeId);
+    return ruta?.nombre ?? '';
+  }
+
+  cambiarEstadoReserva(reservaId: number, status: 'confirmed' | 'cancelled', viajeId: number): void {
+    this.gestionandoReserva.set(reservaId);
+    this.reservaService.actualizarReserva(reservaId, { status }).subscribe({
+      next: () => {
+        this.misViajes.update(viajes =>
+          viajes.map(v => {
+            if (v.id !== viajeId) return v;
+            return {
+              ...v,
+              reservas: (v.reservas ?? []).map(r =>
+                r.id === reservaId ? { ...r, status } : r
+              )
+            };
+          })
+        );
+        this.gestionandoReserva.set(null);
+        const msg = status === 'confirmed' ? 'Reserva confirmada.' : 'Reserva rechazada.';
+        this.mostrarToast('exito', msg);
+      },
+      error: () => {
+        this.gestionandoReserva.set(null);
+        this.mostrarToast('error', 'Error al actualizar la reserva.');
+      }
+    });
   }
 }

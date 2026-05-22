@@ -18,11 +18,11 @@ export const routes: Routes = [
   { path: 'register', component: Register },
   { path: 'profile', component: Profile, canActivate: [authGuard] },
   { path: 'admin-users', component: AdminUsers, canActivate: [authGuard], data: { rolEsperado: 'admin' } },
-  { path: 'crear-viaje', component: CrearViaje, canActivate: [authGuard] },
-  { path: 'rutas', component: Rutas, canActivate: [authGuard], data: { allowGuest: true } },
-  { path: 'reservas', component: Reservas, canActivate: [authGuard], data: { allowGuest: true } },
-  { path: 'viajes-compartidos', component: ViajesCompartidos, canActivate: [authGuard], data: { allowGuest: true } },
-  { path: 'alertas', component: Alertas, canActivate: [authGuard], data: { allowGuest: true } },
-  { path: 'favoritos', component: Favoritos, canActivate: [authGuard], data: { allowGuest: true } },
+  { path: 'crear-viaje', component: CrearViaje, canActivate: [authGuard], data: { blockAdmin: true } },
+  { path: 'rutas', component: Rutas, canActivate: [authGuard], data: { allowGuest: true, blockAdmin: true } },
+  { path: 'reservas', component: Reservas, canActivate: [authGuard], data: { allowGuest: true, blockAdmin: true } },
+  { path: 'viajes-compartidos', component: ViajesCompartidos, canActivate: [authGuard], data: { allowGuest: true, blockAdmin: true } },
+  { path: 'alertas', component: Alertas, canActivate: [authGuard], data: { allowGuest: true, blockAdmin: true } },
+  { path: 'favoritos', component: Favoritos, canActivate: [authGuard], data: { allowGuest: true, blockAdmin: true } },
   { path: '', redirectTo: 'home', pathMatch: 'full' }
 ];
