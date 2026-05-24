@@ -6,6 +6,7 @@ import { AuthService } from '../../core/services/auth.service';
 import { ReservaService } from '../../core/services/reserva.service';
 import { ViajeCompartidoService, ViajeCompartido } from '../../core/services/viaje-compartido.service';
 import { Favorito } from '../../core/models/favorito.model';
+import {SoporteTecnico} from '../../shared/components/soporteTecnico/soporteTecnico';
 
 @Component({
   selector: 'app-favoritos',
@@ -118,5 +119,12 @@ export class Favoritos implements OnInit {
         this.eliminando.set(null);
       }
     });
+  }
+  copiarSoporte(): void {
+
+    navigator.clipboard.writeText(SoporteTecnico.soporteLink);
+
+    alert('Link copiado al portapapeles');
+
   }
 }

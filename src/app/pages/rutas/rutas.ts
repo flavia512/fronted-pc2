@@ -9,6 +9,7 @@ import { RutaService } from '../../core/services/ruta.service';
 import { AuthService } from '../../core/services/auth.service';
 import { Ruta } from '../../core/models/ruta.model';
 import { environment } from '../../../environments/environment';
+import {SoporteTecnico} from '../../shared/components/soporteTecnico/soporteTecnico';
 
 (mapboxgl as any).workerCount = 1;
 
@@ -316,5 +317,12 @@ export class Rutas implements OnInit, OnDestroy {
   cerrarToast(): void {
     this.toast.set(null);
     if (this.toastTimeout) clearTimeout(this.toastTimeout);
+  }
+  copiarSoporte(): void {
+
+    navigator.clipboard.writeText(SoporteTecnico.soporteLink);
+
+    alert('Link copiado al portapapeles');
+
   }
 }

@@ -1,12 +1,13 @@
 import { Component, OnInit, inject, signal, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-
+import { Header } from '../../shared/components/header/header';
 import { User } from '../../core/models/user.model';
 import { AdminService } from '../../core/services/admin.service';
 import { ReservaService } from '../../core/services/reserva.service';
 import { Reserva } from '../../core/models/reserva.model';
 import {Chart, registerables} from 'chart.js';
+import {SoporteTecnico} from '../../shared/components/soporteTecnico/soporteTecnico';
 
 Chart.register(...registerables);
 @Component({
@@ -22,6 +23,7 @@ export class AdminUsers implements OnInit {
   chartReservas: any;
   private userService = inject(AdminService);
   private reservaService = inject(ReservaService);
+  linkSoporte = SoporteTecnico.soporteLink;
 
   // USERS
   usuarios = signal<User[]>([]);
@@ -305,12 +307,15 @@ export class AdminUsers implements OnInit {
       }
     });
   }
-
-  oscuro(): void {
-    document.body.classList.add('dark-theme');
+  cambiarIcono(): void {
+    Header.icono = 'bi-truck';
   }
 
-  claro(): void {
-    document.body.classList.remove('dark-theme');
+
+
+
+  guardarLinkSoporte(): void {
+  SoporteTecnico.soporteLink = this.linkSoporte;
+  this.exito.set('Link de soporte actualizado');
   }
 }

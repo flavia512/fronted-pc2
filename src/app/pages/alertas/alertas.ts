@@ -7,6 +7,7 @@ import { AuthService } from '../../core/services/auth.service';
 import { RutaService } from '../../core/services/ruta.service';
 import { Alerta } from '../../core/models/alerta.model';
 import { Ruta } from '../../core/models/ruta.model';
+import {SoporteTecnico} from '../../shared/components/soporteTecnico/soporteTecnico';
 
 interface AlertaEnriquecida extends Alerta {
   rutaNombre?: string;
@@ -163,5 +164,12 @@ export class Alertas implements OnInit {
         this.desactivando.set(null);
       }
     });
+  }
+  copiarSoporte(): void {
+
+    navigator.clipboard.writeText(SoporteTecnico.soporteLink);
+
+    alert('Link copiado al portapapeles');
+
   }
 }

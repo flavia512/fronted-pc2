@@ -1,14 +1,19 @@
 import { Component, inject, computed, signal } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
+import {NgClass} from '@angular/common';
 
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [RouterLink, RouterLinkActive],
+  imports: [RouterLink, RouterLinkActive, NgClass],
   templateUrl: './header.html',
 })
 export class Header {
+  static icono = 'bi-car-front';
+
+  Header = Header;
+
   authService = inject(AuthService);
   private router = inject(Router);
 
@@ -22,7 +27,7 @@ export class Header {
   private avisoTimeout: any;
 
   toggleMenu(): void {
-    this.menuAbierto.update(v => !v);
+    this.menuAbierto.update((v) => !v);
   }
 
   cerrarMenu(): void {

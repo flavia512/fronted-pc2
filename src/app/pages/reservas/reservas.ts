@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { ReservaService } from '../../core/services/reserva.service';
 import { AuthService } from '../../core/services/auth.service';
+import {SoporteTecnico} from '../../shared/components/soporteTecnico/soporteTecnico';
 
 export interface Reserva {
   id: number;
@@ -100,4 +101,12 @@ export class Reservas implements OnInit {
       clearTimeout(this.toastTimeout);
     }
   }
+  copiarSoporte(): void {
+
+    navigator.clipboard.writeText(SoporteTecnico.soporteLink);
+
+    alert('Link copiado al portapapeles');
+
+  }
+
 }

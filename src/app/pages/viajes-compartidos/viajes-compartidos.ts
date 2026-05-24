@@ -7,6 +7,7 @@ import { ViajeCompartidoService } from '../../core/services/viaje-compartido.ser
 import { ReservaService } from '../../core/services/reserva.service';
 import { AuthService } from '../../core/services/auth.service';
 import { FavoritoService } from '../../core/services/favorito.service';
+import {SoporteTecnico} from '../../shared/components/soporteTecnico/soporteTecnico';
 
 export interface ViajeCompartido {
   id: number;
@@ -299,5 +300,12 @@ export class ViajesCompartidos implements OnInit, OnDestroy {
     if (this.toastTimeout) {
       clearTimeout(this.toastTimeout);
     }
+  }
+  copiarSoporte(): void {
+
+    navigator.clipboard.writeText(SoporteTecnico.soporteLink);
+
+    alert('Link copiado al portapapeles');
+
   }
 }
