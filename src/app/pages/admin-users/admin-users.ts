@@ -7,7 +7,7 @@ import { AdminService } from '../../core/services/admin.service';
 import { ReservaService } from '../../core/services/reserva.service';
 import { Reserva } from '../../core/models/reserva.model';
 import {Chart, registerables} from 'chart.js';
-import {SoporteTecnico} from '../../shared/components/soporteTecnico/soporteTecnico';
+import { ConfiguracionService } from '../../core/services/configuracion.service';
 
 Chart.register(...registerables);
 @Component({
@@ -23,7 +23,9 @@ export class AdminUsers implements OnInit {
   chartReservas: any;
   private userService = inject(AdminService);
   private reservaService = inject(ReservaService);
-  linkSoporte = SoporteTecnico.soporteLink;
+  private configuracionService = inject(ConfiguracionService);
+  linkSoporte = signal('');
+  guardandoSoporte = signal(false);
 
   // USERS
   usuarios = signal<User[]>([]);
@@ -56,6 +58,10 @@ export class AdminUsers implements OnInit {
   ngOnInit(): void {
     this.cargarUsuarios();
     this.cargarEstadisticas();
+    this.configuracionService.obtenerConfig('soporte_link').subscribe({
+      next: (valor) => this.linkSoporte.set(valor),
+      error: () => {}
+    });
   }
 
 
@@ -315,7 +321,17 @@ export class AdminUsers implements OnInit {
 
 
   guardarLinkSoporte(): void {
-  SoporteTecnico.soporteLink = this.linkSoporte;
-  this.exito.set('Link de soporte actualizado');
+    this.guardandoSoporte.set(true);
+    this.error.set('');
+    this.configuracionService.actualizarConfig('soporte_link', this.linkSoporte()).subscribe({
+      next: () => {
+        this.exito.set('Link de soporte actualizado');
+        this.guardandoSoporte.set(false);
+      },
+      error: () => {
+        this.error.set('Error guardando el link de soporte');
+        this.guardandoSoporte.set(false);
+      }
+    });
   }
 }
