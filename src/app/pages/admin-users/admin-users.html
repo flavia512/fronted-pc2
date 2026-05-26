@@ -1,302 +1,382 @@
-<div class="admin-container">
+<div class="admin-page">
 
-  <div class="admin-header">
-    <h1>Gestión de Usuarios</h1>
-    <p>Administra los usuarios del sistema</p>
+  <!-- ── CABECERA ──────────────────────────────────────────────── -->
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">
+        <i class="bi bi-shield-lock-fill me-2"></i>Panel de Administración
+      </h1>
+      <p class="page-subtitle">Gestiona usuarios, estadísticas y configuración del sistema</p>
+    </div>
+    <button class="btn-primary-action" (click)="abrirModalCrear()">
+      <i class="bi bi-person-plus-fill"></i> Nuevo usuario
+    </button>
   </div>
 
+  <!-- ── ALERTAS ───────────────────────────────────────────────── -->
   @if (error()) {
-    <div class="mensaje mensaje-error">{{ error() }}</div>
+    <div class="alert alert--error">
+      <i class="bi bi-exclamation-triangle-fill"></i> {{ error() }}
+    </div>
   }
 
-  @if (exito()) {
-    <div class="mensaje mensaje-exito">{{ exito() }}</div>
-  }
-
+  <!-- ── ESTADÍSTICAS ──────────────────────────────────────────── -->
   @if (estadisticas()) {
-    <div class="stats-cards">
-      <div class="stat-card">
-        <span class="stat-valor">{{ estadisticas()!.total }}</span>
-        <span class="stat-label">Total usuarios</span>
+    <div class="row g-3 mb-4">
+      <div class="col-6 col-sm-3">
+        <div class="stat-card">
+          <div class="stat-icon stat-icon--blue"><i class="bi bi-people-fill"></i></div>
+          <div class="stat-info">
+            <span class="stat-value">{{ estadisticas()!.total }}</span>
+            <span class="stat-label">Total usuarios</span>
+          </div>
+        </div>
       </div>
-      <div class="stat-card stat-admin">
-        <span class="stat-valor">{{ estadisticas()!.admins }}</span>
-        <span class="stat-label">Administradores</span>
+      <div class="col-6 col-sm-3">
+        <div class="stat-card">
+          <div class="stat-icon stat-icon--yellow"><i class="bi bi-shield-fill"></i></div>
+          <div class="stat-info">
+            <span class="stat-value">{{ estadisticas()!.admins }}</span>
+            <span class="stat-label">Administradores</span>
+          </div>
+        </div>
       </div>
-      <div class="stat-card stat-activo">
-        <span class="stat-valor">{{ estadisticas()!.activos }}</span>
-        <span class="stat-label">Activos</span>
+      <div class="col-6 col-sm-3">
+        <div class="stat-card">
+          <div class="stat-icon stat-icon--green"><i class="bi bi-person-check-fill"></i></div>
+          <div class="stat-info">
+            <span class="stat-value">{{ estadisticas()!.activos }}</span>
+            <span class="stat-label">Activos</span>
+          </div>
+        </div>
       </div>
-      <div class="stat-card stat-inactivo">
-        <span class="stat-valor">{{ estadisticas()!.total - estadisticas()!.activos }}</span>
-        <span class="stat-label">Inactivos</span>
+      <div class="col-6 col-sm-3">
+        <div class="stat-card">
+          <div class="stat-icon stat-icon--red"><i class="bi bi-person-x-fill"></i></div>
+          <div class="stat-info">
+            <span class="stat-value">{{ estadisticas()!.total - estadisticas()!.activos }}</span>
+            <span class="stat-label">Inactivos</span>
+          </div>
+        </div>
       </div>
     </div>
   }
 
-  <div class="controles">
-
-    <div class="busqueda">
+  <!-- ── BARRA DE HERRAMIENTAS ─────────────────────────────────── -->
+  <div class="toolbar">
+    <div class="search-box">
+      <i class="bi bi-search search-icon"></i>
       <input
         type="text"
         [(ngModel)]="buscando"
         placeholder="Buscar por nombre o correo..."
-        class="input-busqueda">
-
+        class="search-input"
+      />
       @if (buscando) {
-        <button (click)="limpiarBusqueda()" class="btn-limpiar">✕</button>
+        <button class="search-clear" (click)="limpiarBusqueda()" title="Limpiar">
+          <i class="bi bi-x-lg"></i>
+        </button>
       }
     </div>
-
-    <button
-      (click)="cargarUsuarios()"
-      class="btn-recargar"
-      [disabled]="cargando()">
-      Recargar
+    <button class="btn-outline-action" (click)="cargarUsuarios()" [disabled]="cargando()">
+      <i class="bi bi-arrow-clockwise"></i> Recargar
     </button>
-
-    <button
-      (click)="abrirModalCrear()"
-      class="btn-nuevo-usuario">
-      + Nuevo Usuario
-    </button>
-
-    <button class="btn btn-primary" (click)="cambiarIcono()">
-      Cambiar el icono
-    </button>
-
   </div>
 
+  <!-- ── TABLA DE USUARIOS ─────────────────────────────────────── -->
   @if (cargando()) {
-
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <span>Cargando usuarios...</span>
+    </div>
   } @else if (usuariosFiltrados.length > 0) {
-
-    <div class="tabla-container">
-
-      <table class="tabla-usuarios">
-
+    <div class="table-card">
+      <table class="users-table">
         <thead>
-        <tr>
-          <th>ID</th>
-          <th>Nombre</th>
-          <th>Email</th>
-          <th>Rol</th>
-          <th>Estado</th>
-          <th>Acciones</th>
-          <th>Reservas</th>
-        </tr>
+          <tr>
+            <th>Usuario</th>
+            <th>Email</th>
+            <th>Rol</th>
+            <th>Estado</th>
+            <th class="text-center">Acciones</th>
+          </tr>
         </thead>
-
         <tbody>
-
           @for (usuario of usuariosFiltrados; track usuario.id) {
-
-            <tr [class.inactivo]="!usuario.is_active">
-
-              <td>#{{ usuario.id }}</td>
-              <td>{{ usuario.full_name }}</td>
-              <td>{{ usuario.email }}</td>
-
+            <tr>
               <td>
-              <span class="badge" [class.admin]="usuario.rol === 'admin'">
-                {{ usuario.rol === 'admin' ? 'Admin' : 'Usuario' }}
-              </span>
+                <div class="user-cell">
+                  <div class="user-avatar" [class.user-avatar--admin]="usuario.rol === 'admin'">
+                    {{ usuario.full_name.charAt(0).toUpperCase() }}
+                  </div>
+                  <div>
+                    <div class="user-name">{{ usuario.full_name }}</div>
+                    <div class="user-id">#{{ usuario.id }}</div>
+                  </div>
+                </div>
               </td>
-
+              <td class="user-email">{{ usuario.email }}</td>
               <td>
-              <span class="estado" [class.activo]="usuario.is_active">
-                {{ usuario.is_active ? 'Activo' : 'Inactivo' }}
-              </span>
+                <span class="role-badge" [class.role-badge--admin]="usuario.rol === 'admin'">
+                  <i class="bi" [class.bi-shield-fill]="usuario.rol === 'admin'" [class.bi-person-fill]="usuario.rol !== 'admin'"></i>
+                  {{ usuario.rol === 'admin' ? 'Admin' : 'Usuario' }}
+                </span>
               </td>
-
-              <td class="acciones">
-
-                <button (click)="abrirModalEditar(usuario)" class="btn-accion btn-editar">✏️</button>
-
-                <button
-                  (click)="toggleEstado(usuario)"
-                  class="btn-accion btn-toggle">
-                  {{ usuario.is_active ? '⊘' : '✓' }}
-                </button>
-
-                <button (click)="eliminarUsuario(usuario)" class="btn-accion btn-eliminar">🗑</button>
-
-              </td>
-
               <td>
-                <button class="btn-accion btn-ver" (click)="cargarReservasPorRuta(1)">
-                  Ver reservas
-                </button>
+                <span class="status-badge" [class.status-badge--active]="usuario.is_active">
+                  {{ usuario.is_active ? 'Activo' : 'Inactivo' }}
+                </span>
               </td>
-
+              <td>
+                <div class="action-group">
+                  <button class="action-btn action-btn--edit" title="Editar" (click)="abrirModalEditar(usuario)">
+                    <i class="bi bi-pencil-fill"></i>
+                  </button>
+                  <button
+                    class="action-btn"
+                    [class.action-btn--deactivate]="usuario.is_active"
+                    [class.action-btn--activate]="!usuario.is_active"
+                    [title]="usuario.is_active ? 'Desactivar' : 'Activar'"
+                    (click)="toggleEstado(usuario)">
+                    <i class="bi" [class.bi-toggle-on]="usuario.is_active" [class.bi-toggle-off]="!usuario.is_active"></i>
+                  </button>
+                  <button class="action-btn action-btn--delete" title="Eliminar" (click)="eliminarUsuario(usuario)">
+                    <i class="bi bi-trash3-fill"></i>
+                  </button>
+                </div>
+              </td>
             </tr>
-
           }
-
         </tbody>
-
       </table>
-
+      <div class="table-footer">
+        Mostrando <strong>{{ usuariosFiltrados.length }}</strong> de <strong>{{ usuarios().length }}</strong> usuarios
+      </div>
     </div>
-
-    <div class="contador">
-      Mostrando {{ usuariosFiltrados.length }} de {{ usuarios().length }} usuarios
-    </div>
-
   } @else {
-
-    <div class="sin-resultados">
+    <div class="empty-state">
+      <i class="bi bi-people empty-state__icon"></i>
       @if (buscando) {
-        <p>No se encontraron usuarios con "{{ buscando }}"</p>
+        <p>No se encontraron usuarios con "<strong>{{ buscando }}</strong>"</p>
+        <button class="btn-outline-action" (click)="limpiarBusqueda()">Limpiar búsqueda</button>
       } @else {
         <p>No hay usuarios en el sistema</p>
       }
     </div>
-
   }
 
-  @if (reservas().length > 0) {
-
-    <div class="reservas-section">
-
-      <h2>Reservas de la ruta seleccionada</h2>
-
-      <table class="tabla-usuarios">
-
-        <thead>
-        <tr>
-          <th>ID</th>
-          <th>Viaje</th>
-          <th>Asientos</th>
-          <th>Estado</th>
-        </tr>
-        </thead>
-
-        <tbody>
-
-          @for (reserva of reservas(); track reserva.id) {
-
-            <tr>
-
-              <td>#{{ reserva.id }}</td>
-              <td>{{ reserva.trip_id }}</td>
-              <td>{{ reserva.seats }}</td>
-              <td>
-                <span class="estado">{{ reserva.status }}</span>
-              </td>
-
-            </tr>
-
+  <!-- ── CONFIGURACIÓN SOPORTE ───────────────────────────────── -->
+  <div class="section-card mb-4">
+    <div class="section-card__header">
+      <h2 class="section-card__title">
+        <i class="bi bi-headset me-2"></i>Link de soporte técnico
+      </h2>
+    </div>
+    <div class="section-card__body">
+      <p class="text-muted small mb-3">
+        Este link se mostrará a los usuarios en la página de viajes compartidos.
+      </p>
+      <div class="d-flex gap-2 align-items-center flex-wrap">
+        <input
+          type="url"
+          class="form-control"
+          style="max-width: 420px"
+          placeholder="https://wa.me/..."
+          [ngModel]="linkSoporte()"
+          (ngModelChange)="linkSoporte.set($event)"
+        />
+        <button
+          class="btn btn-primary rounded-pill px-4"
+          (click)="guardarLinkSoporte()"
+          [disabled]="guardandoSoporte()">
+          @if (guardandoSoporte()) {
+            <span class="spinner-border spinner-border-sm me-1"></span>Guardando…
+          } @else {
+            <i class="bi bi-floppy me-1"></i>Guardar
           }
-
-        </tbody>
-
-      </table>
-
+        </button>
+      </div>
+      @if (mensajeSoporte()) {
+        <div class="alert mt-3 mb-0 py-2"
+             [class.alert-success]="mensajeSoporte()!.tipo === 'exito'"
+             [class.alert-danger]="mensajeSoporte()!.tipo === 'error'">
+          {{ mensajeSoporte()!.texto }}
+        </div>
+      }
     </div>
-
-  }
-
-  <div class="filtro-ruta">
-    <label>Introduce ID de ruta:</label>
-
-    <input
-      type="number"
-      [(ngModel)]="rutaSeleccionadaId"
-      placeholder="Ej: 1"
-    />
-
-    <button (click)="cargarReservasPorRuta(rutaSeleccionadaId!)">
-      Cargar reservas
-    </button>
   </div>
 
-  <div class="graficos">
-
-    <div class="grafico-card">
-      <h3>Tipos de usuarios</h3>
-      <canvas id="chartRoles"></canvas>
+  <!-- ── RESERVAS POR VIAJE COMPARTIDO ───────────────────────── -->
+  <div class="section-card">
+    <div class="section-card__header">
+      <i class="bi bi-calendar-check-fill"></i>
+      <h2>Reservas por viaje compartido</h2>
     </div>
+    <div class="section-card__body">
+      <p class="section-desc">Selecciona un viaje compartido para ver quién ha reservado plaza.</p>
+      <div class="ruta-form">
+        <select
+          [(ngModel)]="viajeId"
+          class="form-field"
+          (ngModelChange)="viajeId ? cargarReservasPorViaje(viajeId) : reservas.set([])">
+          <option [ngValue]="null" disabled>-- Elige un viaje --</option>
+          @for (v of viajes(); track v.id) {
+            <option [ngValue]="v.id">
+              #{{ v.id }} · {{ v.origin ?? 'Sin origen' }} → {{ v.destiny ?? 'Sin destino' }}
+              ({{ v.trip_datetime | date:'dd/MM/yyyy HH:mm' }})
+              · {{ v.seats_available }}/{{ v.seats_total }} plazas
+            </option>
+          }
+        </select>
+      </div>
 
-    <div class="grafico-card">
-      <h3>Usuarios activos</h3>
-      <canvas id="chartEstados"></canvas>
+      @if (reservas().length > 0) {
+        <table class="users-table mt-reservas">
+          <thead>
+            <tr>
+              <th>ID Reserva</th>
+              <th>Pasajero</th>
+              <th>Asientos</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (reserva of reservas(); track reserva.id) {
+              <tr>
+                <td>#{{ reserva.id }}</td>
+                <td>
+                  @if ($any(reserva).usuario?.full_name) {
+                    <span>{{ $any(reserva).usuario.full_name }}</span>
+                    <span class="user-id">· #{{ reserva.user_id }}</span>
+                  } @else {
+                    <span class="user-id">Usuario #{{ reserva.user_id }}</span>
+                  }
+                </td>
+                <td>{{ reserva.seats }}</td>
+                <td>
+                  <span class="status-badge" [class.status-badge--active]="reserva.status === 'confirmed'">
+                    {{ reserva.status }}
+                  </span>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      } @else if (viajeId) {
+        <p class="section-empty">No hay reservas para este viaje compartido.</p>
+      }
     </div>
-
-    <div class="grafico-card">
-      <h3>Usuarios por inicial</h3>
-      <canvas id="chartIniciales"></canvas>
-    </div>
-
   </div>
-  <div class="config-soporte">
 
-    <h3>Soporte técnico</h3>
-
-    <input
-      type="text"
-      [value]="linkSoporte()"
-      (input)="linkSoporte.set($any($event.target).value)"
-      placeholder="https://discord.gg/..."
-      class="input-busqueda"
-    />
-
-    <button
-      class="btn btn-primary"
-      [disabled]="guardandoSoporte()"
-      (click)="guardarLinkSoporte()">
-
-      {{ guardandoSoporte() ? 'Guardando...' : 'Guardar link soporte' }}
-
-    </button>
-
+  <!-- ── GRÁFICOS ──────────────────────────────────────────────── -->
+  <div class="section-card mb-4">
+    <div class="section-card__header">
+      <i class="bi bi-bar-chart-fill"></i>
+      <h2>Estadísticas visuales</h2>
+    </div>
+    <div class="row g-3 p-3">
+      <div class="col-12 col-md-6">
+        <div class="chart-card">
+          <h4>Roles de usuario</h4>
+          <div class="chart-canvas-wrap">
+            <canvas #canvasRoles></canvas>
+          </div>
+        </div>
+      </div>
+      <div class="col-12 col-md-6">
+        <div class="chart-card">
+          <h4>Estado de cuentas</h4>
+          <div class="chart-canvas-wrap">
+            <canvas #canvasEstados></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
+
 </div>
 
-<!-- MODAL CREAR -->
+<!-- ── MODAL: CREAR USUARIO ──────────────────────────────────────── -->
 @if (mostrarModalCrear()) {
-  <div class="modal-overlay" (click)="cerrarModalCrear()">
-    <div class="modal" (click)="$event.stopPropagation()">
+  <div class="modal-backdrop" (click)="cerrarModalCrear()">
+    <div class="modal-box" (click)="$event.stopPropagation()">
 
-      <div class="modal-header">
-        <h2>Nuevo Usuario</h2>
-        <button (click)="cerrarModalCrear()">✕</button>
+      <div class="modal-box__header">
+        <h2><i class="bi bi-person-plus-fill me-2"></i>Nuevo usuario</h2>
+        <button class="modal-close" (click)="cerrarModalCrear()" title="Cerrar">
+          <i class="bi bi-x-lg"></i>
+        </button>
       </div>
 
-      <div class="modal-body">
-        <input [(ngModel)]="formCrear.full_name" placeholder="Nombre">
-        <input [(ngModel)]="formCrear.email" placeholder="Email">
-        <input [(ngModel)]="formCrear.password" placeholder="Password">
+      <div class="modal-box__body">
+        <label>Nombre completo</label>
+        <input class="form-field" [(ngModel)]="formCrear.full_name" placeholder="Ej: María García" />
+
+        <label>Email</label>
+        <input class="form-field" type="email" [(ngModel)]="formCrear.email" placeholder="usuario@email.com" />
+
+        <label>Contraseña</label>
+        <input class="form-field" type="password" [(ngModel)]="formCrear.password" placeholder="Mínimo 8 caracteres" />
+
+        <label>Rol</label>
+        <select class="form-field" [(ngModel)]="formCrear.rol">
+          <option value="user">Usuario</option>
+          <option value="admin">Administrador</option>
+        </select>
       </div>
 
-      <div class="modal-footer">
-        <button (click)="crearUsuario()">Crear</button>
+      <div class="modal-box__footer">
+        <button class="btn-ghost" (click)="cerrarModalCrear()">Cancelar</button>
+        <button class="btn-primary-action" [disabled]="guardandoCrear()" (click)="crearUsuario()">
+          <i class="bi bi-check-lg"></i>
+          {{ guardandoCrear() ? 'Creando...' : 'Crear usuario' }}
+        </button>
       </div>
 
     </div>
   </div>
 }
 
-<!-- MODAL EDITAR -->
+<!-- ── MODAL: EDITAR USUARIO ──────────────────────────────────────── -->
 @if (mostrarModalEditar()) {
-  <div class="modal-overlay" (click)="cerrarModalEditar()">
-    <div class="modal" (click)="$event.stopPropagation()">
+  <div class="modal-backdrop" (click)="cerrarModalEditar()">
+    <div class="modal-box" (click)="$event.stopPropagation()">
 
-      <div class="modal-header">
-        <h2>Editar Usuario</h2>
-        <button (click)="cerrarModalEditar()">✕</button>
+      <div class="modal-box__header">
+        <h2><i class="bi bi-pencil-fill me-2"></i>Editar usuario</h2>
+        <button class="modal-close" (click)="cerrarModalEditar()" title="Cerrar">
+          <i class="bi bi-x-lg"></i>
+        </button>
       </div>
 
-      <div class="modal-body">
-        <input [(ngModel)]="formEditar.full_name">
-        <input [(ngModel)]="formEditar.email">
+      <div class="modal-box__body">
+        <label>Nombre completo</label>
+        <input class="form-field" [(ngModel)]="formEditar.full_name" />
+
+        <label>Email</label>
+        <input class="form-field" type="email" [(ngModel)]="formEditar.email" />
+
+        <label>Rol</label>
+        <select class="form-field" [(ngModel)]="formEditar.rol">
+          <option value="user">Usuario</option>
+          <option value="admin">Administrador</option>
+        </select>
+
+        <label class="toggle-label">
+          <input type="checkbox" [(ngModel)]="formEditar.is_active" />
+          Cuenta activa
+        </label>
       </div>
 
-      <div class="modal-footer">
-        <button (click)="guardarEdicion()">Guardar</button>
+      <div class="modal-box__footer">
+        <button class="btn-ghost" (click)="cerrarModalEditar()">Cancelar</button>
+        <button class="btn-primary-action" [disabled]="guardandoEditar()" (click)="guardarEdicion()">
+          <i class="bi bi-save-fill"></i>
+          {{ guardandoEditar() ? 'Guardando...' : 'Guardar cambios' }}
+        </button>
       </div>
 
     </div>
   </div>
-
 }
+

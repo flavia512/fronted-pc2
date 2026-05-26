@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { ReservaService } from '../../core/services/reserva.service';
 import { AuthService } from '../../core/services/auth.service';
-import { ConfiguracionService } from '../../core/services/configuracion.service';
 
 export interface Reserva {
   id: number;
@@ -37,21 +36,15 @@ export class Reservas implements OnInit {
   private reservaService = inject(ReservaService);
   private authService = inject(AuthService);
   private router = inject(Router);
-  private configuracionService = inject(ConfiguracionService);
 
   reservas = signal<Reserva[]>([]);
   toast = signal<{ tipo: 'exito' | 'error'; mensaje: string } | null>(null);
   esInvitado = computed(() => this.authService.isGuest());
-  linkSoporte = signal('');
   private toastTimeout: any;
 
   ngOnInit(): void {
     if (this.esInvitado() || !this.authService.isLoggedIn()) return;
     this.cargarReservas();
-    this.configuracionService.obtenerConfig('soporte_link').subscribe({
-      next: (valor) => this.linkSoporte.set(valor),
-      error: () => {}
-    });
   }
 
   cargarReservas(): void {
@@ -107,11 +100,4 @@ export class Reservas implements OnInit {
       clearTimeout(this.toastTimeout);
     }
   }
-  copiarSoporte(): void {
-    const link = this.linkSoporte();
-    if (!link) return;
-    navigator.clipboard.writeText(link);
-    alert('Link copiado al portapapeles');
-  }
-
 }
