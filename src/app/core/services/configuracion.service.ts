@@ -8,12 +8,22 @@ export class ConfiguracionService {
   private http = inject(HttpClient);
   private base = environment.apiUrl;
 
-  /** Estado global del logo — compartido por header y admin */
+  /** Estado global del logo — controlado por admin */
   readonly logoUrl = signal('');
+
+  /** Enlace de soporte técnico — controlado por admin */
+  readonly linkSoporte = signal('');
 
   cargarLogo(): void {
     this.obtenerConfig('logo_url').subscribe({
       next: (url) => this.logoUrl.set(url),
+      error: () => {}
+    });
+  }
+
+  cargarSoporte(): void {
+    this.obtenerConfig('soporte_link').subscribe({
+      next: (url) => this.linkSoporte.set(url),
       error: () => {}
     });
   }

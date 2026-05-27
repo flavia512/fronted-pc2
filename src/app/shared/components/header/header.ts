@@ -19,11 +19,11 @@ export class Header implements OnInit {
   private router = inject(Router);
   private configuracionService = inject(ConfiguracionService);
 
-  es_logeado = computed(() => !!this.authService.currentUser());
-  puedeExplorar = computed(() => this.authService.canExplore());
-  esInvitado = computed(() => this.authService.isGuest());
-  isAdmin = computed(() => this.authService.getRolUsuario() === 'admin');
-  nombreUsuario = computed(() => this.authService.currentUser()?.full_name ?? '');
+  es_logeado = computed(() => !!this.authService.usuarioActual());
+  puedeExplorar = computed(() => this.authService.puedeExplorar());
+  esInvitado = computed(() => this.authService.esInvitado());
+  isAdmin = computed(() => this.authService.obtenerRolUsuario() === 'admin');
+  nombreUsuario = computed(() => this.authService.usuarioActual()?.full_name ?? '');
   menuAbierto = signal(false);
   aviso = signal('');
   /** Alias a la señal compartida del servicio — se actualiza sola cuando admin sube logo */
@@ -43,7 +43,7 @@ export class Header implements OnInit {
   }
 
   logout(): void {
-    this.authService.logout();
+    this.authService.cerrarSesion();
     this.cerrarMenu();
   }
 
@@ -59,7 +59,7 @@ export class Header implements OnInit {
   }
 
   irLogin(): void {
-    this.authService.logout();
+    this.authService.cerrarSesion();
     this.cerrarMenu();
     this.router.navigate(['/login']);
   }

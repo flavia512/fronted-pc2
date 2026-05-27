@@ -36,10 +36,10 @@ export class AlertaPopup implements OnInit, OnDestroy {
   }
 
   private verificarAlertas(): void {
-    const user = this.authService.currentUser();
+    const user = this.authService.usuarioActual();
     if (!user || this.visible()) return;
 
-    this.alertaService.obtenerAlertaUsuario(user.id).subscribe({
+    this.alertaService.obtenerAlertaUsuario().subscribe({
       next: (res) => {
         const ahora      = new Date();
         const hoy        = ahora.toISOString().slice(0, 10);

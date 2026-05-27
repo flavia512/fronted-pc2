@@ -13,13 +13,13 @@ export class AlertaService {
   private apiUrl = environment.apiUrl;
 
   // PUT /alertas/desactivar?idruta=X
-  desactivarAlerta(idruta: number): Observable<any> {
+  desactivarAlerta(idruta: number): Observable<{ exito: boolean; mensaje: string }> {
     const params = new HttpParams().set('idruta', idruta.toString());
-    return this.http.put(`${this.apiUrl}/alertas/desactivar`, {}, { params });
+    return this.http.put<{ exito: boolean; mensaje: string }>(`${this.apiUrl}/alertas/desactivar`, {}, { params });
   }
 
   // GET /alertas — alertas del usuario autenticado
-  obtenerAlertaUsuario(_user_id?: number): Observable<{ ok: boolean; alertas: Alerta[] }> {
+  obtenerAlertaUsuario(): Observable<{ ok: boolean; alertas: Alerta[] }> {
     return this.http.get<{ exito: boolean; datos: Alerta[] }>(`${this.apiUrl}/alertas`)
       .pipe(map(res => ({ ok: res.exito, alertas: res.datos ?? [] })));
   }
@@ -40,11 +40,11 @@ export class AlertaService {
     color: string;
   }> {
     const params = new HttpParams().set('fecha', fecha).set('hora', hora);
-    return this.http.get<any>(`${environment.pc1Url}/predict`, { params });
+    return this.http.get<{ ok: boolean; nivel_gravedad: number; descripcion: string; minutos_antes: number; recomendacion: string; color: string }>(`${environment.pc1Url}/predict`, { params });
   }
 
   // POST /predicciones — Usado en: alertas.ts (crearAlerta, fire-and-forget)
-  guardarPrediccion(data: { route_id: number; resultado: string; ml_model_id?: string }): Observable<any> {
-    return this.http.post(`${this.apiUrl}/predicciones`, data);
+  guardarPrediccion(data: { route_id: number; resultado: string; ml_model_id?: string }): Observable<{ exito: boolean }> {
+    return this.http.post<{ exito: boolean }>(`${this.apiUrl}/predicciones`, data);
   }
 }

@@ -33,13 +33,13 @@ export class RutaService {
     hora_salida: string | null;
     duration_min: number;
     pasa_por_m30: boolean;
-  }): Observable<{ success: boolean; data: Ruta }> {
+  }): Observable<{ exito: boolean; datos: Ruta }> {
     return this.http.post<{ exito: boolean; datos: Ruta }>(`${this.apiUrl}/rutas`, data)
-      .pipe(map(res => ({ success: res.exito, data: res.datos })));
+      .pipe(map(res => ({ exito: res.exito, datos: res.datos })));
   }
 
   // DELETE /rutas/{id}
-  eliminarRuta(id: number): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/rutas/${id}`);
+  eliminarRuta(id: number): Observable<{ exito: boolean; mensaje: string }> {
+    return this.http.delete<{ exito: boolean; mensaje: string }>(`${this.apiUrl}/rutas/${id}`);
   }
 }

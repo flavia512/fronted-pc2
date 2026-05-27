@@ -45,7 +45,7 @@ export class Alertas implements OnInit {
   creando      = signal(false);
   desactivando = signal<number | null>(null);
 
-  esInvitado = computed(() => this.authService.isGuest());
+  esInvitado = computed(() => this.authService.esInvitado());
 
   rutasM30     = computed(() => this.rutas().filter(r => r.pasa_por_m30));
   alertasActivas = computed(() => this.alertas().filter(a => a.status === 'activa'));
@@ -64,10 +64,10 @@ export class Alertas implements OnInit {
   }
 
   cargarAlertas(): void {
-    const user = this.authService.currentUser();
+    const user = this.authService.usuarioActual();
     if (!user) return;
     this.cargando.set(true);
-    this.alertaService.obtenerAlertaUsuario(user.id).subscribe({
+    this.alertaService.obtenerAlertaUsuario().subscribe({
       next: (res) => {
         this.alertas.set(res.alertas.map(a => this.enriquecer(a)));
         this.cargando.set(false);

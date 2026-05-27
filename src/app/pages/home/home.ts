@@ -14,7 +14,7 @@ export class Home {
   private router = inject(Router);
 
   entrarComoInvitado(): void {
-    this.auth.continueAsGuest();
+    this.auth.continuarComoInvitado();
     this.router.navigate(['/viajes-compartidos']);
   }
 }

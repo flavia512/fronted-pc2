@@ -49,7 +49,7 @@ export class Register implements OnInit {
     this.errorMessage.set('');
     this.successMessage.set('');
 
-    this.authService.register(this.form.getRawValue() as {
+    this.authService.registrar(this.form.getRawValue() as {
       full_name: string;
       email: string;
       password: string;

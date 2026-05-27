@@ -95,7 +95,7 @@ export class AdminUsers implements OnInit, AfterViewInit {
 
 
   cargarEstadisticas(): void {
-    this.userService.getEstadisticas().subscribe({
+    this.userService.obtenerEstadisticas().subscribe({
       next: (stats) => this.estadisticas.set(stats),
       error: () => {}
     });
@@ -104,7 +104,7 @@ export class AdminUsers implements OnInit, AfterViewInit {
   cargarUsuarios(): void {
     this.cargando.set(true);
     this.error.set('');
-    this.userService.getAllUsers().subscribe({
+    this.userService.obtenerTodos().subscribe({
       next: (usuarios) => {
         this.usuarios.set(usuarios);
         this.cargando.set(false);
@@ -194,7 +194,7 @@ export class AdminUsers implements OnInit, AfterViewInit {
   toggleEstado(usuario: User): void {
     const nuevoEstado = !usuario.is_active;
 
-    this.userService.updateUser(usuario.id, { is_active: nuevoEstado }).subscribe({
+    this.userService.actualizarUsuario(usuario.id, { is_active: nuevoEstado }).subscribe({
       next: () => {
         usuario.is_active = nuevoEstado;
         this.exito.set('Estado actualizado correctamente');
@@ -209,7 +209,7 @@ export class AdminUsers implements OnInit, AfterViewInit {
   eliminarUsuario(usuario: User): void {
     if (!confirm(`¿Eliminar a ${usuario.full_name}?`)) return;
 
-    this.userService.deleteUser(usuario.id).subscribe({
+    this.userService.eliminarUsuario(usuario.id).subscribe({
       next: () => {
         this.usuarios.update(list =>
           list.filter(u => u.id !== usuario.id)
@@ -298,7 +298,7 @@ export class AdminUsers implements OnInit, AfterViewInit {
     if (!usuario) return;
     this.guardandoEditar.set(true);
     this.error.set('');
-    this.userService.updateUser(usuario.id, this.formEditar).subscribe({
+    this.userService.actualizarUsuario(usuario.id, this.formEditar).subscribe({
       next: (actualizado) => {
         this.usuarios.update(list => list.map(u => u.id === actualizado.id ? actualizado : u));
         this.cargarEstadisticas();

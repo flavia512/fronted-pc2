@@ -41,36 +41,26 @@ export class Reservas implements OnInit {
 
   reservas = signal<Reserva[]>([]);
   toast = signal<{ tipo: 'exito' | 'error'; mensaje: string } | null>(null);
-  linkSoporte = signal('');
-  esInvitado = computed(() => this.authService.isGuest());
+  readonly linkSoporte = computed(() => this.configuracionService.linkSoporte());
+  esInvitado = computed(() => this.authService.esInvitado());
   modalCancelarId = signal<number | null>(null);
   private toastTimeout: any;
 
   ngOnInit(): void {
-    this.configuracionService.obtenerConfig('soporte_link').subscribe({
-      next: (v) => this.linkSoporte.set(v),
-      error: () => {}
-    });
-    if (this.esInvitado() || !this.authService.isLoggedIn()) return;
+    this.configuracionService.cargarSoporte();
+    if (this.esInvitado() || !this.authService.estaAutenticado()) return;
     this.cargarReservas();
   }
 
   cargarReservas(): void {
-    const userId = this.authService.currentUser()?.id;
-
-    if (!userId) {
-      this.mostrarToast('error', 'No se pudo identificar el usuario.');
-      return;
-    }
-
-    this.reservaService.obtenerReservasPorUsuario(userId).subscribe({
+    this.reservaService.obtenerReservasPorUsuario().subscribe({
       next: (res: ReservasResponse) => this.reservas.set(res.reservas ?? []),
       error: () => this.reservas.set([])
     });
   }
 
   eliminarReserva(id: number): void {
-    if (!this.authService.isLoggedIn()) {
+    if (!this.authService.estaAutenticado()) {
       this.mostrarToast('error', 'Para cancelar una reserva tienes que iniciar sesión');
       setTimeout(() => this.router.navigate(['/login']), 1500);
       return;

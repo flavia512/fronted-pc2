@@ -4,7 +4,6 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { Reserva } from '../models/reserva.model';
 import { environment } from '../../../environments/environment';
-import {ReservasResponse} from '../../pages/reservas/reservas';
 
 @Injectable({
   providedIn: 'root'
@@ -14,7 +13,7 @@ export class ReservaService {
   private apiUrl = environment.apiUrl;
 
   // GET /reservas — reservas del usuario autenticado
-  obtenerReservasPorUsuario(_userId?: number): Observable<ReservasResponse> {
+  obtenerReservasPorUsuario(): Observable<{ ok: boolean; reservas: Reserva[] }> {
     return this.http.get<{ exito: boolean; datos: Reserva[] }>(`${this.apiUrl}/reservas`)
       .pipe(map(res => ({ ok: res.exito, reservas: res.datos ?? [] })));
   }
@@ -26,19 +25,18 @@ export class ReservaService {
   }
 
   // POST /reservas
-  crearReserva(data: { user_id: number; trip_id: number; seats: number; status: string }): Observable<{ success: boolean; message: string; data: Reserva }> {
-    return this.http.post<{ exito: boolean; mensaje: string; datos: Reserva }>(`${this.apiUrl}/reservas`, data)
-      .pipe(map(res => ({ success: res.exito, message: res.mensaje, data: res.datos })));
+  crearReserva(data: { trip_id: number; seats: number; status: string }): Observable<{ exito: boolean; mensaje: string; datos: Reserva }> {
+    return this.http.post<{ exito: boolean; mensaje: string; datos: Reserva }>(`${this.apiUrl}/reservas`, data);
   }
 
   // DELETE /reservas/{id}
-  eliminarReserva(id: number): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/reservas/${id}`);
+  eliminarReserva(id: number): Observable<{ exito: boolean; mensaje: string }> {
+    return this.http.delete<{ exito: boolean; mensaje: string }>(`${this.apiUrl}/reservas/${id}`);
   }
 
   // GET /admin/reservas/ruta?ruta_id=X
-  reservasPorRuta(rutaId: number): Observable<{ success: boolean; data: any[] }> {
+  reservasPorRuta(rutaId: number): Observable<{ exito: boolean; datos: any[] }> {
     return this.http.get<{ exito: boolean; datos: any[] }>(`${this.apiUrl}/admin/reservas/ruta`, { params: { ruta_id: rutaId } })
-      .pipe(map(res => ({ success: res.exito, data: res.datos ?? [] })));
+      .pipe(map(res => ({ exito: res.exito, datos: res.datos ?? [] })));
   }
 }

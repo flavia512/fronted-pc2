@@ -46,7 +46,7 @@ export class Profile implements OnInit {
     this.cargando.set(true);
     this.limpiarMensajes();
 
-    this.userService.getProfile().subscribe({
+    this.userService.obtenerPerfil().subscribe({
       next: (user: User) => {
         this.usuarioId.set(user.id);
         this.isActive.set(user.is_active);
@@ -79,7 +79,7 @@ export class Profile implements OnInit {
       full_name: this.profileForm.get('full_name')?.value
     };
 
-    this.userService.updateProfile(datosActualizados).subscribe({
+    this.userService.actualizarPerfil(datosActualizados).subscribe({
       next: () => {
         this.guardando.set(false);
         this.mensajeExito.set('Perfil actualizado correctamente.');
@@ -101,7 +101,7 @@ export class Profile implements OnInit {
   get fullNameCtrl() { return this.profileForm.get('full_name')!; }
 
   logout(): void {
-    this.authService.logout();
+    this.authService.cerrarSesion();
     this.router.navigate(['/login']);
   }
 }

@@ -7,30 +7,10 @@ import { ViajeCompartidoService } from '../../core/services/viaje-compartido.ser
 import { ReservaService } from '../../core/services/reserva.service';
 import { AuthService } from '../../core/services/auth.service';
 import { FavoritoService } from '../../core/services/favorito.service';
-
-export interface ViajeCompartido {
-  id: number;
-  driver_user_id: number;
-  route_id: number;
-  origin?: string;
-  destiny?: string;
-  trip_datetime: string;
-  seats_total: number;
-  seats_available: number;
-  status: string;
-  conductor?: { id?: number; name?: string; full_name?: string; email?: string };
-  reservas?: Array<{
-    id: number;
-    user_id: number;
-    trip_id: number;
-    seats: number;
-    status: string;
-    usuario?: { id?: number; full_name?: string; email?: string };
-  }>;
-}
+import { ViajeCompartido } from '../../core/models/viaje-compartido.model';
 
 type ToastTipo = 'exito' | 'error';
-type ViajesResponse = { success?: boolean; data?: ViajeCompartido[]; viajes?: ViajeCompartido[] };
+type ViajesResponse = { exito: boolean; datos: ViajeCompartido[] };
 
 @Component({
   selector: 'app-viajes-compartidos',
@@ -99,7 +79,7 @@ export class ViajesCompartidos implements OnInit, OnDestroy {
     });
 
     this.filtros$.next(); // carga inicial
-    if (this.authService.isLoggedIn()) {
+    if (this.authService.estaAutenticado()) {
       this.cargarFavoritos();
     }
   }
@@ -124,7 +104,7 @@ export class ViajesCompartidos implements OnInit, OnDestroy {
   }
 
   cargarFavoritos(): void {
-    if (!this.authService.isLoggedIn()) {
+    if (!this.authService.estaAutenticado()) {
       return;
     }
 
@@ -149,11 +129,11 @@ export class ViajesCompartidos implements OnInit, OnDestroy {
   }
 
   esMiViaje(viaje: ViajeCompartido): boolean {
-    return this.authService.currentUser()?.id === viaje.driver_user_id;
+    return this.authService.usuarioActual()?.id === viaje.driver_user_id;
   }
 
   yaReservado(viaje: ViajeCompartido): boolean {
-    const userId = this.authService.currentUser()?.id;
+    const userId = this.authService.usuarioActual()?.id;
     return !!userId && this.reservasActivas(viaje).some(reserva => reserva.user_id === userId);
   }
 
@@ -162,21 +142,19 @@ export class ViajesCompartidos implements OnInit, OnDestroy {
   }
 
   toggleFavorito(viaje: ViajeCompartido): void {
-    if (!this.authService.isLoggedIn()) {
+    if (!this.authService.estaAutenticado()) {
       this.mostrarModalLogin.set(true);
       return;
     }
 
-    const userId = this.authService.currentUser()?.id;
-
-    if (!userId || this.toggling() === viaje.route_id) {
+    if (this.toggling() === viaje.route_id) {
       return;
     }
 
     this.toggling.set(viaje.route_id);
 
     if (this.esFavorito(viaje.route_id)) {
-      this.favoritoService.eliminarFavorito(userId, viaje.route_id).subscribe({
+      this.favoritoService.eliminarFavorito(viaje.route_id).subscribe({
         next: () => {
           this.favoritosIds.update(s => {
             const n = new Set(s);
@@ -191,10 +169,7 @@ export class ViajesCompartidos implements OnInit, OnDestroy {
         }
       });
     } else {
-      this.favoritoService.agregarFavorito({
-        user_id: userId,
-        route_id: viaje.route_id
-      }).subscribe({
+      this.favoritoService.agregarFavorito(viaje.route_id).subscribe({
         next: () => {
           this.favoritosIds.update(s => new Set([...s, viaje.route_id]));
           this.toggling.set(null);
@@ -207,12 +182,12 @@ export class ViajesCompartidos implements OnInit, OnDestroy {
   }
 
   reservarViaje(viaje: ViajeCompartido): void {
-    if (!this.authService.isLoggedIn()) {
+    if (!this.authService.estaAutenticado()) {
       this.mostrarModalLogin.set(true);
       return;
     }
 
-    const userId = this.authService.currentUser()?.id;
+    const userId = this.authService.usuarioActual()?.id;
 
     if (!userId) {
       this.mostrarToast('error', 'No se pudo identificar el usuario.');
@@ -237,15 +212,14 @@ export class ViajesCompartidos implements OnInit, OnDestroy {
     this.reservando.set(viaje.id);
 
     this.reservaService.crearReserva({
-      user_id: userId,
       trip_id: viaje.id,
       seats: 1,
       status: 'pending'
     }).subscribe({
-      next: (res: any) => {
+      next: (res) => {
         this.reservando.set(null);
         this.mostrarToast('exito', '¡Reserva realizada con éxito!');
-        const nuevaReserva = res?.data;
+        const nuevaReserva = res?.datos;
         const plazasReservadas = nuevaReserva?.seats ?? 1;
 
         this.viajes.update(list =>
@@ -273,9 +247,8 @@ export class ViajesCompartidos implements OnInit, OnDestroy {
     });
   }
 
-  private extraerViajes(res: ViajesResponse | ViajeCompartido[] | null | undefined): ViajeCompartido[] {
-    if (Array.isArray(res)) return res;
-    return res?.data ?? res?.viajes ?? [];
+  private extraerViajes(res: ViajesResponse | null | undefined): ViajeCompartido[] {
+    return res?.datos ?? [];
   }
 
   private reservasActivas(viaje: ViajeCompartido): NonNullable<ViajeCompartido['reservas']> {

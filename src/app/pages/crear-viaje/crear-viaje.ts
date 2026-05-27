@@ -45,7 +45,7 @@ export class CrearViaje implements OnInit {
   }
 
   ngOnInit() {
-    if (!this.authService.isLoggedIn()) {
+    if (!this.authService.estaAutenticado()) {
       this.mostrarToast('error', 'Para publicar un viaje tienes que iniciar sesión');
 
       setTimeout(() => {
@@ -96,7 +96,7 @@ export class CrearViaje implements OnInit {
   }
 
   onSubmit() {
-    if (!this.authService.isLoggedIn()) {
+    if (!this.authService.estaAutenticado()) {
       this.mostrarToast('error', 'Para publicar un viaje tienes que iniciar sesión');
 
       setTimeout(() => {
@@ -111,7 +111,7 @@ export class CrearViaje implements OnInit {
 
       const formValues = this.form.value;
       const ruta = this.rutaSeleccionada();
-      const userId = this.authService.currentUser()?.id;
+      const userId = this.authService.usuarioActual()?.id;
 
       if (!ruta || !userId) {
         this.loading = false;
@@ -153,7 +153,7 @@ export class CrearViaje implements OnInit {
 
   cargarMisViajes(): void {
     this.cargandoViajes.set(true);
-    const userId = this.authService.currentUser()?.id;
+    const userId = this.authService.usuarioActual()?.id;
 
     this.viajeService.listarViajes().subscribe({
       next: ({ data }) => {

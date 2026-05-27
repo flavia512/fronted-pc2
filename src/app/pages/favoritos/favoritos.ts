@@ -4,7 +4,8 @@ import { RouterLink } from '@angular/router';
 import { FavoritoService } from '../../core/services/favorito.service';
 import { AuthService } from '../../core/services/auth.service';
 import { ReservaService } from '../../core/services/reserva.service';
-import { ViajeCompartidoService, ViajeCompartido } from '../../core/services/viaje-compartido.service';
+import { ViajeCompartidoService } from '../../core/services/viaje-compartido.service';
+import { ViajeCompartido } from '../../core/models/viaje-compartido.model';
 import { Favorito } from '../../core/models/favorito.model';
 
 @Component({
@@ -26,7 +27,7 @@ export class Favoritos implements OnInit {
   exito           = signal('');
   eliminando      = signal<number | null>(null);
   mostrarModalLogin = signal(false);
-  esInvitado      = computed(() => this.authService.isGuest());
+  esInvitado      = computed(() => this.authService.esInvitado());
 
   // viajes expandidos por route_id
   viajesMap       = signal<Map<number, ViajeCompartido[]>>(new Map());
@@ -77,10 +78,10 @@ export class Favoritos implements OnInit {
   }
 
   reservarViaje(viaje: ViajeCompartido): void {
-    const user = this.authService.currentUser();
+    const user = this.authService.usuarioActual();
     if (!user || this.reservando() === viaje.id) return;
     this.reservando.set(viaje.id);
-    this.reservaService.crearReserva({ user_id: user.id, trip_id: viaje.id, seats: 1, status: 'pending' }).subscribe({
+    this.reservaService.crearReserva({ trip_id: viaje.id, seats: 1, status: 'pending' }).subscribe({
       next: () => {
         this.exito.set('¡Reserva realizada con éxito!');
         this.reservando.set(null);
@@ -103,10 +104,9 @@ export class Favoritos implements OnInit {
   }
 
   eliminarFavorito(fav: Favorito): void {
-    const user = this.authService.currentUser();
-    if (!user) return;
+    if (!this.authService.usuarioActual()) return;
     this.eliminando.set(fav.route_id);
-    this.favoritoService.eliminarFavorito(user.id, fav.route_id).subscribe({
+    this.favoritoService.eliminarFavorito(fav.route_id).subscribe({
       next: () => {
         this.favoritos.update(lista => lista.filter(f => f.route_id !== fav.route_id));
         this.exito.set('Eliminado de favoritos.');

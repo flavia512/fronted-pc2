@@ -3,13 +3,13 @@ import { inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { catchError, throwError } from 'rxjs';
 import { environment } from '../../../environments/environment';
+import { AuthService } from '../services/auth.service';
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const router = inject(Router);
-  const token = localStorage.getItem('token');
-
+  const authService = inject(AuthService);
+  const token = authService.obtenerToken();
   const esLlamadaAlApi = req.url.startsWith(environment.apiUrl);
-
   const peticionConToken = token && esLlamadaAlApi
     ? req.clone({
         setHeaders: {
@@ -20,11 +20,8 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
 
   return next(peticionConToken).pipe(
     catchError((error: HttpErrorResponse) => {
-      const esInvitado = sessionStorage.getItem('guestMode') === '1';
-      if (error.status === 401 && esLlamadaAlApi && !esInvitado) {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-
+      if (error.status === 401 && esLlamadaAlApi && !authService.esInvitado()) {
+        authService.limpiarAutenticacion();
         if (!router.url.includes('/login')) {
           router.navigate(['/login'], { queryParams: { expirado: '1' } });
         }

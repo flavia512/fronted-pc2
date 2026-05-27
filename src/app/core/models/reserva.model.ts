@@ -7,7 +7,7 @@ export interface Reserva {
   created_at?: string;
   updated_at?: string;
 
-  // Relación del backend (muestra la ruta reservada)
+  // (muestra la ruta reservada) es decir añade datos a la reserva 
   viaje?: {
     origin: string;
     destiny: string;

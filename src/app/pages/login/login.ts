@@ -52,10 +52,10 @@ export class Login implements OnInit {
     this.loading.set(true);
     this.errorMessage.set('');
 
-    this.authService.login(this.form.getRawValue() as { email: string; password: string }).subscribe({
+    this.authService.iniciarSesion(this.form.getRawValue() as { email: string; password: string }).subscribe({
       next: () => {
         this.loading.set(false);
-        const esAdmin = this.authService.getRolUsuario() === 'admin';
+        const esAdmin = this.authService.obtenerRolUsuario() === 'admin';
         this.router.navigateByUrl(this.returnUrl || (esAdmin ? '/admin-users' : '/rutas'));
       },
       error: () => {
@@ -66,7 +66,7 @@ export class Login implements OnInit {
   }
 
   entrarComoInvitado(): void {
-    this.authService.continueAsGuest();
+    this.authService.continuarComoInvitado();
     this.router.navigate(['/viajes-compartidos']);
   }
 

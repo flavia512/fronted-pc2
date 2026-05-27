@@ -5,17 +5,17 @@ import { AuthService } from '../services/auth.service';
 export const authGuard: CanActivateFn = (route, state) => {
   const authService = inject(AuthService);
   const router = inject(Router);
-
-  if (route.data['allowGuest'] && authService.canExplore()) {
+// Permite acceso a invitados para rutas que lo permiten o si puede explorar ( autenticado o invitado )
+  if (route.data['allowGuest'] && authService.puedeExplorar()) {
     return true;
   }
-
-  if (!authService.isLoggedIn()) {
+// Si esta autenticado ( tiene los datos del usuario) navega a login
+  if (!authService.estaAutenticado()) {
     router.navigate(['/login'], { queryParams: { required: '1', returnUrl: state.url } });
     return false;
   }
 
-  const esAdmin = authService.getRolUsuario() === 'admin';
+  const esAdmin = authService.obtenerRolUsuario() === 'admin';
 
   // Admin solo puede acceder a /admin-users (y perfil/login/register)
   if (esAdmin && route.data['blockAdmin']) {
@@ -25,11 +25,10 @@ export const authGuard: CanActivateFn = (route, state) => {
 
   const rolEsperado = route.data['rolEsperado'];
   if (rolEsperado) {
-    const miRol = authService.getRolUsuario();
+    const miRol = authService.obtenerRolUsuario();
 
     if (miRol !== rolEsperado) {
-      console.warn(`Acceso denegado. Eres ${miRol}, se requiere ${rolEsperado}`);
-      router.navigate(['/admin-users']);
+      router.navigate(['/home']);
       return false;
     }
   }

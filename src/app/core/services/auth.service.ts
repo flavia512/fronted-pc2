@@ -10,92 +10,99 @@ import { environment } from '../../../environments/environment';
 })
 export class AuthService {
   private http = inject(HttpClient);
-
+//Constantes internas  
   private apiUrl = environment.apiUrl;
   private tokenKey = 'token';
   private userKey = 'user';
   private guestKey = 'guestMode';
-// se creo para que el header solo sea visto por los autenticados y para mostrar el nombre del usuario en el header
-  readonly currentUser = signal<User | null>(this.getStoredUser());
-  readonly guestMode = signal(this.getStoredGuestMode());
-  readonly isLoggedIn = computed(() => !!this.currentUser());
-  readonly isGuest = computed(() => this.guestMode() && !this.currentUser());
-  readonly canExplore = computed(() => this.isLoggedIn() || this.isGuest());
 
-  login(data: { email: string; password: string }): Observable<AuthResponse> {
+  readonly usuarioActual = signal<User | null>(this.obtenerUsuarioGuardado());
+  readonly modoInvitado = signal(this.obtenerModoInvitadoGuardado());
+  readonly estaAutenticado = computed(() => !!this.usuarioActual());
+  readonly esInvitado = computed(() => this.modoInvitado() && !this.usuarioActual());
+  readonly puedeExplorar = computed(() => this.estaAutenticado() || this.esInvitado());
+
+  iniciarSesion(data: { email: string; password: string }): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${this.apiUrl}/auth/login`, data).pipe(
       tap((response) => {
-        this.clearGuestMode();
-        this.saveToken(response.access_token);
+        this.limpiarModoInvitado();
+        this.guardarToken(response.access_token);
         if (response.user) {
-          this.saveUser(response.user);
-          this.currentUser.set(response.user);
+          this.guardarUsuario(response.user);
+          this.usuarioActual.set(response.user);
         }
       })
     );
   }
 
-  register(data: { full_name: string; email: string; password: string; password_confirmation: string }): Observable<AuthResponse> {
+  registrar(data: { full_name: string; email: string; password: string; password_confirmation: string }): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${this.apiUrl}/auth/registro`, data).pipe(
       tap((response) => {
-        this.clearGuestMode();
+        this.limpiarModoInvitado();
         if (response.access_token) {
-          this.saveToken(response.access_token);
+          this.guardarToken(response.access_token);
         }
         if (response.user) {
-          this.saveUser(response.user);
-          this.currentUser.set(response.user);
+          this.guardarUsuario(response.user);
+          this.usuarioActual.set(response.user);
         }
       })
     );
   }
 
-  logout(): void {
+  cerrarSesion(): void {
     // Invalida token
     this.http.post(`${this.apiUrl}/auth/logout`, {}).subscribe({ error: () => {} });
     localStorage.removeItem(this.tokenKey);
     localStorage.removeItem(this.userKey);
     sessionStorage.removeItem(this.guestKey);
-    this.currentUser.set(null);
-    this.guestMode.set(false);
+    this.usuarioActual.set(null);
+    this.modoInvitado.set(false);
   }
 
-  continueAsGuest(): void {
+  continuarComoInvitado(): void {
     localStorage.removeItem(this.tokenKey);
     localStorage.removeItem(this.userKey);
     sessionStorage.setItem(this.guestKey, '1');
-    this.currentUser.set(null);
-    this.guestMode.set(true);
+    this.usuarioActual.set(null);
+    this.modoInvitado.set(true);
   }
 
-  saveToken(token: string): void {
+  private guardarToken(token: string): void {
     localStorage.setItem(this.tokenKey, token);
   }
 
-  getToken(): string | null {
+  obtenerToken(): string | null {
     return localStorage.getItem(this.tokenKey);
   }
 
-  saveUser(user: User): void {
+  private guardarUsuario(user: User): void {
     localStorage.setItem(this.userKey, JSON.stringify(user));
   }
 
-  getStoredUser(): User | null {
+  private obtenerUsuarioGuardado(): User | null {
     const user = localStorage.getItem(this.userKey);
     return user ? JSON.parse(user) : null;
   }
 
-  private getStoredGuestMode(): boolean {
+  private obtenerModoInvitadoGuardado(): boolean {
     return sessionStorage.getItem(this.guestKey) === '1';
   }
 
-  private clearGuestMode(): void {
+  private limpiarModoInvitado(): void {
     sessionStorage.removeItem(this.guestKey);
-    this.guestMode.set(false);
+    this.modoInvitado.set(false);
+  }
+// Metodo utilizado en auth.guard.ts para verificar el rol de admin
+  obtenerRolUsuario(): string | null {
+    const user = this.usuarioActual();
+    return user ? user.rol : null;
   }
 
-  getRolUsuario(): string | null {
-    const user = this.currentUser();
-    return user ? user.rol : null;
+  limpiarAutenticacion(): void {
+    localStorage.removeItem(this.tokenKey);
+    localStorage.removeItem(this.userKey);
+    this.usuarioActual.set(null);
+    this.modoInvitado.set(false);
   }
 }

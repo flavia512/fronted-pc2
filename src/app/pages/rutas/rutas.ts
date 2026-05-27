@@ -30,7 +30,7 @@ export class Rutas implements OnInit, OnDestroy {
   modalEliminarRuta = signal<{ id: number; nombre: string } | null>(null);
   toast = signal<{ tipo: 'exito' | 'error'; mensaje: string } | null>(null);
 
-  esInvitado = computed(() => this.authService.isGuest());
+  esInvitado = computed(() => this.authService.esInvitado());
   tituloPagina = 'Mis Rutas';
   descripcionPagina = 'Gestiona tus trayectos habituales y recibe alertas de tráfico';
 
@@ -186,7 +186,7 @@ export class Rutas implements OnInit, OnDestroy {
   }
 
   cargarRutasUsuario(): void {
-    if (this.esInvitado() || !this.authService.isLoggedIn()) return;
+    if (this.esInvitado() || !this.authService.estaAutenticado()) return;
     this.cargando.set(true);
     this.errorCarga.set(false);
 
@@ -209,7 +209,7 @@ export class Rutas implements OnInit, OnDestroy {
   }
 
   eliminarRuta(id: number): void {
-    if (!this.authService.isLoggedIn()) {
+    if (!this.authService.estaAutenticado()) {
       this.mostrarModalLogin.set(true);
       return;
     }
@@ -231,7 +231,7 @@ export class Rutas implements OnInit, OnDestroy {
   }
 
   abrirModal(): void {
-    if (!this.authService.isLoggedIn()) {
+    if (!this.authService.estaAutenticado()) {
       this.mostrarModalLogin.set(true);
       return;
     }
@@ -268,7 +268,7 @@ export class Rutas implements OnInit, OnDestroy {
   }
 
   guardarRutaBackend(): void {
-    if (!this.authService.isLoggedIn()) {
+    if (!this.authService.estaAutenticado()) {
       this.mostrarModalLogin.set(true);
       return;
     }
@@ -286,14 +286,14 @@ export class Rutas implements OnInit, OnDestroy {
       dest_lng: this.coordDestino()![0],
       hora_salida: this.nuevaRuta.horaSalida || null,
       duration_min: this.rutaInfo()!.duracionMinutos,
-      pasa_por_m30: this.rutaInfo()!.pasamPorM30
+      pasa_por_m30: this.rutaInfo()!.pasaPorM30
     };
 
     this.rutaService.crearRuta(payload).subscribe({
       next: (res) => {
         this.ngZone.run(() => {
           this.cerrarModal();
-          const r = res?.data;
+          const r = res?.datos;
           if (r) this.rutas.update(list => [r, ...list]);
           this.mostrarToast('exito', `✓ Ruta "${r?.nombre ?? 'Nueva ruta'}" guardada correctamente`);
         });
