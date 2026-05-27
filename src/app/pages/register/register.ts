@@ -5,7 +5,6 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { HttpErrorResponse } from '@angular/common/http';
 import {Header} from '../../shared/components/header/header';
-import {SoporteTecnico} from '../../shared/components/soporteTecnico/soporteTecnico';
 
 @Component({
   selector: 'app-register',
@@ -81,11 +80,4 @@ export class Register {
   }
 
   protected readonly Header = Header;
-  copiarSoporte(): void {
-
-    navigator.clipboard.writeText(SoporteTecnico.soporteLink);
-
-    alert('Link copiado al portapapeles');
-
-  }
 }

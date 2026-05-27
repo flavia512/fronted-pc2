@@ -4,7 +4,6 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import {Header} from '../../shared/components/header/header';
-import {SoporteTecnico} from '../../shared/components/soporteTecnico/soporteTecnico';
 
 @Component({
   selector: 'app-login',
@@ -64,11 +63,4 @@ export class Login {
   }
 
   protected readonly Header = Header;
-  copiarSoporte(): void {
-
-    navigator.clipboard.writeText(SoporteTecnico.soporteLink);
-
-    alert('Link copiado al portapapeles');
-
-  }
 }

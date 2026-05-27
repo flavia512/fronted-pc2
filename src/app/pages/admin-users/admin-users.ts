@@ -1,4 +1,4 @@
-import { Component, OnInit, AfterViewInit, inject, signal, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, AfterViewInit, inject, signal, ViewChild, ElementRef, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Header } from '../../shared/components/header/header';
@@ -19,9 +19,8 @@ Chart.register(...registerables);
   styleUrl: './admin-users.scss',
 })
 export class AdminUsers implements OnInit, AfterViewInit {
-  @ViewChild('canvasRoles', { static: false }) canvasRoles?: ElementRef<HTMLCanvasElement>;
+  @ViewChild('canvasRoles',   { static: false }) canvasRoles?:   ElementRef<HTMLCanvasElement>;
   @ViewChild('canvasEstados', { static: false }) canvasEstados?: ElementRef<HTMLCanvasElement>;
-  private viewReady = false;
   chartRoles: any;
   chartEstados: any;
   private userService = inject(AdminService);
@@ -63,10 +62,17 @@ export class AdminUsers implements OnInit, AfterViewInit {
   formEditar: { full_name: string; email: string; rol: string; is_active: boolean } = { full_name: '', email: '', rol: 'user', is_active: true };
   guardandoEditar = signal(false);
 
-  ngAfterViewInit(): void {
-    this.viewReady = true;
-    if (this.usuarios().length > 0) this.crearGraficos();
+  constructor() {
+    // effect() runs inside Angular's scheduler — @ViewChild refs are always valid here
+    effect(() => {
+      const users = this.usuarios();
+      this.estadisticas(); // also track stats so chart refreshes when both arrive
+      if (users.length === 0) return;
+      setTimeout(() => this.crearGraficos(), 0);
+    });
   }
+
+  ngAfterViewInit(): void { /* ViewChild refs are ready */ }
 
   ngOnInit(): void {
     this.cargarUsuarios();
@@ -81,11 +87,8 @@ export class AdminUsers implements OnInit, AfterViewInit {
 
   cargarEstadisticas(): void {
     this.userService.getEstadisticas().subscribe({
-      next: (stats) => {
-        this.estadisticas.set(stats);
-        if (this.usuarios().length > 0) setTimeout(() => this.crearGraficos(), 0);
-      },
-      error: () => {} // no bloquea la UI
+      next: (stats) => this.estadisticas.set(stats),
+      error: () => {}
     });
   }
 
@@ -95,7 +98,6 @@ export class AdminUsers implements OnInit, AfterViewInit {
     this.userService.getAllUsers().subscribe({
       next: (usuarios) => {
         this.usuarios.set(usuarios);
-        setTimeout(() => this.crearGraficos(), 0);
         this.cargando.set(false);
       },
       error: () => {
@@ -105,7 +107,7 @@ export class AdminUsers implements OnInit, AfterViewInit {
     });
   }
   crearGraficos(): void {
-    if (!this.viewReady || !this.canvasRoles || !this.canvasEstados) return;
+    if (!this.canvasRoles || !this.canvasEstados) return;
     const usuarios = this.usuarios();
     const stats    = this.estadisticas();
 

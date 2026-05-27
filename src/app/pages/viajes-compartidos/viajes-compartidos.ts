@@ -7,7 +7,6 @@ import { ViajeCompartidoService } from '../../core/services/viaje-compartido.ser
 import { ReservaService } from '../../core/services/reserva.service';
 import { AuthService } from '../../core/services/auth.service';
 import { FavoritoService } from '../../core/services/favorito.service';
-import { ConfiguracionService } from '../../core/services/configuracion.service';
 
 export interface ViajeCompartido {
   id: number;
@@ -50,9 +49,6 @@ export class ViajesCompartidos implements OnInit, OnDestroy {
   private reservaService = inject(ReservaService);
   private authService = inject(AuthService);
   private favoritoService = inject(FavoritoService);
-  private configuracionService = inject(ConfiguracionService);
-
-  linkSoporte = signal('');
   viajes = signal<ViajeCompartido[]>([]);
   cargando = signal(true);
   favoritosIds = signal<Set<number>>(new Set());
@@ -71,10 +67,6 @@ export class ViajesCompartidos implements OnInit, OnDestroy {
   private toastTimeout: any;
 
   ngOnInit(): void {
-    this.configuracionService.obtenerConfig('soporte_link').subscribe({
-      next: (v) => this.linkSoporte.set(v),
-      error: () => {}
-    });
     this.sub = this.filtros$.pipe(
       debounceTime(400),
       switchMap(() => {
@@ -306,11 +298,5 @@ export class ViajesCompartidos implements OnInit, OnDestroy {
     if (this.toastTimeout) {
       clearTimeout(this.toastTimeout);
     }
-  }
-  copiarSoporte(): void {
-    const link = this.linkSoporte();
-    if (!link) return;
-    navigator.clipboard.writeText(link);
-    alert('Link copiado al portapapeles');
   }
 }

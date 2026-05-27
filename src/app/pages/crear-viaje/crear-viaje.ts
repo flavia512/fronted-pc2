@@ -7,7 +7,6 @@ import { RutaService } from '../../core/services/ruta.service';
 import { ReservaService } from '../../core/services/reserva.service';
 import { Ruta } from '../../core/models/ruta.model';
 import { AuthService } from '../../core/services/auth.service';
-import {SoporteTecnico} from '../../shared/components/soporteTecnico/soporteTecnico';
 
 @Component({
   selector: 'app-crear-viaje',
@@ -211,12 +210,5 @@ export class CrearViaje implements OnInit {
         this.mostrarToast('error', 'Error al actualizar la reserva.');
       }
     });
-  }
-  copiarSoporte(): void {
-
-    navigator.clipboard.writeText(SoporteTecnico.soporteLink);
-
-    alert('Link copiado al portapapeles');
-
   }
 }

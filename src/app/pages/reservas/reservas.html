@@ -62,4 +62,13 @@
       }
     </div>
   }
+
+  @if (linkSoporte()) {
+    <div class="mt-4 text-center">
+      <a [href]="linkSoporte()" target="_blank" rel="noopener noreferrer"
+         class="btn btn-primary rounded-pill py-2 fw-semibold">
+        <i class="bi bi-headset me-2"></i>Contacta al soporte técnico
+      </a>
+    </div>
+  }
 </div>
