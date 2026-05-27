@@ -20,13 +20,11 @@ export class Profile implements OnInit {
   private fb = inject(FormBuilder);
 
   usuarioId = signal<number | null>(null);
-  puntos = signal<number>(0);
   isActive = signal<boolean>(false);
   rol = signal<string>('');
 
   cargando = signal(true);
   guardando = signal(false);
-  modificandoPuntos = signal(false);
 
   mensajeExito = signal('');
   mensajeError = signal('');
@@ -51,7 +49,6 @@ export class Profile implements OnInit {
     this.userService.getProfile().subscribe({
       next: (user: User) => {
         this.usuarioId.set(user.id);
-        this.puntos.set(user.puntos);
         this.isActive.set(user.is_active);
         this.rol.set(user.rol);
 
@@ -91,42 +88,6 @@ export class Profile implements OnInit {
         console.error('Error:', err.error);
         this.guardando.set(false);
         this.mensajeError.set('No se pudo actualizar el perfil.');
-      }
-    });
-  }
-
-  aumentarPuntos(): void {
-    this.modificandoPuntos.set(true);
-    this.limpiarMensajes();
-
-    this.userService.aumentarPuntos(10).subscribe({
-      next: (res) => {
-        this.puntos.set(res.puntos_totales);
-        this.modificandoPuntos.set(false);
-        this.mensajeExito.set(`Puntos aumentados. Total: ${res.puntos_totales}`);
-      },
-      error: (err) => {
-        console.error('Error:', err.error);
-        this.modificandoPuntos.set(false);
-        this.mensajeError.set('No se pudieron aumentar los puntos.');
-      }
-    });
-  }
-
-  quitarPuntos(): void {
-    this.modificandoPuntos.set(true);
-    this.limpiarMensajes();
-
-    this.userService.quitarPuntos(10).subscribe({
-      next: (res) => {
-        this.puntos.set(res.usuario.puntos);
-        this.modificandoPuntos.set(false);
-        this.mensajeExito.set(`Puntos actualizados. Total: ${res.usuario.puntos}`);
-      },
-      error: (err) => {
-        console.error('Error:', err.error);
-        this.modificandoPuntos.set(false);
-        this.mensajeError.set('No se pudieron quitar los puntos.');
       }
     });
   }
