@@ -4,7 +4,7 @@
   <div class="page-header">
     <div>
       <h1 class="page-title">
-        <i class="bi bi-shield-lock-fill me-2"></i>Panel de Administración
+        Panel de Administración
       </h1>
       <p class="page-subtitle">Gestiona usuarios, estadísticas y configuración del sistema</p>
     </div>
@@ -91,7 +91,53 @@
     </div>
   } @else if (usuariosFiltrados.length > 0) {
     <div class="table-card">
-      <table class="users-table">
+
+      <!-- ── VISTA MÓVIL: cards ─────────────────────────── -->
+      <div class="d-md-none user-card-list">
+        @for (usuario of usuariosFiltrados; track usuario.id) {
+          <div class="user-card">
+            <div class="user-card__top">
+              <div class="user-avatar" [class.user-avatar--admin]="usuario.rol === 'admin'">
+                {{ usuario.full_name.charAt(0).toUpperCase() }}
+              </div>
+              <div class="user-card__info">
+                <div class="user-name">{{ usuario.full_name }}</div>
+                <div class="user-id">#{{ usuario.id }} · {{ usuario.email }}</div>
+              </div>
+            </div>
+            <div class="user-card__footer">
+              <div class="d-flex gap-2 align-items-center flex-wrap">
+                <span class="role-badge" [class.role-badge--admin]="usuario.rol === 'admin'">
+                  <i class="bi" [class.bi-shield-fill]="usuario.rol === 'admin'" [class.bi-person-fill]="usuario.rol !== 'admin'"></i>
+                  {{ usuario.rol === 'admin' ? 'Admin' : 'Usuario' }}
+                </span>
+                <span class="status-badge" [class.status-badge--active]="usuario.is_active">
+                  {{ usuario.is_active ? 'Activo' : 'Inactivo' }}
+                </span>
+              </div>
+              <div class="action-group">
+                <button class="action-btn action-btn--edit" title="Editar" (click)="abrirModalEditar(usuario)">
+                  <i class="bi bi-pencil-fill"></i>
+                </button>
+                <button
+                  class="action-btn"
+                  [class.action-btn--activate]="usuario.is_active"
+                  [class.action-btn--deactivate]="!usuario.is_active"
+                  [title]="usuario.is_active ? 'Desactivar' : 'Activar'"
+                  (click)="toggleEstado(usuario)">
+                  <i class="bi" [class.bi-toggle-on]="usuario.is_active" [class.bi-toggle-off]="!usuario.is_active"></i>
+                </button>
+                <button class="action-btn action-btn--delete" title="Eliminar" (click)="eliminarUsuario(usuario)">
+                  <i class="bi bi-trash3-fill"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- ── VISTA DESKTOP: tabla ───────────────────────── -->
+      <table class="users-table d-none d-md-table">
         <thead>
           <tr>
             <th>Usuario</th>
@@ -134,8 +180,8 @@
                   </button>
                   <button
                     class="action-btn"
-                    [class.action-btn--deactivate]="usuario.is_active"
-                    [class.action-btn--activate]="!usuario.is_active"
+                    [class.action-btn--activate]="usuario.is_active"
+                    [class.action-btn--deactivate]="!usuario.is_active"
                     [title]="usuario.is_active ? 'Desactivar' : 'Activar'"
                     (click)="toggleEstado(usuario)">
                     <i class="bi" [class.bi-toggle-on]="usuario.is_active" [class.bi-toggle-off]="!usuario.is_active"></i>
@@ -149,6 +195,7 @@
           }
         </tbody>
       </table>
+
       <div class="table-footer">
         Mostrando <strong>{{ usuariosFiltrados.length }}</strong> de <strong>{{ usuarios().length }}</strong> usuarios
       </div>
@@ -218,13 +265,13 @@
         <select
           [(ngModel)]="viajeId"
           class="form-field"
-          (ngModelChange)="viajeId ? cargarReservasPorViaje(viajeId) : reservas.set([])">
+          (ngModelChange)="$event ? cargarReservasPorViaje($event) : reservas.set([])">
           <option [ngValue]="null" disabled>-- Elige un viaje --</option>
           @for (v of viajes(); track v.id) {
             <option [ngValue]="v.id">
               #{{ v.id }} · {{ v.origin ?? 'Sin origen' }} → {{ v.destiny ?? 'Sin destino' }}
               ({{ v.trip_datetime | date:'dd/MM/yyyy HH:mm' }})
-              · {{ v.seats_available }}/{{ v.seats_total }} plazas
+              · {{ (v.seats_total - v.seats_available) === 0 ? 'sin reservas' : (v.seats_total - v.seats_available) + '/' + v.seats_total + ' ocupadas' }}
             </option>
           }
         </select>

@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, AfterViewInit, inject, signal, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Header } from '../../shared/components/header/header';
@@ -18,9 +18,10 @@ Chart.register(...registerables);
   templateUrl: './admin-users.html',
   styleUrl: './admin-users.scss',
 })
-export class AdminUsers implements OnInit {
-  @ViewChild('canvasRoles', { static: true }) canvasRoles!: ElementRef<HTMLCanvasElement>;
-  @ViewChild('canvasEstados', { static: true }) canvasEstados!: ElementRef<HTMLCanvasElement>;
+export class AdminUsers implements OnInit, AfterViewInit {
+  @ViewChild('canvasRoles', { static: false }) canvasRoles?: ElementRef<HTMLCanvasElement>;
+  @ViewChild('canvasEstados', { static: false }) canvasEstados?: ElementRef<HTMLCanvasElement>;
+  private viewReady = false;
   chartRoles: any;
   chartEstados: any;
   private userService = inject(AdminService);
@@ -62,6 +63,11 @@ export class AdminUsers implements OnInit {
   formEditar: { full_name: string; email: string; rol: string; is_active: boolean } = { full_name: '', email: '', rol: 'user', is_active: true };
   guardandoEditar = signal(false);
 
+  ngAfterViewInit(): void {
+    this.viewReady = true;
+    if (this.usuarios().length > 0) this.crearGraficos();
+  }
+
   ngOnInit(): void {
     this.cargarUsuarios();
     this.cargarEstadisticas();
@@ -99,6 +105,7 @@ export class AdminUsers implements OnInit {
     });
   }
   crearGraficos(): void {
+    if (!this.viewReady || !this.canvasRoles || !this.canvasEstados) return;
     const usuarios = this.usuarios();
     const stats    = this.estadisticas();
 
@@ -218,21 +225,9 @@ export class AdminUsers implements OnInit {
   }
 
   cargarReservasPorViaje(id: number): void {
-    this.cargando.set(true);
     this.viajeId = id;
-    this.error.set('');
-
-    this.viajeService.obtenerViaje(id).subscribe({
-      next: (res) => {
-        this.reservas.set((res.data?.reservas ?? []) as unknown as Reserva[]);
-        this.cargando.set(false);
-      },
-      error: () => {
-        this.error.set('Error cargando reservas del viaje');
-        this.reservas.set([]);
-        this.cargando.set(false);
-      }
-    });
+    const viaje = this.viajes().find(v => v.id === id);
+    this.reservas.set((viaje?.reservas ?? []) as unknown as Reserva[]);
   }
   // ── CREAR USUARIO ─────────────────────────────────────────────────────────
   abrirModalCrear(): void {
