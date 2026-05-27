@@ -34,6 +34,14 @@ export class AdminUsers implements OnInit, AfterViewInit {
   mensajeSoporte = signal<{ tipo: 'exito' | 'error'; texto: string } | null>(null);
   private soporteTimeout: any;
 
+  // LOGO — alias a la señal compartida del servicio
+  logoUrl = this.configuracionService.logoUrl;
+  logoPreview = signal<string | null>(null);
+  logoFile = signal<File | null>(null);
+  subiendoLogo = signal(false);
+  mensajeLogo = signal<{ tipo: 'exito' | 'error'; texto: string } | null>(null);
+  private logoTimeout: any;
+
   // USERS
   usuarios = signal<User[]>([]);
   buscando: string = '';
@@ -82,6 +90,7 @@ export class AdminUsers implements OnInit, AfterViewInit {
       next: (valor) => this.linkSoporte.set(valor),
       error: () => {}
     });
+    this.configuracionService.cargarLogo();
   }
 
 
@@ -326,6 +335,41 @@ export class AdminUsers implements OnInit, AfterViewInit {
     this.mensajeSoporte.set({ tipo, texto });
     if (this.soporteTimeout) clearTimeout(this.soporteTimeout);
     this.soporteTimeout = setTimeout(() => this.mensajeSoporte.set(null), 4000);
+  }
+
+  onLogoSeleccionado(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+    this.logoFile.set(file);
+    const reader = new FileReader();
+    reader.onload = (e) => this.logoPreview.set(e.target?.result as string);
+    reader.readAsDataURL(file);
+  }
+
+  subirLogo(): void {
+    const file = this.logoFile();
+    if (!file) return;
+    this.subiendoLogo.set(true);
+    this.configuracionService.subirLogo(file).subscribe({
+      next: (res) => {
+        this.subiendoLogo.set(false);
+        this.configuracionService.logoUrl.set(res.datos.url);
+        this.logoPreview.set(null);
+        this.logoFile.set(null);
+        this.mostrarMensajeLogo('exito', 'Logo actualizado correctamente');
+      },
+      error: () => {
+        this.subiendoLogo.set(false);
+        this.mostrarMensajeLogo('error', 'Error al subir el logo');
+      }
+    });
+  }
+
+  private mostrarMensajeLogo(tipo: 'exito' | 'error', texto: string): void {
+    this.mensajeLogo.set({ tipo, texto });
+    if (this.logoTimeout) clearTimeout(this.logoTimeout);
+    this.logoTimeout = setTimeout(() => this.mensajeLogo.set(null), 4000);
   }
 
 }

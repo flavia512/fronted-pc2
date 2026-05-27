@@ -1,4 +1,4 @@
-import { inject, Injectable } from '@angular/core';
+import { inject, Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 import { environment } from '../../../environments/environment';
@@ -7,6 +7,16 @@ import { environment } from '../../../environments/environment';
 export class ConfiguracionService {
   private http = inject(HttpClient);
   private base = environment.apiUrl;
+
+  /** Estado global del logo — compartido por header y admin */
+  readonly logoUrl = signal('');
+
+  cargarLogo(): void {
+    this.obtenerConfig('logo_url').subscribe({
+      next: (url) => this.logoUrl.set(url),
+      error: () => {}
+    });
+  }
 
   obtenerConfig(clave: string): Observable<string> {
     return this.http
@@ -20,6 +30,15 @@ export class ConfiguracionService {
     return this.http.put<{ exito: boolean; mensaje: string }>(
       `${this.base}/admin/configuracion/${clave}`,
       { valor }
+    );
+  }
+
+  subirLogo(file: File): Observable<{ exito: boolean; datos: { url: string } }> {
+    const formData = new FormData();
+    formData.append('logo', file);
+    return this.http.post<{ exito: boolean; datos: { url: string } }>(
+      `${this.base}/admin/configuracion/logo`,
+      formData
     );
   }
 }

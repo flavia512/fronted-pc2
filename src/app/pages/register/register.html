@@ -2,10 +2,14 @@
   <div class="text-center mb-4">
     <span class="d-flex align-items-center justify-content-center rounded-circle bg-primary mx-auto mb-2"
           style="width:56px;height:56px;">
-      <i class="bi text-white"
-         [ngClass]="Header.icono"
-         style="font-size:1.5rem;">
-      </i>
+      @if (logoUrl()) {
+        <img [src]="logoUrl()" alt="Logo" class="rounded-circle" style="width:56px;height:56px;object-fit:cover;">
+      } @else {
+        <i class="bi text-white"
+           [ngClass]="Header.icono"
+           style="font-size:1.5rem;">
+        </i>
+      }
     </span>
     <h1 class="fw-bold mb-1">Crear Cuenta</h1>
     <p class="text-secondary mb-0">Únete a VoyContigo</p>

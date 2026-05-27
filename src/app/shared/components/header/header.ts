@@ -1,6 +1,7 @@
-import { Component, inject, computed, signal } from '@angular/core';
+import { Component, OnInit, inject, computed, signal } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
+import { ConfiguracionService } from '../../../core/services/configuracion.service';
 import {NgClass} from '@angular/common';
 
 @Component({
@@ -9,13 +10,14 @@ import {NgClass} from '@angular/common';
   imports: [RouterLink, RouterLinkActive, NgClass],
   templateUrl: './header.html',
 })
-export class Header {
+export class Header implements OnInit {
   static icono = 'bi-car-front';
 
   Header = Header;
 
   authService = inject(AuthService);
   private router = inject(Router);
+  private configuracionService = inject(ConfiguracionService);
 
   es_logeado = computed(() => !!this.authService.currentUser());
   puedeExplorar = computed(() => this.authService.canExplore());
@@ -24,7 +26,13 @@ export class Header {
   nombreUsuario = computed(() => this.authService.currentUser()?.full_name ?? '');
   menuAbierto = signal(false);
   aviso = signal('');
+  /** Alias a la señal compartida del servicio — se actualiza sola cuando admin sube logo */
+  logoUrl = this.configuracionService.logoUrl;
   private avisoTimeout: any;
+
+  ngOnInit(): void {
+    this.configuracionService.cargarLogo();
+  }
 
   toggleMenu(): void {
     this.menuAbierto.update((v) => !v);

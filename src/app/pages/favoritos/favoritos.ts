@@ -80,7 +80,7 @@ export class Favoritos implements OnInit {
     const user = this.authService.currentUser();
     if (!user || this.reservando() === viaje.id) return;
     this.reservando.set(viaje.id);
-    this.reservaService.crearReserva({ user_id: user.id, trip_id: viaje.id, seats: 1, status: 'pendiente' }).subscribe({
+    this.reservaService.crearReserva({ user_id: user.id, trip_id: viaje.id, seats: 1, status: 'pending' }).subscribe({
       next: () => {
         this.exito.set('¡Reserva realizada con éxito!');
         this.reservando.set(null);

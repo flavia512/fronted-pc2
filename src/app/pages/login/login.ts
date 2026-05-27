@@ -1,8 +1,9 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
+import { ConfiguracionService } from '../../core/services/configuracion.service';
 import {Header} from '../../shared/components/header/header';
 
 @Component({
@@ -11,11 +12,18 @@ import {Header} from '../../shared/components/header/header';
   imports: [CommonModule, ReactiveFormsModule, RouterLink],
   templateUrl: './login.html',
 })
-export class Login {
+export class Login implements OnInit {
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
+  private configuracionService = inject(ConfiguracionService);
+
+  logoUrl = this.configuracionService.logoUrl;
+
+  ngOnInit(): void {
+    this.configuracionService.cargarLogo();
+  }
 
   returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') ?? '';
   errorMessage = signal('');

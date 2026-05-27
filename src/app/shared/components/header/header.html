@@ -6,12 +6,16 @@
   }
 
   <a routerLink="/" class="navbar-brand d-flex align-items-center gap-2 text-decoration-none me-auto" (click)="cerrarMenu()">
-    <span class="d-flex align-items-center justify-content-center rounded-circle bg-primary" style="width:40px;height:40px;flex-shrink:0;">
-      <i class="bi text-white"
-         [ngClass]="Header.icono"
-         style="font-size:1.5rem;">
-      </i>
-    </span>
+    @if (logoUrl()) {
+      <img [src]="logoUrl()" alt="Logo" class="rounded-circle" style="width:40px;height:40px;object-fit:cover;flex-shrink:0;">
+    } @else {
+      <span class="d-flex align-items-center justify-content-center rounded-circle bg-primary" style="width:40px;height:40px;flex-shrink:0;">
+        <i class="bi text-white"
+           [ngClass]="Header.icono"
+           style="font-size:1.5rem;">
+        </i>
+      </span>
+    }
     <span class="fw-bold fs-5 text-primary">VoyContigo</span>
   </a>
 

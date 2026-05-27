@@ -212,6 +212,54 @@
     </div>
   }
 
+  <!-- ── CONFIGURACIÓN LOGO ─────────────────────────────────────── -->
+  <div class="section-card mb-4">
+    <div class="section-card__header">
+      <h2 class="section-card__title">
+        <i class="bi bi-image me-2"></i>Logo de la aplicación
+      </h2>
+    </div>
+    <div class="section-card__body">
+      <p class="text-muted small mb-3">
+        El logo se mostrará en la barra de navegación de toda la aplicación.
+        Formatos: JPG, PNG, WEBP. Máximo 2 MB.
+      </p>
+      <div class="d-flex align-items-center gap-4 flex-wrap mb-3">
+        <!-- Preview actual / nueva -->
+        <div class="d-flex align-items-center justify-content-center rounded-circle border overflow-hidden"
+             style="width:72px;height:72px;flex-shrink:0;background:#f8f9fa;">
+          @if (logoPreview()) {
+            <img [src]="logoPreview()" alt="Preview" style="width:100%;height:100%;object-fit:cover;">
+          } @else if (logoUrl()) {
+            <img [src]="logoUrl()" alt="Logo actual" style="width:100%;height:100%;object-fit:cover;">
+          } @else {
+            <i class="bi bi-image text-secondary" style="font-size:2rem;"></i>
+          }
+        </div>
+        <!-- Input + botón -->
+        <div class="d-flex flex-column gap-2">
+          <input type="file" accept="image/*" class="form-control" style="max-width:320px;"
+                 (change)="onLogoSeleccionado($event)">
+          <button class="btn btn-primary rounded-pill px-4" style="width:fit-content;"
+                  (click)="subirLogo()" [disabled]="!logoFile() || subiendoLogo()">
+            @if (subiendoLogo()) {
+              <span class="spinner-border spinner-border-sm me-1"></span>Subiendo…
+            } @else {
+              <i class="bi bi-cloud-upload me-1"></i>Subir logo
+            }
+          </button>
+        </div>
+      </div>
+      @if (mensajeLogo()) {
+        <div class="alert mt-2 mb-0 py-2"
+             [class.alert-success]="mensajeLogo()!.tipo === 'exito'"
+             [class.alert-danger]="mensajeLogo()!.tipo === 'error'">
+          {{ mensajeLogo()!.texto }}
+        </div>
+      }
+    </div>
+  </div>
+
   <!-- ── CONFIGURACIÓN SOPORTE ───────────────────────────────── -->
   <div class="section-card mb-4">
     <div class="section-card__header">
