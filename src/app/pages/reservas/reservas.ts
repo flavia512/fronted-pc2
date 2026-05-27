@@ -43,6 +43,7 @@ export class Reservas implements OnInit {
   toast = signal<{ tipo: 'exito' | 'error'; mensaje: string } | null>(null);
   linkSoporte = signal('');
   esInvitado = computed(() => this.authService.isGuest());
+  modalCancelarId = signal<number | null>(null);
   private toastTimeout: any;
 
   ngOnInit(): void {
@@ -71,16 +72,16 @@ export class Reservas implements OnInit {
   eliminarReserva(id: number): void {
     if (!this.authService.isLoggedIn()) {
       this.mostrarToast('error', 'Para cancelar una reserva tienes que iniciar sesión');
-
-      setTimeout(() => {
-        this.router.navigate(['/login']);
-      }, 1500);
-
+      setTimeout(() => this.router.navigate(['/login']), 1500);
       return;
     }
+    this.modalCancelarId.set(id);
+  }
 
-    if (!confirm('¿Cancelar esta reserva?')) return;
-
+  confirmarCancelacion(): void {
+    const id = this.modalCancelarId();
+    if (id === null) return;
+    this.modalCancelarId.set(null);
     this.reservaService.eliminarReserva(id).subscribe({
       next: () => {
         this.reservas.update(list => list.filter(r => r.id !== id));

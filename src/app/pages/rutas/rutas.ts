@@ -27,6 +27,7 @@ export class Rutas implements OnInit, OnDestroy {
   mostrarModal = signal(false);
   guardandoRuta = signal(false);
   mostrarModalLogin = signal(false);
+  modalEliminarRuta = signal<{ id: number; nombre: string } | null>(null);
   toast = signal<{ tipo: 'exito' | 'error'; mensaje: string } | null>(null);
 
   esInvitado = computed(() => this.authService.isGuest());
@@ -212,14 +213,17 @@ export class Rutas implements OnInit, OnDestroy {
       this.mostrarModalLogin.set(true);
       return;
     }
-
     const ruta = this.rutas().find(r => r.id === id);
-    const nombre = ruta?.nombre || 'esta ruta';
-    if (!confirm(`¿Eliminar "${nombre}"? Esta acción no se puede deshacer.`)) return;
+    this.modalEliminarRuta.set({ id, nombre: ruta?.nombre || 'esta ruta' });
+  }
 
-    this.rutaService.eliminarRuta(id).subscribe({
+  confirmarEliminarRuta(): void {
+    const datos = this.modalEliminarRuta();
+    if (!datos) return;
+    this.modalEliminarRuta.set(null);
+    this.rutaService.eliminarRuta(datos.id).subscribe({
       next: () => {
-        this.rutas.update(list => list.filter(r => r.id !== id));
+        this.rutas.update(list => list.filter(r => r.id !== datos.id));
         this.mostrarToast('exito', 'Ruta eliminada correctamente');
       },
       error: () => this.mostrarToast('error', 'No se pudo eliminar la ruta. Inténtalo de nuevo.')
