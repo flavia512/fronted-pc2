@@ -1,32 +1,5 @@
 <div class="container py-4 py-md-5" style="max-width: 680px;">
 
-  <!-- MODAL: necesitas cuenta -->
-  @if (mostrarModalLogin()) {
-    <div class="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center"
-         style="background:rgba(0,0,0,.5);z-index:1080;"
-         (click)="mostrarModalLogin.set(false)">
-      <div class="card border-0 shadow-lg rounded-4 p-4 text-center"
-           style="max-width:360px;width:90%;"
-           (click)="$event.stopPropagation()">
-        <span class="d-inline-flex align-items-center justify-content-center bg-primary bg-opacity-10 rounded-circle mx-auto mb-3"
-              style="width:56px;height:56px;">
-          <i class="bi bi-heart text-primary fs-4"></i>
-        </span>
-        <h5 class="fw-bold mb-1">Guarda tus favoritos</h5>
-        <p class="text-secondary small mb-4">Necesitas una cuenta para guardar y gestionar tus viajes favoritos.</p>
-        <div class="d-flex flex-column gap-2">
-          <a routerLink="/login" [queryParams]="{returnUrl: '/favoritos'}" class="btn btn-primary rounded-pill fw-semibold">
-            <i class="bi bi-box-arrow-in-right me-1"></i>Iniciar sesión
-          </a>
-          <a routerLink="/register" [queryParams]="{returnUrl: '/favoritos'}" class="btn btn-outline-primary rounded-pill">
-            <i class="bi bi-person-plus me-1"></i>Registrarse
-          </a>
-          <button class="btn btn-link text-secondary small mt-1" (click)="mostrarModalLogin.set(false)">Cancelar</button>
-        </div>
-      </div>
-    </div>
-  }
-
   <!-- Toast éxito/error -->
   @if (exito()) {
     <div class="position-fixed top-0 end-0 p-3" style="z-index:1090;">

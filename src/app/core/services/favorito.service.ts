@@ -1,7 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
 import { Favorito } from '../models/favorito.model';
 import { environment } from '../../../environments/environment';
 
@@ -13,9 +12,8 @@ export class FavoritoService {
   private apiUrl = environment.apiUrl;
 
   // GET /favoritos — favoritos del usuario autenticado
-  listarFavoritos(): Observable<{ ok: boolean; favoritos: Favorito[] }> {
-    return this.http.get<{ exito: boolean; datos: Favorito[] }>(`${this.apiUrl}/favoritos`)
-      .pipe(map(res => ({ ok: res.exito, favoritos: res.datos ?? [] })));
+  listarFavoritos(): Observable<{ exito: boolean; datos: Favorito[] }> {
+    return this.http.get<{ exito: boolean; datos: Favorito[] }>(`${this.apiUrl}/favoritos`);
   }
 
   // POST /favoritos

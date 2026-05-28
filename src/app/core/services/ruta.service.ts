@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, map } from 'rxjs';
+import { Observable } from 'rxjs';
 import { Ruta } from '../models/ruta.model';
 import { environment } from '../../../environments/environment';
 
@@ -10,15 +10,13 @@ export class RutaService {
   private apiUrl = environment.apiUrl;
 
   // GET /rutas — rutas del usuario autenticado
-  obtenerRutas(): Observable<Ruta[]> {
-    return this.http.get<{ exito: boolean; datos: Ruta[] }>(`${this.apiUrl}/rutas`)
-      .pipe(map(res => res.datos ?? []));
+  obtenerRutas(): Observable<{ exito: boolean; datos: Ruta[] }> {
+    return this.http.get<{ exito: boolean; datos: Ruta[] }>(`${this.apiUrl}/rutas`);
   }
 
   // GET /rutas/todas — todas las rutas públicas
-  listarRutasPublicas(): Observable<Ruta[]> {
-    return this.http.get<{ exito: boolean; datos: Ruta[] }>(`${this.apiUrl}/rutas/todas`)
-      .pipe(map(res => res.datos ?? []));
+  listarRutasPublicas(): Observable<{ exito: boolean; datos: Ruta[] }> {
+    return this.http.get<{ exito: boolean; datos: Ruta[] }>(`${this.apiUrl}/rutas/todas`);
   }
 
   // POST /rutas
@@ -34,8 +32,7 @@ export class RutaService {
     duration_min: number;
     pasa_por_m30: boolean;
   }): Observable<{ exito: boolean; datos: Ruta }> {
-    return this.http.post<{ exito: boolean; datos: Ruta }>(`${this.apiUrl}/rutas`, data)
-      .pipe(map(res => ({ exito: res.exito, datos: res.datos })));
+    return this.http.post<{ exito: boolean; datos: Ruta }>(`${this.apiUrl}/rutas`, data);
   }
 
   // DELETE /rutas/{id}

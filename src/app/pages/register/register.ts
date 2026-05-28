@@ -1,5 +1,5 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { NgClass } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
@@ -9,8 +9,7 @@ import {Header} from '../../shared/components/header/header';
 
 @Component({
   selector: 'app-register',
-  standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
+  imports: [NgClass, ReactiveFormsModule, RouterLink],
   templateUrl: './register.html'
 })
 export class Register implements OnInit {
@@ -80,9 +79,6 @@ export class Register implements OnInit {
           // Si es otro error (como que el servidor se apagó)
           this.errorMessage.set('Error de conexión con el servidor.');
         }
-
-        // Imprimimos el error completo en consola para depurar
-        console.error('Error detallado de Laravel:', err);
       }
     });
   }

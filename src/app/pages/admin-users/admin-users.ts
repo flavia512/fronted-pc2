@@ -1,13 +1,12 @@
-import { Component, OnInit, AfterViewInit, inject, signal, ViewChild, ElementRef, effect } from '@angular/core';
+import { Component, OnInit, inject, signal, ViewChild, ElementRef, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Header } from '../../shared/components/header/header';
 import { User } from '../../core/models/user.model';
 import { AdminService } from '../../core/services/admin.service';
-import { ReservaService } from '../../core/services/reserva.service';
 import { Reserva } from '../../core/models/reserva.model';
-import { ViajeCompartidoService, ViajeCompartido } from '../../core/services/viaje-compartido.service';
-import {Chart, registerables} from 'chart.js';
+import { ViajeCompartidoService } from '../../core/services/viaje-compartido.service';
+import { ViajeCompartido } from '../../core/models/viaje-compartido.model';
+import {Chart, registerables} from 'chart.js';// librería para gráficos
 import { ConfiguracionService } from '../../core/services/configuracion.service';
 
 Chart.register(...registerables);
@@ -18,13 +17,13 @@ Chart.register(...registerables);
   templateUrl: './admin-users.html',
   styleUrl: './admin-users.scss',
 })
-export class AdminUsers implements OnInit, AfterViewInit {
+export class AdminUsers implements OnInit {
+  // Referencias a los canvas en el html para gráficos
   @ViewChild('canvasRoles',   { static: false }) canvasRoles?:   ElementRef<HTMLCanvasElement>;
   @ViewChild('canvasEstados', { static: false }) canvasEstados?: ElementRef<HTMLCanvasElement>;
   chartRoles: any;
   chartEstados: any;
   private userService = inject(AdminService);
-  private reservaService = inject(ReservaService);
   private viajeService = inject(ViajeCompartidoService);
   private configuracionService = inject(ConfiguracionService);
 
@@ -71,23 +70,20 @@ export class AdminUsers implements OnInit, AfterViewInit {
   guardandoEditar = signal(false);
 
   constructor() {
-    // effect() runs inside Angular's scheduler — @ViewChild refs are always valid here
     effect(() => {
       const users = this.usuarios();
-      this.estadisticas(); // also track stats so chart refreshes when both arrive
+      this.estadisticas(); 
       if (users.length === 0) return;
       setTimeout(() => this.crearGraficos(), 0);
     });
   }
-
-  ngAfterViewInit(): void { /* ViewChild refs are ready */ }
 
   ngOnInit(): void {
     this.cargarUsuarios();
     this.cargarEstadisticas();
     this.cargarViajes();
     this.configuracionService.obtenerConfig('soporte_link').subscribe({
-      next: (valor) => this.linkSoporte.set(valor),
+      next: (res) => this.linkSoporte.set(res.datos?.valor ?? ''),
       error: () => {}
     });
     this.configuracionService.cargarLogo();
@@ -96,7 +92,7 @@ export class AdminUsers implements OnInit, AfterViewInit {
 
   cargarEstadisticas(): void {
     this.userService.obtenerEstadisticas().subscribe({
-      next: (stats) => this.estadisticas.set(stats),
+      next: (res) => this.estadisticas.set(res.datos),
       error: () => {}
     });
   }
@@ -105,8 +101,8 @@ export class AdminUsers implements OnInit, AfterViewInit {
     this.cargando.set(true);
     this.error.set('');
     this.userService.obtenerTodos().subscribe({
-      next: (usuarios) => {
-        this.usuarios.set(usuarios);
+      next: (res) => {
+        this.usuarios.set(res.datos ?? []);
         this.cargando.set(false);
       },
       error: () => {
@@ -115,6 +111,8 @@ export class AdminUsers implements OnInit, AfterViewInit {
       }
     });
   }
+
+// ── CREA LOS 2 GRÁFICOS ─────────────────────────────────────────────────────────
   crearGraficos(): void {
     if (!this.canvasRoles || !this.canvasEstados) return;
     const usuarios = this.usuarios();
@@ -140,14 +138,15 @@ export class AdminUsers implements OnInit, AfterViewInit {
         }]
       },
       options: {
-        cutout: '68%',
+        cutout: '68%', // agujero central del donut 
         maintainAspectRatio: false,
-        animation: { duration: 700 },
+        animation: { duration: 700 }, // animacion de entrada de 700ms 
         plugins: {
-          legend: {
+          legend: {// configuración de la leyenda debajo del gráfico
             position: 'bottom',
             labels: { padding: 18, font: { size: 13 }, usePointStyle: true }
           },
+          // personalización del tooltip para mostrar "Admin: 5" en lugar de solo "5"
           tooltip: { callbacks: { label: (ctx) => ` ${ctx.label}: ${ctx.parsed}` } }
         }
       }
@@ -168,11 +167,11 @@ export class AdminUsers implements OnInit, AfterViewInit {
         }]
       },
       options: {
-        cutout: '68%',
+        cutout: '68%', // agujero central del donut 
         maintainAspectRatio: false,
-        animation: { duration: 700 },
+        animation: { duration: 700 }, // animacion de entrada de 700ms 
         plugins: {
-          legend: {
+          legend: {// configuración de la leyenda debajo del gráfico
             position: 'bottom',
             labels: { padding: 18, font: { size: 13 }, usePointStyle: true }
           }
@@ -180,6 +179,7 @@ export class AdminUsers implements OnInit, AfterViewInit {
       }
     });
   }
+// ── FILTRADO DE USUARIOS ─────────────────────────────────────────
   get usuariosFiltrados(): User[] {
     if (!this.buscando.trim()) return this.usuarios();
 
@@ -190,7 +190,7 @@ export class AdminUsers implements OnInit, AfterViewInit {
       u.email.toLowerCase().includes(termino)
     );
   }
-
+// ── TOGGLE ESTADO (ACTIVO/INACTIVO) ─────────────────────────────────────────
   toggleEstado(usuario: User): void {
     const nuevoEstado = !usuario.is_active;
 
@@ -206,6 +206,7 @@ export class AdminUsers implements OnInit, AfterViewInit {
     });
   }
 
+  // ── ELIMINAR USUARIO ─────────────────────────────────────────
   eliminarUsuario(usuario: User): void {
     if (!confirm(`¿Eliminar a ${usuario.full_name}?`)) return;
 
@@ -222,25 +223,27 @@ export class AdminUsers implements OnInit, AfterViewInit {
       }
     });
   }
-
+// ─ LIMPIAR BÚSQUEDA ─────────────────────────────────────────
   limpiarBusqueda(): void {
     this.buscando = '';
   }
 
-
+// ── VIAJES ─────────────────────────────────────────
   cargarViajes(): void {
     this.viajeService.listarViajes().subscribe({
-      next: (res) => this.viajes.set(res.data),
+      next: (res) => this.viajes.set(res.datos ?? []),
       error: () => {}
     });
   }
 
+// ── RESERVAS POR VIAJE ─────────────────────────────────────────
   cargarReservasPorViaje(id: number): void {
     this.viajeId = id;
     const viaje = this.viajes().find(v => v.id === id);
     this.reservas.set((viaje?.reservas ?? []) as unknown as Reserva[]);
   }
-  // ── CREAR USUARIO ─────────────────────────────────────────────────────────
+
+// ── ABRIR MODAL   ─────────────────────────────────────────────────────────
   abrirModalCrear(): void {
     this.formCrear = { full_name: '', email: '', password: '', rol: 'user' };
     this.error.set('');
@@ -248,10 +251,12 @@ export class AdminUsers implements OnInit, AfterViewInit {
     this.mostrarModalCrear.set(true);
   }
 
+// ── CERRAR MODAL ─────────────────────────────────────────────────────────
   cerrarModalCrear(): void {
     this.mostrarModalCrear.set(false);
   }
 
+// ── CREAR USUARIO ─────────────────────────────────────────────────────────
   crearUsuario(): void {
     if (!this.formCrear.full_name.trim() || !this.formCrear.email.trim() || !this.formCrear.password.trim()) {
       this.error.set('Rellena todos los campos obligatorios');
@@ -260,7 +265,8 @@ export class AdminUsers implements OnInit, AfterViewInit {
     this.guardandoCrear.set(true);
     this.error.set('');
     this.userService.crearUsuario(this.formCrear).subscribe({
-      next: (nuevo) => {
+      next: (res) => {
+        const nuevo = res.datos;
         this.usuarios.update(list => [...list, nuevo]);
         this.cargarEstadisticas();
         this.exito.set(`Usuario ${nuevo.full_name} creado correctamente`);
@@ -274,7 +280,7 @@ export class AdminUsers implements OnInit, AfterViewInit {
     });
   }
 
-  // ── EDITAR USUARIO ─────────────────────────────────────────────────────────
+// ── MODAL EDITAR USUARIO ─────────────────────────────────────────────────────────
   abrirModalEditar(usuario: User): void {
     this.usuarioEditando.set(usuario);
     this.formEditar = {
@@ -288,18 +294,21 @@ export class AdminUsers implements OnInit, AfterViewInit {
     this.mostrarModalEditar.set(true);
   }
 
+// ── CERRAR MODAL EDITAR USUARIO ─────────────────────────────────────────────────────────
   cerrarModalEditar(): void {
     this.mostrarModalEditar.set(false);
     this.usuarioEditando.set(null);
   }
 
+// ── GUARDAR EDICIÓN USUARIO ─────────────────────────────────────────────────────────
   guardarEdicion(): void {
     const usuario = this.usuarioEditando();
     if (!usuario) return;
     this.guardandoEditar.set(true);
     this.error.set('');
     this.userService.actualizarUsuario(usuario.id, this.formEditar).subscribe({
-      next: (actualizado) => {
+      next: (res) => {
+        const actualizado = res.datos;
         this.usuarios.update(list => list.map(u => u.id === actualizado.id ? actualizado : u));
         this.cargarEstadisticas();
         this.exito.set('Usuario actualizado correctamente');
@@ -313,10 +322,8 @@ export class AdminUsers implements OnInit, AfterViewInit {
       }
     });
   }
-  cambiarIcono(): void {
-    Header.icono = 'bi-truck';
-  }
 
+// ── GUARDAR LINK SOPORTE ─────────────────────────────────────────────────────────
   guardarLinkSoporte(): void {
     this.guardandoSoporte.set(true);
     this.configuracionService.actualizarConfig('soporte_link', this.linkSoporte()).subscribe({
@@ -331,12 +338,14 @@ export class AdminUsers implements OnInit, AfterViewInit {
     });
   }
 
+// ── MENSAJE TEMPORAL SOPORTE ─────────────────────────────────────────────────────────
   private mostrarMensajeSoporte(tipo: 'exito' | 'error', texto: string): void {
     this.mensajeSoporte.set({ tipo, texto });
     if (this.soporteTimeout) clearTimeout(this.soporteTimeout);
     this.soporteTimeout = setTimeout(() => this.mensajeSoporte.set(null), 4000);
   }
 
+// ── SELECCIONAR LOGO ─────────────────────────────────────────────────────────
   onLogoSeleccionado(event: Event): void {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
@@ -347,6 +356,7 @@ export class AdminUsers implements OnInit, AfterViewInit {
     reader.readAsDataURL(file);
   }
 
+// ── SUBIR LOGO ─────────────────────────────────────────────────────────
   subirLogo(): void {
     const file = this.logoFile();
     if (!file) return;
@@ -366,6 +376,7 @@ export class AdminUsers implements OnInit, AfterViewInit {
     });
   }
 
+// ── MENSAJE TEMPORAL LOGO ─────────────────────────────────────────────────────────
   private mostrarMensajeLogo(tipo: 'exito' | 'error', texto: string): void {
     this.mensajeLogo.set({ tipo, texto });
     if (this.logoTimeout) clearTimeout(this.logoTimeout);

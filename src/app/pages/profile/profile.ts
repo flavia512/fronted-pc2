@@ -1,5 +1,4 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AdminService } from '../../core/services/admin.service';
 import { User } from '../../core/models/user.model';
@@ -8,8 +7,7 @@ import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-profile',
-  standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [ReactiveFormsModule],
   templateUrl: './profile.html',
   styleUrl: './profile.scss'
 })
@@ -47,7 +45,8 @@ export class Profile implements OnInit {
     this.limpiarMensajes();
 
     this.userService.obtenerPerfil().subscribe({
-      next: (user: User) => {
+      next: (res) => {
+        const user = res.datos;
         this.usuarioId.set(user.id);
         this.isActive.set(user.is_active);
         this.rol.set(user.rol);
@@ -84,8 +83,7 @@ export class Profile implements OnInit {
         this.guardando.set(false);
         this.mensajeExito.set('Perfil actualizado correctamente.');
       },
-      error: (err) => {
-        console.error('Error:', err.error);
+      error: () => {
         this.guardando.set(false);
         this.mensajeError.set('No se pudo actualizar el perfil.');
       }

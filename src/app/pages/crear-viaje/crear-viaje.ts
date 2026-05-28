@@ -1,8 +1,9 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { ViajeCompartidoService, ViajeCompartido } from '../../core/services/viaje-compartido.service';
+import { ViajeCompartidoService } from '../../core/services/viaje-compartido.service';
+import { ViajeCompartido } from '../../core/models/viaje-compartido.model';
 import { RutaService } from '../../core/services/ruta.service';
 import { ReservaService } from '../../core/services/reserva.service';
 import { Ruta } from '../../core/models/ruta.model';
@@ -11,7 +12,7 @@ import { AuthService } from '../../core/services/auth.service';
 @Component({
   selector: 'app-crear-viaje',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
+  imports: [DatePipe, ReactiveFormsModule, RouterLink],
   templateUrl: './crear-viaje.html'
 })
 export class CrearViaje implements OnInit {
@@ -23,7 +24,6 @@ export class CrearViaje implements OnInit {
   private authService = inject(AuthService);
 
   form: FormGroup;
-  loading = false;
   misRutas: Ruta[] = [];
   rutaSeleccionada = signal<Ruta | null>(null);
 
@@ -56,8 +56,8 @@ export class CrearViaje implements OnInit {
     }
 
     this.rutaService.obtenerRutas().subscribe({
-      next: (rutas) => {
-        this.misRutas = rutas;
+      next: (res) => {
+        this.misRutas = res.datos ?? [];
       },
       error: () => {
         this.mostrarToast('error', 'No se pudieron cargar tus rutas guardadas.');
@@ -107,14 +107,11 @@ export class CrearViaje implements OnInit {
     }
 
     if (this.form.valid) {
-      this.loading = true;
-
       const formValues = this.form.value;
       const ruta = this.rutaSeleccionada();
       const userId = this.authService.usuarioActual()?.id;
 
       if (!ruta || !userId) {
-        this.loading = false;
         this.mostrarToast('error', 'No se pudo preparar el viaje. Selecciona una ruta e inicia sesión.');
         return;
       }
@@ -134,15 +131,12 @@ export class CrearViaje implements OnInit {
 
       this.viajeService.crearViaje(payloadViaje).subscribe({
         next: () => {
-          this.loading = false;
           this.form.reset();
           this.rutaSeleccionada.set(null);
           this.mostrarToast('exito', '¡Viaje publicado con éxito!');
           this.cargarMisViajes();
         },
-        error: (err) => {
-          this.loading = false;
-          console.error('Error al crear el viaje:', err);
+        error: () => {
           this.mostrarToast('error', 'Error al publicar el viaje. Revisa tu conexión.');
         }
       });
@@ -156,8 +150,8 @@ export class CrearViaje implements OnInit {
     const userId = this.authService.usuarioActual()?.id;
 
     this.viajeService.listarViajes().subscribe({
-      next: ({ data }) => {
-        this.misViajes.set((data ?? []).filter(v => v.driver_user_id === userId));
+      next: ({ datos }) => {
+        this.misViajes.set((datos ?? []).filter(v => v.driver_user_id === userId));
         this.cargandoViajes.set(false);
       },
       error: () => {

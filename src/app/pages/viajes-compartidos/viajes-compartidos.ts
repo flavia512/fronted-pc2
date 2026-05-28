@@ -1,5 +1,5 @@
 import { Component, inject, OnInit, OnDestroy, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { Subject, Subscription, debounceTime, switchMap } from 'rxjs';
@@ -14,8 +14,7 @@ type ViajesResponse = { exito: boolean; datos: ViajeCompartido[] };
 
 @Component({
   selector: 'app-viajes-compartidos',
-  standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [DatePipe, FormsModule, RouterLink],
   templateUrl: './viajes-compartidos.html',
   styles: [`
     .fav-btn { line-height:1; color: #d1d5db; transition: color .15s, transform .15s; }
@@ -110,8 +109,7 @@ export class ViajesCompartidos implements OnInit, OnDestroy {
 
     this.favoritoService.listarFavoritos().subscribe({
       next: (res) => {
-        const favoritos = res?.favoritos ?? [];
-        const ids = new Set(favoritos.map(f => f.route_id));
+        const ids = new Set((res.datos ?? []).map(f => f.route_id));
         this.favoritosIds.set(ids);
       },
       error: () => {
@@ -242,7 +240,7 @@ export class ViajesCompartidos implements OnInit, OnDestroy {
           return;
         }
 
-        this.mostrarToast('error', err?.error?.message ?? 'No se pudo realizar la reserva. Inténtalo de nuevo.');
+        this.mostrarToast('error', err?.error?.mensaje ?? 'No se pudo realizar la reserva. Inténtalo de nuevo.');
       }
     });
   }

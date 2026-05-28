@@ -1,20 +1,21 @@
 import { Component, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { Router, RouterModule } from '@angular/router';
+import { Router } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 
 @Component({
   selector: 'app-home',
-  imports: [CommonModule, RouterModule],
+  imports: [],
   templateUrl: './home.html',
   styleUrls: ['./home.scss']
 })
 export class Home {
-  protected auth = inject(AuthService);
-  private router = inject(Router);
+  private authService = inject(AuthService);
+  private router      = inject(Router);
+
+  readonly estaAutenticado = this.authService.estaAutenticado;
 
   entrarComoInvitado(): void {
-    this.auth.continuarComoInvitado();
+    this.authService.continuarComoInvitado();
     this.router.navigate(['/viajes-compartidos']);
   }
 }

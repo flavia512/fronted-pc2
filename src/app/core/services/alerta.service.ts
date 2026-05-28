@@ -1,7 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
 import { Alerta } from '../models/alerta.model';
 import { environment } from '../../../environments/environment';
 
@@ -19,15 +18,13 @@ export class AlertaService {
   }
 
   // GET /alertas — alertas del usuario autenticado
-  obtenerAlertaUsuario(): Observable<{ ok: boolean; alertas: Alerta[] }> {
-    return this.http.get<{ exito: boolean; datos: Alerta[] }>(`${this.apiUrl}/alertas`)
-      .pipe(map(res => ({ ok: res.exito, alertas: res.datos ?? [] })));
+  obtenerAlertaUsuario(): Observable<{ exito: boolean; datos: Alerta[] }> {
+    return this.http.get<{ exito: boolean; datos: Alerta[] }>(`${this.apiUrl}/alertas`);
   }
 
   // POST /alertas
-  crearAlerta(data: { route_id: number; for_datetime: string }): Observable<{ ok: boolean; alerta: Alerta }> {
-    return this.http.post<{ exito: boolean; datos: Alerta }>(`${this.apiUrl}/alertas`, data)
-      .pipe(map(res => ({ ok: res.exito, alerta: res.datos })));
+  crearAlerta(data: { route_id: number; for_datetime: string }): Observable<{ exito: boolean; datos: Alerta }> {
+    return this.http.post<{ exito: boolean; datos: Alerta }>(`${this.apiUrl}/alertas`, data);
   }
 
   // PC1 FastAPI: GET /predict?fecha=YYYY-MM-DD&hora=HH:MM

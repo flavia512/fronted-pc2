@@ -1,6 +1,6 @@
 import { inject, Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, map } from 'rxjs';
+import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
@@ -16,24 +16,22 @@ export class ConfiguracionService {
 
   cargarLogo(): void {
     this.obtenerConfig('logo_url').subscribe({
-      next: (url) => this.logoUrl.set(url),
+      next: (res) => this.logoUrl.set(res.datos?.valor ?? ''),
       error: () => {}
     });
   }
 
   cargarSoporte(): void {
     this.obtenerConfig('soporte_link').subscribe({
-      next: (url) => this.linkSoporte.set(url),
+      next: (res) => this.linkSoporte.set(res.datos?.valor ?? ''),
       error: () => {}
     });
   }
 
-  obtenerConfig(clave: string): Observable<string> {
-    return this.http
-      .get<{ exito: boolean; mensaje: string; datos: { clave: string; valor: string } }>(
-        `${this.base}/configuracion/${clave}`
-      )
-      .pipe(map(res => res.datos?.valor ?? ''));
+  obtenerConfig(clave: string): Observable<{ exito: boolean; datos: { clave: string; valor: string } }> {
+    return this.http.get<{ exito: boolean; datos: { clave: string; valor: string } }>(
+      `${this.base}/configuracion/${clave}`
+    );
   }
 
   actualizarConfig(clave: string, valor: string): Observable<{ exito: boolean; mensaje: string }> {

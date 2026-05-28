@@ -57,6 +57,12 @@ $red:    #ef4444;
     color: $red;
     border: 1px solid rgba($red, 0.2);
   }
+
+  &--exito {
+    background: rgba(#22c55e, 0.1);
+    color: #15803d;
+    border: 1px solid rgba(#22c55e, 0.2);
+  }
 }
 
 // ── Botones ────────────────────────────────────────────────────────

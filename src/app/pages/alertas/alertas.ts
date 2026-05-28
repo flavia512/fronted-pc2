@@ -1,5 +1,5 @@
 ﻿import { Component, OnInit, inject, signal, computed } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { AlertaService } from '../../core/services/alerta.service';
@@ -15,7 +15,7 @@ interface AlertaEnriquecida extends Alerta {
 @Component({
   selector: 'app-alertas',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [DatePipe, FormsModule, RouterLink],
   templateUrl: './alertas.html',
   styleUrl: './alertas.scss'
 })
@@ -42,10 +42,11 @@ export class Alertas implements OnInit {
     recomendacion: string;
     color: string;
   } | null>(null);
+
   creando      = signal(false);
   desactivando = signal<number | null>(null);
 
-  esInvitado = computed(() => this.authService.esInvitado());
+  readonly esInvitado = this.authService.esInvitado;
 
   rutasM30     = computed(() => this.rutas().filter(r => r.pasa_por_m30));
   alertasActivas = computed(() => this.alertas().filter(a => a.status === 'activa'));
@@ -56,20 +57,21 @@ export class Alertas implements OnInit {
     this.cargarAlertas();
   }
 
+  // ── CARGAR RUTAS ─────────────────────────────────────────────────────────  
   cargarRutas(): void {
     this.rutaService.obtenerRutas().subscribe({
-      next: (rutas) => this.rutas.set(rutas),
+      next: (res) => this.rutas.set(res.datos ?? []),
       error: () => {}
     });
   }
 
+// ── CARGAR ALERTAS ─────────────────────────────────────────────────────────
   cargarAlertas(): void {
-    const user = this.authService.usuarioActual();
-    if (!user) return;
+    if (!this.authService.usuarioActual()) return;
     this.cargando.set(true);
     this.alertaService.obtenerAlertaUsuario().subscribe({
       next: (res) => {
-        this.alertas.set(res.alertas.map(a => this.enriquecer(a)));
+        this.alertas.set(res.datos.map(a => this.enriquecer(a)));
         this.cargando.set(false);
       },
       error: () => {
@@ -79,6 +81,7 @@ export class Alertas implements OnInit {
     });
   }
 
+// ── ENRIQUECER ALERTA CON NOMBRE RUTA ─────────────────────────────────────────────────────────
   private enriquecer(a: Alerta): AlertaEnriquecida {
     const ruta = this.rutas().find(r => r.id === a.route_id);
     const nombre = a.ruta?.nombre || ruta?.nombre
@@ -88,11 +91,13 @@ export class Alertas implements OnInit {
     return { ...a, rutaNombre: nombre };
   }
 
+// ── OBTENER NOMBRE RUTA POR ID ─────────────────────────────────────────────────────────
   private getRutaNombre(routeId: number): string {
     const ruta = this.rutas().find(r => r.id === routeId);
     return ruta?.nombre || ruta?.origin_text || 'Ruta #' + routeId;
   }
 
+// ── CONSULTAR TRÁFICO ─────────────────────────────────────────────────────────
   consultarTrafico(): void {
     if (!this.fechaAlerta() || !this.horaAlerta()) return;
     this.consultando.set(true);
@@ -127,7 +132,7 @@ export class Alertas implements OnInit {
     this.alertaService.crearAlerta({ route_id: routeId, for_datetime: forDatetime }).subscribe({
       next: (res) => {
         const nueva: AlertaEnriquecida = {
-          ...res.alerta,
+          ...res.datos,
           rutaNombre: this.getRutaNombre(routeId),
         };
         this.alertas.update(lista => [nueva, ...lista]);

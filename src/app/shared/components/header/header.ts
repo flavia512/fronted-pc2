@@ -6,7 +6,6 @@ import {NgClass} from '@angular/common';
 
 @Component({
   selector: 'app-header',
-  standalone: true,
   imports: [RouterLink, RouterLinkActive, NgClass],
   templateUrl: './header.html',
 })
@@ -15,14 +14,13 @@ export class Header implements OnInit {
 
   Header = Header;
 
-  authService = inject(AuthService);
-  private router = inject(Router);
+  private authService   = inject(AuthService);
+  private router        = inject(Router);
   private configuracionService = inject(ConfiguracionService);
 
-  es_logeado = computed(() => !!this.authService.usuarioActual());
-  puedeExplorar = computed(() => this.authService.puedeExplorar());
-  esInvitado = computed(() => this.authService.esInvitado());
-  isAdmin = computed(() => this.authService.obtenerRolUsuario() === 'admin');
+  readonly estaAutenticado = this.authService.estaAutenticado;
+  readonly puedeExplorar   = this.authService.puedeExplorar;
+  isAdmin      = computed(() => this.authService.obtenerRolUsuario() === 'admin');
   nombreUsuario = computed(() => this.authService.usuarioActual()?.full_name ?? '');
   menuAbierto = signal(false);
   aviso = signal('');

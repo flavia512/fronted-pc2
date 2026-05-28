@@ -1,7 +1,6 @@
-import { Component, OnInit, OnDestroy, ViewChild, ElementRef, NgZone, signal, computed } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, OnDestroy, ViewChild, ElementRef, NgZone, signal, computed, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterModule } from '@angular/router';
+import { RouterLink } from '@angular/router';
 import mapboxgl from 'mapbox-gl';
 import { Subject, debounceTime, switchMap, of } from 'rxjs';
 import { MapboxService, MapboxFeature, RouteInfo } from '../../core/services/mapbox.service';
@@ -14,12 +13,17 @@ import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-rutas',
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [FormsModule, RouterLink],
   templateUrl: './rutas.html',
   styleUrl: './rutas.scss'
 })
 export class Rutas implements OnInit, OnDestroy {
   @ViewChild('mapaContainer') mapaContainer!: ElementRef;
+
+  private mapboxService = inject(MapboxService);
+  private rutaService   = inject(RutaService);
+  private ngZone        = inject(NgZone);
+  protected authService = inject(AuthService);
 
   rutas = signal<Ruta[]>([]);
   cargando = signal(true);
@@ -30,7 +34,7 @@ export class Rutas implements OnInit, OnDestroy {
   modalEliminarRuta = signal<{ id: number; nombre: string } | null>(null);
   toast = signal<{ tipo: 'exito' | 'error'; mensaje: string } | null>(null);
 
-  esInvitado = computed(() => this.authService.esInvitado());
+  readonly esInvitado = this.authService.esInvitado;
   tituloPagina = 'Mis Rutas';
   descripcionPagina = 'Gestiona tus trayectos habituales y recibe alertas de tráfico';
 
@@ -60,13 +64,6 @@ export class Rutas implements OnInit, OnDestroy {
   private origenSubject = new Subject<string>();
   private destinoSubject = new Subject<string>();
   private toastTimeout: any = null;
-
-  constructor(
-    private mapboxService: MapboxService,
-    private rutaService: RutaService,
-    private ngZone: NgZone,
-    protected authService: AuthService
-  ) {}
 
   ngOnInit(): void {
     this.cargarRutasUsuario();
@@ -191,8 +188,8 @@ export class Rutas implements OnInit, OnDestroy {
     this.errorCarga.set(false);
 
     this.rutaService.obtenerRutas().subscribe({
-      next: (rutas: Ruta[]) => {
-        this.rutas.set(rutas);
+      next: (res) => {
+        this.rutas.set(res.datos ?? []);
         this.cargando.set(false);
       },
       error: (err) => {

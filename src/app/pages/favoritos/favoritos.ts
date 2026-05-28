@@ -1,5 +1,5 @@
-import { Component, OnInit, inject, signal, computed } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, inject, signal } from '@angular/core';
+import { DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FavoritoService } from '../../core/services/favorito.service';
 import { AuthService } from '../../core/services/auth.service';
@@ -11,7 +11,7 @@ import { Favorito } from '../../core/models/favorito.model';
 @Component({
   selector: 'app-favoritos',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [DatePipe, RouterLink],
   templateUrl: './favoritos.html',
   styleUrl: './favoritos.scss'
 })
@@ -26,8 +26,7 @@ export class Favoritos implements OnInit {
   error           = signal('');
   exito           = signal('');
   eliminando      = signal<number | null>(null);
-  mostrarModalLogin = signal(false);
-  esInvitado      = computed(() => this.authService.esInvitado());
+  readonly esInvitado = this.authService.esInvitado;
 
   // viajes expandidos por route_id
   viajesMap       = signal<Map<number, ViajeCompartido[]>>(new Map());
@@ -45,7 +44,7 @@ export class Favoritos implements OnInit {
     this.cargando.set(true);
     this.error.set('');
     this.favoritoService.listarFavoritos().subscribe({
-      next: (res) => { this.favoritos.set(res.favoritos); this.cargando.set(false); },
+      next: (res) => { this.favoritos.set(res.datos ?? []); this.cargando.set(false); },
       error: () => { this.error.set('No se pudieron cargar los favoritos.'); this.cargando.set(false); }
     });
   }
@@ -63,7 +62,7 @@ export class Favoritos implements OnInit {
     const destino = fav.ruta?.dest_text   ?? '';
     this.viajeService.buscarViajes({ origin: origen, destiny: destino }).subscribe({
       next: (res) => {
-        this.viajesMap.update(m => { const n = new Map(m); n.set(fav.route_id, res.data); return n; });
+        this.viajesMap.update(m => { const n = new Map(m); n.set(fav.route_id, res.datos ?? []); return n; });
         this.cargandoViajes.set(null);
       },
       error: () => {
@@ -96,7 +95,7 @@ export class Favoritos implements OnInit {
         setTimeout(() => this.exito.set(''), 3000);
       },
       error: (err) => {
-        this.error.set(err?.error?.message ?? 'No se pudo realizar la reserva.');
+        this.error.set(err?.error?.mensaje ?? 'No se pudo realizar la reserva.');
         this.reservando.set(null);
         setTimeout(() => this.error.set(''), 4000);
       }

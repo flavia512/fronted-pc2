@@ -1,13 +1,11 @@
 ﻿import { Component, OnInit, OnDestroy, inject, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { AlertaService } from '../../../core/services/alerta.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { Alerta } from '../../../core/models/alerta.model';
 
 @Component({
   selector: 'app-alerta-popup',
-  standalone: true,
-  imports: [CommonModule],
+  imports: [],
   templateUrl: './alerta-popup.html',
   styleUrl: './alerta-popup.scss'
 })
@@ -45,7 +43,7 @@ export class AlertaPopup implements OnInit, OnDestroy {
         const hoy        = ahora.toISOString().slice(0, 10);
         const minAhora   = ahora.getHours() * 60 + ahora.getMinutes();
 
-        const alerta = res.alertas.find(a => {
+        const alerta = res.datos.find(a => {
           if (a.status !== 'activa') return false;
           const fechaInicio = a.for_datetime.slice(0, 10);
           if (hoy < fechaInicio) return false;

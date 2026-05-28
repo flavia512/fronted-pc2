@@ -1,36 +1,14 @@
-import { Component, OnInit, signal, inject, computed } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, signal, inject } from '@angular/core';
+import { DatePipe } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { ReservaService } from '../../core/services/reserva.service';
 import { AuthService } from '../../core/services/auth.service';
 import { ConfiguracionService } from '../../core/services/configuracion.service';
-
-export interface Reserva {
-  id: number;
-  user_id: number;
-  trip_id: number;
-  seats: number;
-  status: string;
-  viaje?: {
-    origin: string;
-    destiny: string;
-    trip_datetime: string;
-    conductor?: {
-      full_name?: string;
-      email?: string;
-    };
-  };
-}
-
-export interface ReservasResponse {
-  ok: boolean;
-  reservas: Reserva[];
-}
+import { Reserva } from '../../core/models/reserva.model';
 
 @Component({
   selector: 'app-reservas',
-  standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [DatePipe, RouterLink],
   templateUrl: './reservas.html',
 })
 export class Reservas implements OnInit {
@@ -41,8 +19,8 @@ export class Reservas implements OnInit {
 
   reservas = signal<Reserva[]>([]);
   toast = signal<{ tipo: 'exito' | 'error'; mensaje: string } | null>(null);
-  readonly linkSoporte = computed(() => this.configuracionService.linkSoporte());
-  esInvitado = computed(() => this.authService.esInvitado());
+  readonly linkSoporte = this.configuracionService.linkSoporte;
+  readonly esInvitado = this.authService.esInvitado;
   modalCancelarId = signal<number | null>(null);
   private toastTimeout: any;
 
@@ -54,7 +32,7 @@ export class Reservas implements OnInit {
 
   cargarReservas(): void {
     this.reservaService.obtenerReservasPorUsuario().subscribe({
-      next: (res: ReservasResponse) => this.reservas.set(res.reservas ?? []),
+      next: (res) => this.reservas.set(res.datos ?? []),
       error: () => this.reservas.set([])
     });
   }
