@@ -1,5 +1,5 @@
 import { Component, OnInit, inject, signal, ViewChild, ElementRef, effect } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { User } from '../../core/models/user.model';
 import { AdminService } from '../../core/services/admin.service';
@@ -12,8 +12,7 @@ import { ConfiguracionService } from '../../core/services/configuracion.service'
 Chart.register(...registerables);
 @Component({
   selector: 'app-admin-users',
-  standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [DatePipe, FormsModule],
   templateUrl: './admin-users.html',
   styleUrl: './admin-users.scss',
 })
