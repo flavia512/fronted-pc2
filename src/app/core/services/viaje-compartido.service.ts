@@ -47,6 +47,11 @@ export class ViajeCompartidoService {
     );
   }
 
+  // GET /viajes/mis-viajes
+  misViajes(): Observable<{ exito: boolean; datos: ViajeCompartido[] }> {
+    return this.http.get<{ exito: boolean; datos: ViajeCompartido[] }>(`${this.apiUrl}/viajes/mis-viajes`);
+  }
+
   // GET /viajes
   listarViajes(): Observable<{ exito: boolean; datos: ViajeCompartido[] }> {
     return this.http.get<{ exito: boolean; datos: ViajeCompartido[] }>(`${this.apiUrl}/viajes`);

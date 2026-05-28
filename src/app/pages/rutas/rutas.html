@@ -110,7 +110,7 @@
   </div>
 
   <!-- LISTA DE RUTAS -->
-  @if (!authService.isLoggedIn()) {
+  @if (!estaAutenticado()) {
     <div class="card border-0 bg-light rounded-4 text-center py-5 px-3">
       <i class="bi bi-person-lock text-secondary mb-3" style="font-size:2.5rem;"></i>
       <h6 class="fw-semibold">Inicia sesión para ver tus rutas</h6>

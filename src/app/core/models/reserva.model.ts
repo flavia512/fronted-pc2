@@ -12,5 +12,9 @@ export interface Reserva {
     origin: string;
     destiny: string;
     trip_datetime: string;
+    conductor?: {
+      full_name?: string;
+      email?: string;
+    };
   };
 }

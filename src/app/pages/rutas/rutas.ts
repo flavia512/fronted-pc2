@@ -23,7 +23,9 @@ export class Rutas implements OnInit, OnDestroy {
   private mapboxService = inject(MapboxService);
   private rutaService   = inject(RutaService);
   private ngZone        = inject(NgZone);
-  protected authService = inject(AuthService);
+  private authService   = inject(AuthService);
+
+  readonly estaAutenticado = this.authService.estaAutenticado;
 
   rutas = signal<Ruta[]>([]);
   cargando = signal(true);

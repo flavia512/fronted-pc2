@@ -11,7 +11,6 @@ import { AuthService } from '../../core/services/auth.service';
 
 @Component({
   selector: 'app-crear-viaje',
-  standalone: true,
   imports: [DatePipe, ReactiveFormsModule, RouterLink],
   templateUrl: './crear-viaje.html'
 })
@@ -147,11 +146,10 @@ export class CrearViaje implements OnInit {
 
   cargarMisViajes(): void {
     this.cargandoViajes.set(true);
-    const userId = this.authService.usuarioActual()?.id;
 
-    this.viajeService.listarViajes().subscribe({
+    this.viajeService.misViajes().subscribe({
       next: ({ datos }) => {
-        this.misViajes.set((datos ?? []).filter(v => v.driver_user_id === userId));
+        this.misViajes.set(datos ?? []);
         this.cargandoViajes.set(false);
       },
       error: () => {

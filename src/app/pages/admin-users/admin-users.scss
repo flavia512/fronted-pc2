@@ -1,3 +1,5 @@
+@use 'sass:color';
+
 // ── Variables ──────────────────────────────────────────────────────
 $blue:   #3b82f6;
 $green:  #22c55e;
@@ -80,7 +82,7 @@ $red:    #ef4444;
   cursor: pointer;
   transition: background 0.2s, transform 0.1s;
 
-  &:hover:not(:disabled) { background: darken($blue, 8%); }
+  &:hover:not(:disabled) { background: color.adjust($blue, $lightness: -8%); }
   &:active:not(:disabled) { transform: scale(0.98); }
   &:disabled { opacity: 0.55; cursor: not-allowed; }
 }
@@ -260,7 +262,7 @@ $red:    #ef4444;
   font-size: 0.95rem;
   flex-shrink: 0;
 
-  &--admin { background: rgba($yellow, 0.15); color: darken($yellow, 20%); }
+  &--admin { background: rgba($yellow, 0.15); color: color.adjust($yellow, $lightness: -20%); }
 }
 
 .user-name  { font-weight: 600; }
@@ -278,7 +280,7 @@ $red:    #ef4444;
   background: rgba($blue, 0.1);
   color: $blue;
 
-  &--admin { background: rgba($yellow, 0.15); color: darken($yellow, 20%); }
+  &--admin { background: rgba($yellow, 0.15); color: color.adjust($yellow, $lightness: -20%); }
 }
 
 .status-badge {
@@ -290,7 +292,7 @@ $red:    #ef4444;
   background: rgba($red, 0.1);
   color: $red;
 
-  &--active { background: rgba($green, 0.12); color: darken($green, 10%); }
+  &--active { background: rgba($green, 0.12); color: color.adjust($green, $lightness: -10%); }
 }
 
 .action-group {
@@ -524,7 +526,7 @@ $red:    #ef4444;
   font-size: 0.9rem;
   font-weight: 500;
   background: rgba($green, 0.1);
-  color: darken($green, 10%);
+  color: color.adjust($green, $lightness: -10%);
   animation: fadeIn 0.2s ease;
 
   &--error { background: rgba($red, 0.1); color: $red; }
