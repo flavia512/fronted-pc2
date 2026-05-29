@@ -30,6 +30,8 @@
         @if (estaAutenticado()) {
           <a routerLink="/crear-viaje" routerLinkActive="fw-semibold text-primary" class="text-secondary text-decoration-none small">Crear Viaje</a>
         }
+      } @else {
+        <a routerLink="/admin-users" routerLinkActive="fw-semibold text-primary" class="text-secondary text-decoration-none small"><i class="bi bi-shield-lock me-1"></i>Panel Admin</a>
       }
     </div>
 
@@ -108,6 +110,12 @@
               <i class="bi bi-plus-circle fs-5"></i> Crear Viaje
             </a>
           }
+        } @else {
+          <a routerLink="/admin-users" routerLinkActive="text-primary fw-semibold"
+             class="text-secondary text-decoration-none py-2 px-3 rounded-3 d-flex align-items-center gap-3"
+             style="font-size:.97rem;" (click)="cerrarMenu()">
+            <i class="bi bi-shield-lock fs-5"></i> Panel Admin
+          </a>
         }
 
         <hr class="my-2">
